@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PinoyPool — Coming Soon</title>
+<meta name="description" content="The Official Philippine Billiards Platform. Verified matches. National rankings. Real talent, real recognition.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#c8a84b;--gold2:#e8c86a;--gold-dim:rgba(200,168,75,0.15);
+    --bg:#070d05;--bg2:#0d1a0a;
+    --ivory:#f2edd8;--chalk:#aaa490;
+    --border:rgba(200,168,75,0.18);
+    --grn:#1a3a22;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);
+    color:var(--ivory);
+    font-family:'Barlow Condensed',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding-top:clamp(2rem,6vh,5rem);
+  }
+
+  /* Background texture */
+  body::before{
+    content:'';position:fixed;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='5' height='5'%3E%3Ccircle cx='1' cy='1' r='0.55' fill='rgba(255,255,255,0.013)'/%3E%3Ccircle cx='4' cy='4' r='0.55' fill='rgba(255,255,255,0.013)'/%3E%3C/svg%3E");
+    pointer-events:none;z-index:0;
+  }
+
+  /* Radial glow from center */
+  body::after{
+    content:'';position:fixed;inset:0;
+    background:radial-gradient(ellipse 80% 60% at 50% 45%, rgba(26,58,34,0.45) 0%, transparent 70%);
+    pointer-events:none;z-index:0;
+  }
+
+  .wrap{
+    position:relative;z-index:1;
+    display:flex;flex-direction:column;align-items:center;
+    text-align:center;
+    padding:2rem 1.5rem;
+    max-width:860px;
+    width:100%;
+  }
+
+  /* Logo */
+  .logo{display:flex;align-items:center;gap:12px;margin-bottom:2.8rem;text-decoration:none;}
+  .logo-ball{
+    width:52px;height:52px;border-radius:50%;
+    background:radial-gradient(circle at 32% 30%,rgba(255,255,255,.45) 0%,var(--gold) 42%,#6b4400 100%);
+    box-shadow:0 0 28px rgba(200,168,75,.35),inset 0 -4px 8px rgba(0,0,0,.3);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Bebas Neue',sans-serif;font-size:18px;color:#1a0800;flex-shrink:0;
+  }
+  .logo-text h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:2rem;letter-spacing:4px;color:var(--gold);line-height:1;
+  }
+  .logo-text span{
+    display:block;font-size:.55rem;letter-spacing:4px;color:var(--chalk);
+    text-transform:uppercase;margin-top:-1px;
+  }
+
+  /* Eyebrow */
+  .eyebrow{
+    display:flex;align-items:center;gap:9px;
+    font-size:.7rem;letter-spacing:4px;text-transform:uppercase;
+    color:var(--chalk);margin-bottom:1.4rem;
+  }
+  .eyebrow-line{width:38px;height:1px;background:var(--border);}
+
+  /* Hero headline */
+  .hero-title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(3.4rem,11vw,8rem);
+    line-height:.92;
+    letter-spacing:2px;
+    margin-bottom:.5rem;
+  }
+  .hero-title .line1{color:var(--ivory);}
+  .hero-title .line2{
+    color:var(--gold);
+    text-shadow:0 0 60px rgba(200,168,75,.25);
+  }
+
+  .tagline{
+    font-size:clamp(.85rem,2.2vw,1.05rem);
+    color:var(--chalk);letter-spacing:1.5px;
+    margin-bottom:3rem;
+    line-height:1.6;
+  }
+
+  /* Countdown */
+  .countdown-label{
+    font-size:.6rem;letter-spacing:3px;text-transform:uppercase;
+    color:var(--chalk);margin-bottom:.8rem;
+  }
+  .countdown{
+    display:flex;gap:1.2rem;justify-content:center;
+    margin-bottom:3rem;flex-wrap:wrap;
+  }
+  .cd-block{
+    background:linear-gradient(145deg,rgba(26,58,34,.6),rgba(8,14,6,.92));
+    border:1px solid var(--border);border-radius:12px;
+    padding:.9rem 1.4rem;min-width:74px;
+  }
+  .cd-num{
+    font-family:'Bebas Neue',sans-serif;font-size:2.8rem;
+    color:var(--gold);line-height:1;
+    text-shadow:0 0 20px rgba(200,168,75,.25);
+  }
+  .cd-unit{
+    font-size:.55rem;letter-spacing:2.5px;text-transform:uppercase;
+    color:var(--chalk);margin-top:3px;
+  }
+
+  /* Divider */
+  .divider{
+    width:100%;max-width:400px;height:1px;
+    background:linear-gradient(90deg,transparent,var(--border),transparent);
+    margin-bottom:2.6rem;
+  }
+
+  /* Notify form */
+  .notify-title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:1.4rem;letter-spacing:3px;color:var(--ivory);
+    margin-bottom:.4rem;
+  }
+  .notify-sub{
+    font-size:.78rem;color:var(--chalk);letter-spacing:.8px;
+    margin-bottom:1.2rem;
+  }
+  .notify-form{
+    display:flex;gap:8px;width:100%;max-width:440px;
+    flex-wrap:wrap;justify-content:center;
+  }
+  .notify-form input{
+    flex:1;min-width:200px;
+    background:rgba(4,9,3,.75);
+    border:1px solid var(--border);border-radius:8px;
+    color:var(--ivory);padding:11px 15px;
+    font-family:'Barlow Condensed',sans-serif;font-size:.92rem;
+    outline:none;transition:border-color .2s,box-shadow .2s;
+  }
+  .notify-form input::placeholder{color:rgba(170,164,144,.45);}
+  .notify-form input:focus{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(200,168,75,.1);
+  }
+  .notify-btn{
+    background:linear-gradient(135deg,#c8a84b,#8b6218);
+    color:#080400;border:none;border-radius:8px;
+    padding:11px 22px;cursor:pointer;
+    font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:2.5px;
+    transition:all .2s;white-space:nowrap;
+  }
+  .notify-btn:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(200,168,75,.3);}
+  .notify-btn:disabled{opacity:.6;cursor:default;transform:none;}
+
+  .success-msg{
+    display:none;align-items:center;gap:8px;
+    background:rgba(31,140,78,.12);border:1px solid rgba(31,140,78,.3);
+    border-radius:8px;padding:.75rem 1.2rem;
+    font-size:.85rem;color:#2ecc71;margin-top:.5rem;
+  }
+  .success-msg.show{display:flex;}
+
+  /* Features row */
+  .features{
+    display:flex;gap:1.4rem;flex-wrap:wrap;justify-content:center;
+    margin-top:3rem;
+  }
+  .feat{
+    display:flex;align-items:center;gap:7px;
+    font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--chalk);
+  }
+  .feat-dot{
+    width:5px;height:5px;border-radius:50%;
+    background:var(--gold);box-shadow:0 0 5px var(--gold);flex-shrink:0;
+  }
+
+  /* Bottom bar */
+  .bottom{
+    position:relative;z-index:1;
+    width:100%;text-align:center;
+    padding:1.4rem;
+    font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:rgba(170,164,144,.4);
+    border-top:1px solid rgba(200,168,75,.07);
+    margin-top:auto;
+  }
+
+  /* Toast */
+  .toast{
+    position:fixed;bottom:1.8rem;right:1.8rem;
+    background:linear-gradient(135deg,var(--grn),var(--bg2));
+    border:1px solid var(--gold);border-radius:10px;
+    padding:.85rem 1.3rem;z-index:300;
+    transform:translateY(70px);opacity:0;
+    transition:all .28s;font-size:.86rem;
+    min-width:250px;max-width:330px;
+  }
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast strong{color:var(--gold);}
+
+  @media(max-width:480px){
+    .logo-ball{width:42px;height:42px;font-size:15px;}
+    .logo-text h1{font-size:1.6rem;}
+    .cd-block{min-width:60px;padding:.75rem 1rem;}
+    .cd-num{font-size:2.2rem;}
+    .features{gap:.9rem;}
+    .feat{font-size:.65rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- Logo -->
+  <a class="logo" href="/">
+    <div class="logo-ball">9</div>
+    <div class="logo-text">
+      <h1>PinoyPool</h1>
+      <span>Official Philippine Billiards Platform</span>
+    </div>
+  </a>
+
+  <!-- Eyebrow -->
+  <div class="eyebrow">
+    <div class="eyebrow-line"></div>
+    🇵🇭 &nbsp;The Official Home of Philippine Pool
+    <div class="eyebrow-line"></div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero-title">
+    <div class="line1">WHERE LEGENDS</div>
+    <div class="line2">GET DISCOVERED</div>
+  </div>
+
+  <p class="tagline">Verified matches. National rankings. Real talent, real recognition.</p>
+
+  <!-- Countdown -->
+  <div class="countdown-label">Launching in</div>
+  <div class="countdown">
+    <div class="cd-block"><div class="cd-num" id="cd-d">00</div><div class="cd-unit">Days</div></div>
+    <div class="cd-block"><div class="cd-num" id="cd-h">00</div><div class="cd-unit">Hours</div></div>
+    <div class="cd-block"><div class="cd-num" id="cd-m">00</div><div class="cd-unit">Minutes</div></div>
+    <div class="cd-block"><div class="cd-num" id="cd-s">00</div><div class="cd-unit">Seconds</div></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Notify form -->
+  <div class="notify-title">Get Notified on Launch</div>
+  <p class="notify-sub">Be the first to join — enter your email and we'll let you know when we go live.</p>
+  <div class="notify-form">
+    <input type="email" id="notify-email" placeholder="your@email.com">
+    <button class="notify-btn" id="notify-btn" onclick="submitNotify()">Notify Me</button>
+  </div>
+  <div class="success-msg" id="notify-success">
+    ✅ &nbsp;<span>You're on the list! We'll notify you on launch day.</span>
+  </div>
+
+  <!-- Features -->
+  <div class="features">
+    <div class="feat"><div class="feat-dot"></div>Verified Match Records</div>
+    <div class="feat"><div class="feat-dot"></div>National Rankings</div>
+    <div class="feat"><div class="feat-dot"></div>9-Ball &amp; 10-Ball</div>
+    <div class="feat"><div class="feat-dot"></div>Hall Finder</div>
+    <div class="feat"><div class="feat-dot"></div>Live Scoring</div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="bottom">© 2026 PinoyPool &nbsp;·&nbsp; The Official Philippine Billiards Platform</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Launch date — change this to your actual go-live date ──
+  const LAUNCH = new Date('2026-04-01T00:00:00+08:00');
+
+  function pad(n){return String(n).padStart(2,'0');}
+  function tick(){
+    const now=new Date();
+    let diff=Math.max(0,LAUNCH-now);
+    const d=Math.floor(diff/864e5); diff-=d*864e5;
+    const h=Math.floor(diff/36e5);  diff-=h*36e5;
+    const m=Math.floor(diff/6e4);   diff-=m*6e4;
+    const s=Math.floor(diff/1e3);
+    document.getElementById('cd-d').textContent=pad(d);
+    document.getElementById('cd-h').textContent=pad(h);
+    document.getElementById('cd-m').textContent=pad(m);
+    document.getElementById('cd-s').textContent=pad(s);
+  }
+  tick();
+  setInterval(tick,1000);
+
+  // ── Notify form ──
+  function submitNotify(){
+    const em=document.getElementById('notify-email').value.trim();
+    if(!em||!em.includes('@')){showToast('⚠️ Please enter a valid email address.');return;}
+    const btn=document.getElementById('notify-btn');
+    btn.disabled=true;btn.textContent='Sending…';
+    fetch('/api/notify',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:em})
+    })
+    .then(r=>r.json())
+    .then(data=>{
+      btn.textContent='Sent ✓';
+      document.getElementById('notify-success').classList.add('show');
+      document.getElementById('notify-email').style.display='none';
+    })
+    .catch(()=>{
+      btn.disabled=false;btn.textContent='Notify Me';
+      showToast('⚠️ Could not connect. Please try again.');
+    });
+  }
+
+  // ── Toast ──
+  let toastTimer;
+  function showToast(msg){
+    const t=document.getElementById('toast');
+    t.innerHTML=msg;t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+  }
+
+  // Allow Enter key on email input
+  document.getElementById('notify-email').addEventListener('keydown',e=>{
+    if(e.key==='Enter') submitNotify();
+  });
+</script>
+</body>
+</html>
