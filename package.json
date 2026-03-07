@@ -1,7 +1,7 @@
 {
   "name": "pinoypool",
   "version": "10.0.0",
-  "description": "Official Philippine Billiards Platform",
+  "description": "",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -17,8 +17,8 @@
     "url": "https://github.com/socparty-hub/pinoypool/issues"
   },
   "homepage": "https://github.com/socparty-hub/pinoypool#readme",
-  "description": "",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "nodemailer": "^8.0.1"
   }
 }

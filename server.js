@@ -1,10 +1,30 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const nodemailer = require('nodemailer');
 const app = express();
 
 // ── Set COMING_SOON=true in your hosting environment to show the coming soon page ──
 const COMING_SOON = process.env.COMING_SOON === 'true';
+
+// ── Email config (set these env vars on your server) ──
+// SMTP_USER   = your Gmail address  e.g. yourname@gmail.com
+// SMTP_PASS   = Gmail App Password  (16-char, from Google Account → Security → App Passwords)
+// NOTIFY_TO   = where to send alerts e.g. yourname@gmail.com
+const mailer = nodemailer.createTransport({
+  service: 'gmail',
+  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+});
+
+function sendAlert(subject, html) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.NOTIFY_TO) return;
+  mailer.sendMail({
+    from: `"PinoyPool" <${process.env.SMTP_USER}>`,
+    to: process.env.NOTIFY_TO,
+    subject,
+    html
+  }).catch(err => console.error('[MAIL ERROR]', err.message));
+}
 
 const DATA_DIR = path.join(__dirname, 'data');
 const REG_FILE  = path.join(DATA_DIR, 'registrations.json');
@@ -36,9 +56,17 @@ app.post('/api/notify', (req, res) => {
   if (list.find(e => e.email === email)) {
     return res.json({ ok: true, message: 'Already on the list!' });
   }
-  list.push({ email, submittedAt: new Date().toISOString() });
+  const entry = { email, submittedAt: new Date().toISOString() };
+  list.push(entry);
   writeJSON(NOTIFY_FILE, list);
-  console.log(`[NOTIFY] ${email} wants to be notified on launch.`);
+  console.log(`[NOTIFY] ${email} signed up for launch notification.`);
+  sendAlert(
+    `🎱 PinoyPool — New Launch Signup: ${email}`,
+    `<h2 style="font-family:sans-serif;">New Launch Notification Signup</h2>
+     <p style="font-family:sans-serif;font-size:16px;"><strong>Email:</strong> ${email}<br>
+     <strong>Time:</strong> ${new Date().toLocaleString('en-PH',{timeZone:'Asia/Manila'})}</p>
+     <p style="font-family:sans-serif;font-size:13px;color:#888;">Total signups so far: ${list.length}</p>`
+  );
   res.json({ ok: true });
 });
 
@@ -64,6 +92,20 @@ app.post('/api/register', (req, res) => {
   regs.push(entry);
   writeJSON(REG_FILE, regs);
   console.log(`[REG] New ${role} registration: ${firstName} ${lastName} (${email || 'no email'})`);
+  sendAlert(
+    `🎱 PinoyPool — New ${role.charAt(0).toUpperCase()+role.slice(1)} Registration: ${firstName} ${lastName}`,
+    `<h2 style="font-family:sans-serif;">New Registration on PinoyPool</h2>
+     <table style="font-family:sans-serif;font-size:15px;border-collapse:collapse;">
+       <tr><td style="padding:4px 12px 4px 0;color:#888;">Name</td><td><strong>${firstName} ${lastName}</strong></td></tr>
+       <tr><td style="padding:4px 12px 4px 0;color:#888;">Role</td><td>${role}</td></tr>
+       <tr><td style="padding:4px 12px 4px 0;color:#888;">Email</td><td>${email || '—'}</td></tr>
+       <tr><td style="padding:4px 12px 4px 0;color:#888;">Phone</td><td>${phone || '—'}</td></tr>
+       ${hallName ? `<tr><td style="padding:4px 12px 4px 0;color:#888;">Hall</td><td>${hallName}</td></tr>` : ''}
+       ${city ? `<tr><td style="padding:4px 12px 4px 0;color:#888;">City</td><td>${city}</td></tr>` : ''}
+       <tr><td style="padding:4px 12px 4px 0;color:#888;">Time</td><td>${new Date().toLocaleString('en-PH',{timeZone:'Asia/Manila'})}</td></tr>
+     </table>
+     <p style="font-family:sans-serif;font-size:13px;color:#888;margin-top:12px;">Login to the admin panel to activate this account.</p>`
+  );
   res.json({ ok: true, message: 'Registration received! Admin will review and activate your account within 24–48 hours.' });
 });
 

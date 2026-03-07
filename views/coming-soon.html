@@ -101,28 +101,23 @@
     line-height:1.6;
   }
 
-  /* Countdown */
-  .countdown-label{
-    font-size:.6rem;letter-spacing:3px;text-transform:uppercase;
-    color:var(--chalk);margin-bottom:.8rem;
+  /* Coming Soon badge */
+  .cs-badge{
+    display:inline-flex;align-items:center;gap:10px;
+    background:linear-gradient(135deg,rgba(200,168,75,.12),rgba(200,168,75,.04));
+    border:1px solid rgba(200,168,75,.35);
+    border-radius:40px;padding:.6rem 1.6rem;
+    margin-bottom:2.6rem;
   }
-  .countdown{
-    display:flex;gap:1.2rem;justify-content:center;
-    margin-bottom:3rem;flex-wrap:wrap;
+  .cs-pulse{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--gold);box-shadow:0 0 8px var(--gold);
+    animation:pu 1.4s ease infinite;flex-shrink:0;
   }
-  .cd-block{
-    background:linear-gradient(145deg,rgba(26,58,34,.6),rgba(8,14,6,.92));
-    border:1px solid var(--border);border-radius:12px;
-    padding:.9rem 1.4rem;min-width:74px;
-  }
-  .cd-num{
-    font-family:'Bebas Neue',sans-serif;font-size:2.8rem;
-    color:var(--gold);line-height:1;
-    text-shadow:0 0 20px rgba(200,168,75,.25);
-  }
-  .cd-unit{
-    font-size:.55rem;letter-spacing:2.5px;text-transform:uppercase;
-    color:var(--chalk);margin-top:3px;
+  @keyframes pu{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+  .cs-text{
+    font-family:'Bebas Neue',sans-serif;font-size:1rem;
+    letter-spacing:4px;color:var(--gold);
   }
 
   /* Divider */
@@ -217,8 +212,6 @@
   @media(max-width:480px){
     .logo-ball{width:42px;height:42px;font-size:15px;}
     .logo-text h1{font-size:1.6rem;}
-    .cd-block{min-width:60px;padding:.75rem 1rem;}
-    .cd-num{font-size:2.2rem;}
     .features{gap:.9rem;}
     .feat{font-size:.65rem;}
   }
@@ -247,18 +240,15 @@
   <!-- Hero -->
   <div class="hero-title">
     <div class="line1">WHERE LEGENDS</div>
-    <div class="line2">GET DISCOVERED</div>
+    <div class="line2">ARE DISCOVERED</div>
   </div>
 
   <p class="tagline">Verified matches. National rankings. Real talent, real recognition.</p>
 
-  <!-- Countdown -->
-  <div class="countdown-label">Launching in</div>
-  <div class="countdown">
-    <div class="cd-block"><div class="cd-num" id="cd-d">00</div><div class="cd-unit">Days</div></div>
-    <div class="cd-block"><div class="cd-num" id="cd-h">00</div><div class="cd-unit">Hours</div></div>
-    <div class="cd-block"><div class="cd-num" id="cd-m">00</div><div class="cd-unit">Minutes</div></div>
-    <div class="cd-block"><div class="cd-num" id="cd-s">00</div><div class="cd-unit">Seconds</div></div>
+  <!-- Coming Soon badge -->
+  <div class="cs-badge">
+    <div class="cs-pulse"></div>
+    <div class="cs-text">Coming Soon</div>
   </div>
 
   <div class="divider"></div>
@@ -292,25 +282,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── Launch date — change this to your actual go-live date ──
-  const LAUNCH = new Date('2026-04-01T00:00:00+08:00');
-
-  function pad(n){return String(n).padStart(2,'0');}
-  function tick(){
-    const now=new Date();
-    let diff=Math.max(0,LAUNCH-now);
-    const d=Math.floor(diff/864e5); diff-=d*864e5;
-    const h=Math.floor(diff/36e5);  diff-=h*36e5;
-    const m=Math.floor(diff/6e4);   diff-=m*6e4;
-    const s=Math.floor(diff/1e3);
-    document.getElementById('cd-d').textContent=pad(d);
-    document.getElementById('cd-h').textContent=pad(h);
-    document.getElementById('cd-m').textContent=pad(m);
-    document.getElementById('cd-s').textContent=pad(s);
-  }
-  tick();
-  setInterval(tick,1000);
-
   // ── Notify form ──
   function submitNotify(){
     const em=document.getElementById('notify-email').value.trim();
