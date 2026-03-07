@@ -108,13 +108,29 @@ function doLogin(){
 function doRegister(){
   const fn=document.getElementById('rfn').value.trim(),ln=document.getElementById('rln').value.trim(),em=document.getElementById('rem').value.trim();
   const role=document.querySelector('.rc.sel')?.dataset.role||'player';
+  const ph=document.getElementById('rph')?.value.trim()||'';
+  const hn=document.getElementById('rhn')?.value.trim()||'';
+  const rc=document.getElementById('rrc')?.value.trim()||'';
+  const rci=document.getElementById('rrci')?.value.trim()||'';
   if(!fn||!ln){toast('⚠️ Fill in all required fields.');return;}
-  const name=fn+' '+ln;
-  const hall=role==='owner'?(document.getElementById('rhn')?.value.trim()||'My Billiard Hall'):null;
-  setUser({name,role,initials:getInit(name),hall});
-  closeM('m-auth');
-  toast(`🎉 Welcome to PinoyPool, <strong>${fn}</strong>!`);
-  if(role==='owner') setTimeout(()=>sv('portal',document.getElementById('nb-portal')),600);
+  const btn=document.getElementById('reg-submit-btn');
+  if(btn){btn.disabled=true;btn.textContent='Submitting…';}
+  fetch('/api/register',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({firstName:fn,lastName:ln,email:em,phone:ph,role,hallName:hn,city:rc,region:rci})
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    if(btn){btn.disabled=false;btn.textContent='Create Account';}
+    if(!data.ok){toast('⚠️ '+data.message);return;}
+    closeM('m-auth');
+    toast(`🎉 <strong>Registration submitted!</strong> Admin will review and activate your account within 24–48 hours.`);
+  })
+  .catch(()=>{
+    if(btn){btn.disabled=false;btn.textContent='Create Account';}
+    toast('⚠️ Could not connect. Please try again.');
+  });
 }
 function setUser(u){
   app.user=u;
@@ -1905,8 +1921,14 @@ const STATUS_OPTS=['active','suspended','pending','review'];
 
 function buildAdmin(){
   if(app.user?.role!=='admin'){toast('⚠️ Admin access only.');return;}
-  // Update stat badges
-  const pendP=adminPlayers.filter(p=>p.status==='pending').length;
+  // Fetch real registrations then render
+  fetch('/api/registrations')
+    .then(r=>r.json())
+    .then(regs=>{app.realRegs=regs;_renderAdmin();})
+    .catch(()=>{app.realRegs=app.realRegs||[];_renderAdmin();});
+}
+function _renderAdmin(){
+  const pendP=adminPlayers.filter(p=>p.status==='pending').length+(app.realRegs||[]).filter(r=>r.status==='pending').length;
   const pendH=adminHalls.filter(h=>h.status==='pending'||h.status==='review').length;
   const pendM=adminMatches.filter(m=>m.status==='pending'||m.status==='review').length;
   const el=id=>document.getElementById(id);
@@ -1915,7 +1937,7 @@ function buildAdmin(){
   el('adm-b-matches').textContent=pendM;
   el('adm-stats').innerHTML=`
     <div style="text-align:center;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);">${adminPlayers.length}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);">${adminPlayers.length+(app.realRegs||[]).filter(r=>r.status==='active').length}</div>
       <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Players</div>
     </div>
     <div style="text-align:center;">
@@ -1944,7 +1966,35 @@ function admTab(btn,tab){
       if(searchQ&&!p.name.toLowerCase().includes(searchQ))return false;
       return true;
     });
-    c.innerHTML=`
+    // Real registrations from API
+    const realRegs=app.realRegs||[];
+    const pendingRegs=realRegs.filter(r=>r.status==='pending');
+    const pendingRegsHtml=pendingRegs.length?`
+    <div class="card" style="margin-bottom:1.1rem;border-color:rgba(200,168,75,.4);background:linear-gradient(145deg,rgba(200,168,75,.07),rgba(8,14,6,.95));">
+      <div class="ct">🔔 New Registrations <span class="adm-badge" style="background:var(--gold);color:#080400;">${pendingRegs.length}</span></div>
+      <p style="font-size:.76rem;color:var(--chalk);margin-bottom:1rem;">These people registered on pinoypool.com and are waiting for activation.</p>
+      ${pendingRegs.map(r=>{
+        const roleIcon={player:'🎱',owner:'🏢',scout:'👁️'}[r.role]||'🎱';
+        const dt=new Date(r.submittedAt).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+        return`<div class="adm-row" style="border-color:rgba(200,168,75,.25);">
+          <div style="display:flex;align-items:center;gap:.9rem;min-width:0;flex:1;">
+            <div class="av" style="background:#1a3a22;font-size:.7rem;flex-shrink:0;">${r.firstName[0]}${r.lastName[0]}</div>
+            <div style="min-width:0;">
+              <div style="font-weight:600;font-size:.9rem;">${r.firstName} ${r.lastName} <span style="font-size:.65rem;color:var(--chalk);font-weight:400;">${roleIcon} ${r.role.toUpperCase()}</span></div>
+              <div style="font-size:.72rem;color:var(--chalk);margin-top:2px;">${r.email||'<em>no email</em>'} ${r.phone?'· '+r.phone:''}</div>
+              ${r.hallName?`<div style="font-size:.68rem;color:var(--chalk2);">Hall: ${r.hallName} · ${r.city||''}</div>`:''}
+              <div style="font-size:.65rem;color:var(--chalk2);margin-top:2px;">Submitted: ${dt}</div>
+            </div>
+          </div>
+          <div class="adm-actions">
+            <span class="status-pill sp-pending">● pending</span>
+            <button class="btn btn-s btn-sm" onclick="admApproveReg('${r.id}')">✓ Activate</button>
+            <button class="btn btn-d btn-sm" onclick="admRejectReg('${r.id}')">✗ Reject</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`:'';
+    c.innerHTML=pendingRegsHtml+`
     <div class="card">
       <div class="ct">🎱 Player Registry <span style="font-size:.7rem;color:var(--chalk);font-family:'Barlow Condensed',sans-serif;font-weight:400;text-transform:none;letter-spacing:0;">Manage player statuses and career tiers</span></div>
       <div style="display:flex;gap:.8rem;margin-bottom:1.1rem;flex-wrap:wrap;align-items:center;">
@@ -2123,6 +2173,26 @@ function admApprovePlayer(id){
   p.status='active';
   buildAdmin();
   toast(`✅ <strong>${p.name}</strong> approved and activated! Welcome notification sent.`);
+}
+function admApproveReg(id){
+  fetch(`/api/registrations/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'active'})})
+    .then(r=>r.json())
+    .then(data=>{
+      const r=data.entry;
+      toast(`✅ <strong>${r.firstName} ${r.lastName}</strong> activated! They can now log in.`);
+      buildAdmin();
+    })
+    .catch(()=>toast('⚠️ Could not update. Try again.'));
+}
+function admRejectReg(id){
+  fetch(`/api/registrations/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'rejected'})})
+    .then(r=>r.json())
+    .then(data=>{
+      const r=data.entry;
+      toast(`✗ <strong>${r.firstName} ${r.lastName}</strong> registration rejected.`);
+      buildAdmin();
+    })
+    .catch(()=>toast('⚠️ Could not update. Try again.'));
 }
 function admSuspendPlayer(id){
   const p=adminPlayers.find(x=>x.id===id);
