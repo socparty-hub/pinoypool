@@ -15,8 +15,9 @@ if (fs.existsSync(envPath)) {
   });
 }
 
-// ── Set COMING_SOON=true in your hosting environment to show the coming soon page ──
-const COMING_SOON = process.env.COMING_SOON === 'true';
+// ── COMING_SOON: true = show coming soon page, false = show full app ──
+// Change to false and push when ready to go fully live
+const COMING_SOON = process.env.COMING_SOON !== 'false';
 
 // ── Email config (set these env vars on your server) ──
 // SMTP_USER   = your Gmail address  e.g. yourname@gmail.com
