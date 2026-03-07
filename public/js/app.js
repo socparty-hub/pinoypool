@@ -1,39 +1,9 @@
 /* ══════════════════ DATA ══════════════════ */
-const PLAYERS = [
-  {id:1,name:'Efren Reyes Jr.',region:'NCR',fmt:'9-Ball',mw:42,ml:5,rw:312,rl:89,hcp:'-3',rank:1,colors:'#1a3a22'},
-  {id:2,name:'Carlo Biado Jr.',region:'Pampanga',fmt:'9-Ball',mw:38,ml:7,rw:285,rl:94,hcp:'-2',rank:2,colors:'#2d1a0a'},
-  {id:3,name:'Dennis Orcollo Jr.',region:'Davao',fmt:'10-Ball',mw:35,ml:9,rw:261,rl:108,hcp:'-2',rank:3,colors:'#0e1f16'},
-  {id:4,name:'Alex Pagulayan Jr.',region:'NCR',fmt:'9-Ball',mw:30,ml:9,rw:224,rl:112,hcp:'-1',rank:4,colors:'#1a3a22'},
-  {id:5,name:'Jun Tupaz',region:'Cebu',fmt:'10-Ball',mw:28,ml:9,rw:209,rl:118,hcp:'-1',rank:5,colors:'#2a1a3a'},
-  {id:6,name:'Warren Kiamco',region:'Laguna',fmt:'9-Ball',mw:25,ml:10,rw:188,rl:120,hcp:'-1',rank:6,colors:'#1a2a3a'},
-  {id:7,name:'Roberto Gomez',region:'NCR',fmt:'10-Ball',mw:22,ml:9,rw:165,rl:115,hcp:'0',rank:7,colors:'#3a1a22'},
-  {id:8,name:'Mark Santos',region:'Quezon City',fmt:'9-Ball',mw:20,ml:11,rw:149,rl:122,hcp:'0',rank:8,colors:'#1a3a22'},
-  {id:9,name:'Ryan Cruz',region:'Makati',fmt:'9-Ball',mw:18,ml:13,rw:134,rl:130,hcp:'+1',rank:9,colors:'#2d1a0a'},
-  {id:10,name:'Rico Santos',region:'Davao',fmt:'10-Ball',mw:16,ml:14,rw:120,rl:140,hcp:'+2',rank:10,colors:'#1a2a1a'},
-  {id:11,name:'Gerry Villanueva',region:'NCR',fmt:'9-Ball',mw:14,ml:12,rw:105,rl:118,hcp:'0',rank:11,colors:'#2a3a1a'},
-  {id:12,name:'Arnel Bachar',region:'Cebu',fmt:'10-Ball',mw:12,ml:11,rw:90,rl:110,hcp:'+1',rank:12,colors:'#1a2a3a'},
-];
+const PLAYERS = [];
 
-const HALLS = [
-  {n:'Cue Masters Billiards',c:'Quezon City, NCR',t:12,open:true,fmt:'9-Ball, 10-Ball',ap:8,fb:'fb.com/cuemasters'},
-  {n:'Break Point Billiards',c:'Makati, NCR',t:8,open:true,fmt:'9-Ball',ap:5,fb:'fb.com/breakpoint'},
-  {n:'Golden Cue Billiards',c:'Cebu City',t:15,open:true,fmt:'9-Ball, 10-Ball',ap:12,fb:'fb.com/goldencue'},
-  {n:'Rack & Roll',c:'Davao City',t:10,open:true,fmt:'10-Ball',ap:4,fb:'fb.com/rackroll'},
-  {n:'Pocket Kings',c:'Manila, NCR',t:6,open:false,fmt:'9-Ball',ap:0,fb:'fb.com/pocketkings'},
-  {n:'The Billiard Palace',c:'Caloocan, NCR',t:20,open:true,fmt:'9-Ball, 10-Ball',ap:18,fb:'fb.com/billiardpalace'},
-  {n:'Corner Pocket',c:'Iloilo City',t:7,open:true,fmt:'9-Ball',ap:3,fb:'fb.com/cornerpocket'},
-  {n:'Strike Zone',c:'Batangas City',t:9,open:true,fmt:'10-Ball',ap:6,fb:'fb.com/strikezone'},
-  {n:'Champions Arena',c:'Pasig, NCR',t:14,open:true,fmt:'9-Ball, 10-Ball',ap:11,fb:'fb.com/championsarena'},
-];
+const HALLS = [];
 
-const STREAMS = [
-  {player:'Efren Reyes Jr.',opp:'Mark Santos',fmt:'9-Ball',venue:'Cue Masters – QC',viewers:342,url:'https://fb.watch/demo1',platform:'FB Live',live:true},
-  {player:'Carlo Biado Jr.',opp:'Warren Kiamco',fmt:'9-Ball',venue:'Break Point – Makati',viewers:218,url:'https://youtu.be/demo2',platform:'YouTube',live:true},
-  {player:'Dennis Orcollo Jr.',opp:'Rico Santos',fmt:'10-Ball',venue:'Golden Cue – Cebu',viewers:189,url:'https://fb.watch/demo3',platform:'FB Live',live:true},
-  {player:'Alex Pagulayan Jr.',opp:'Jun Tupaz',fmt:'10-Ball',venue:'Rack & Roll – Davao',viewers:97,url:'https://youtu.be/demo4',platform:'YouTube',live:false},
-  {player:'Gerry Villanueva',opp:'Arnel Bachar',fmt:'9-Ball',venue:'Champions Arena – Pasig',viewers:54,url:'https://fb.watch/demo5',platform:'FB Live',live:true},
-  {player:'Ryan Cruz',opp:'Roberto Gomez',fmt:'9-Ball',venue:'Billiard Palace – Caloocan',viewers:122,url:'https://fb.watch/demo6',platform:'FB Live',live:true},
-];
+const STREAMS = [];
 
 /* ══════════════════ STATE ══════════════════ */
 const app = {
@@ -670,6 +640,16 @@ function renderLbTab(tab){
   const data=PLAYERS.map(p=>genPlayerStats(p,m));
   const c=document.getElementById('lb-content');
 
+  /* ── EMPTY STATE ── */
+  if(data.length===0){
+    c.innerHTML=`<div style="text-align:center;padding:3rem 1rem;color:var(--chalk);">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">🎱</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--gold);margin-bottom:.5rem;">No Players Ranked Yet</div>
+      <div style="font-size:.82rem;line-height:1.6;">Rankings will appear here once players register and their matches are verified by admin.</div>
+    </div>`;
+    return;
+  }
+
   /* ── GLOBAL LEADERBOARD ── */
   if(tab==='global'){
     const sorted=[...data].sort((a,b)=>b.overall-a.overall);
@@ -1046,6 +1026,14 @@ function renderLbTab(tab){
 
 /* ══════════════════ HALLS ══════════════════ */
 function buildHalls(){
+  if(HALLS.length===0){
+    document.getElementById('hall-grid').innerHTML=`<div style="text-align:center;padding:3rem 1rem;color:var(--chalk);grid-column:1/-1;">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">🏠</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--gold);margin-bottom:.5rem;">No Halls Listed Yet</div>
+      <div style="font-size:.82rem;line-height:1.6;">Registered billiard halls will appear here once approved by admin. Hall owners can apply below.</div>
+    </div>`;
+    return;
+  }
   document.getElementById('hall-grid').innerHTML=HALLS.map(h=>`
     <div class="hc" onclick="toast('📍 <strong>${h.n}</strong> — ${h.c}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
@@ -1070,14 +1058,7 @@ function regHall(){closeM('m-hall');toast('✅ Hall submitted! Admin will verify
 /* ══════════════════ LIVE NOW ══════════════════ */
 
 // Active matches data (matches in progress across all halls)
-const LIVE_MATCHES = [
-  {id:'lm1',p1:'Efren Reyes Jr.',p2:'Mark Santos',fmt:'9-Ball',venue:'Cue Masters – QC',type:'Tournament',score:[7,4],streamUrl:'https://fb.watch/demo1',platform:'FB Live',viewers:342},
-  {id:'lm2',p1:'Carlo Biado Jr.',p2:'Warren Kiamco',fmt:'9-Ball',venue:'Break Point – Makati',type:'Money Game',score:[5,5],streamUrl:'https://youtu.be/demo2',platform:'YouTube',viewers:218},
-  {id:'lm3',p1:'Dennis Orcollo Jr.',p2:'Rico Santos',fmt:'10-Ball',venue:'Golden Cue – Cebu',type:'Exhibition',score:[3,6],streamUrl:null,platform:null,viewers:0},
-  {id:'lm4',p1:'Alex Pagulayan Jr.',p2:'Jun Tupaz',fmt:'10-Ball',venue:'Rack & Roll – Davao',type:'Tournament',score:[8,7],streamUrl:null,platform:null,viewers:0},
-  {id:'lm5',p1:'Gerry Villanueva',p2:'Arnel Bachar',fmt:'9-Ball',venue:'Champions Arena – Pasig',type:'Money Game',score:[2,4],streamUrl:'https://fb.watch/demo5',platform:'FB Live',viewers:54},
-  {id:'lm6',p1:'Ryan Cruz',p2:'Roberto Gomez',fmt:'9-Ball',venue:'Billiard Palace – Caloocan',type:'Tournament',score:[9,8],streamUrl:'https://fb.watch/demo6',platform:'FB Live',viewers:122},
-];
+const LIVE_MATCHES = [];
 
 let liveFmt='all';
 function setLiveFmt(btn,fmt){
@@ -1099,6 +1080,15 @@ function buildLive(){
 
   // Only scout/fan users can paste stream links. Players and owners cannot.
   const canAddStream = app.user && app.user.role === 'fan';
+
+  if(data.length===0){
+    document.getElementById('live-match-grid').innerHTML=`<div style="text-align:center;padding:3rem 1rem;color:var(--chalk);grid-column:1/-1;">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">📡</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--gold);margin-bottom:.5rem;">No Live Matches Right Now</div>
+      <div style="font-size:.82rem;line-height:1.6;">Active matches will appear here in real time once halls and players are registered.</div>
+    </div>`;
+    return;
+  }
 
   document.getElementById('live-match-grid').innerHTML=data.map(m=>{
     const hasStream=!!m.streamUrl;
@@ -1891,30 +1881,13 @@ function declineChal(){closeM('m-chal');document.getElementById('pend-area').inn
 /* ══════════════════ ADMIN PORTAL ══════════════════ */
 
 // Registered player list with admin-editable status
-const adminPlayers = PLAYERS.map((p,i)=>({
-  ...p,
-  status: i<8 ? 'active' : 'pending',
-  email: p.name.toLowerCase().replace(/ /g,'.')+`@pool.ph`,
-  phone: '09'+Math.floor(100000000+Math.random()*900000000),
-  joined: `202${5+Math.floor(i/4)}-0${(i%9)+1}-${String(10+i).padStart(2,'0')}`,
-  careerStatus: i<2?'Elite':i<4?'Pro':i<6?'Semi-Pro':i<8?'Skilled':'Amateur'
-}));
+const adminPlayers = [];
 
 // Hall owner pending applications
-const adminHalls = [
-  {id:'h1',name:'Metro Billiards Hub',owner:'Jose Pangilinan',city:'Calamba, Laguna',tables:8,contact:'09171234567',email:'jose@metrobilliards.ph',fb:'fb.com/metrobilliardshub',status:'pending',submitted:'2026-02-20'},
-  {id:'h2',name:'Pro Cue Lounge',owner:'Marites Soriano',city:'Antipolo, Rizal',tables:6,contact:'09281234567',email:'marites@procue.ph',fb:'fb.com/procuelounge',status:'pending',submitted:'2026-02-21'},
-  {id:'h3',name:'Champions Table',owner:'Renato dela Peña',city:'Lipa City, Batangas',tables:10,contact:'09191234567',email:'renato@champions.ph',fb:'fb.com/championstable',status:'review',submitted:'2026-02-18'},
-  {id:'h4',name:'Strike Masters',owner:'Lorna Balagtas',city:'San Pedro, Laguna',tables:5,contact:'09251234567',email:'lorna@strikemaster.ph',fb:'fb.com/strikemasters',status:'pending',submitted:'2026-02-22'},
-];
+const adminHalls = [];
 
 // Pending match approvals (fully confirmed by both players, awaiting admin final sign-off)
-const adminMatches = [
-  {id:'am1',p1:'Mark Santos',p2:'Ryan Cruz',fmt:'9-Ball',type:'Tournament',score:'7-5',venue:'Cue Masters Billiards',date:'Feb 22, 2026',hcp:'None',status:'pending',p1ok:true,p2ok:true,venueOk:true},
-  {id:'am2',p1:'Alex Cruz',p2:'Dennis Lim',fmt:'9-Ball',type:'Money Game',score:'8-5',venue:'Break Point Billiards',date:'Feb 22, 2026',hcp:'None',status:'pending',p1ok:true,p2ok:true,venueOk:true},
-  {id:'am3',p1:'Rico Santos',p2:'Jun Tupaz',fmt:'10-Ball',type:'Tournament',score:'9-7',venue:'Rack & Roll – Davao',date:'Feb 21, 2026',hcp:'+2 racks (Rico)',status:'pending',p1ok:true,p2ok:true,venueOk:true},
-  {id:'am4',p1:'Gerry Villanueva',p2:'Arnel Bachar',fmt:'9-Ball',type:'Exhibition',score:'6-4',venue:'Champions Arena',date:'Feb 20, 2026',hcp:'None',status:'review',p1ok:true,p2ok:false,venueOk:true},
-];
+const adminMatches = [];
 
 const CAREER_TIERS=['Amateur','Skilled','Semi-Pro','Pro','Elite'];
 const STATUS_OPTS=['active','suspended','pending','review'];
@@ -2061,6 +2034,7 @@ function admTab(btn,tab){
           </div>
         </div>`;
       }).join('')}
+      ${!adminHalls.length?'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No hall applications yet</div>':''}
     </div>
     <div class="card">
       <div class="ct">✅ Registered Halls <span style="font-size:.7rem;font-family:'Barlow Condensed',sans-serif;font-weight:400;text-transform:none;letter-spacing:0;color:var(--chalk);">${HALLS.length} approved venues</span></div>
@@ -2075,6 +2049,7 @@ function admTab(btn,tab){
             <button class="btn btn-g btn-sm" onclick="toast('✏️ Edit feature — ${h.n}')">✏️ Edit</button>
           </div>
         </div>`).join('')}
+      ${!HALLS.length?'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No approved halls yet</div>':''}
     </div>`;
 
   /* ── MATCH APPROVALS ── */
@@ -2110,6 +2085,7 @@ function admTab(btn,tab){
           </div>
         </div>`;
       }).join('')}
+      ${!adminMatches.length?'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No match approvals pending yet</div>':''}
     </div>`;
 
   /* ── REGISTER HALL OWNER ── */
