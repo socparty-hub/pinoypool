@@ -4,6 +4,17 @@ const fs = require('fs');
 const nodemailer = require('nodemailer');
 const app = express();
 
+// Load .env file if present (for local dev / Hostinger)
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+    const [key, ...val] = line.split('=');
+    if (key && !key.startsWith('#') && val.length) {
+      process.env[key.trim()] = val.join('=').trim();
+    }
+  });
+}
+
 // ── Set COMING_SOON=true in your hosting environment to show the coming soon page ──
 const COMING_SOON = process.env.COMING_SOON === 'true';
 
