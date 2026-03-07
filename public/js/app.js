@@ -41,7 +41,7 @@ const app = {
   scores:[0,0], matchOn:false,
   p1:'',p2:'', p1id:null, p2id:null,
   rackLog:[], confirmState:{p1:false,p2:false,venue:false},
-  rankPeriod:'alltime', rankFmt:'all'
+  rankPeriod:'thismonth', rankFmt:'all'
 };
 const avcolors=['#1a3a22','#2d1a0a','#0e1f16','#1a1a3a','#2a1a1a','#1a2a3a','#3a1a22','#2a3a1a'];
 
@@ -108,7 +108,7 @@ function doLogin(){
 function doRegister(){
   const fn=document.getElementById('rfn').value.trim(),ln=document.getElementById('rln').value.trim(),em=document.getElementById('rem').value.trim();
   const role=document.querySelector('.rc.sel')?.dataset.role||'player';
-  if(!fn||!ln||!em){toast('⚠️ Fill in all required fields.');return;}
+  if(!fn||!ln){toast('⚠️ Fill in all required fields.');return;}
   const name=fn+' '+ln;
   const hall=role==='owner'?(document.getElementById('rhn')?.value.trim()||'My Billiard Hall'):null;
   setUser({name,role,initials:getInit(name),hall});
@@ -638,9 +638,9 @@ function genPlayerStats(p, mult){
 }
 
 function buildRankings(){
-  const periods={alltime:'All-Time',year:'2026',month:'February 2026',jan:'January 2026',dec25:'December 2025'};
-  document.getElementById('rank-period-badge').textContent='📅 '+periods[app.rankPeriod];
-  const multipliers={alltime:1,year:.55,month:.12,jan:.1,dec25:.09};
+  const periods={alltime:'All-Time',year:'2026',thismonth:'March 2026',lastmonth:'February 2026'};
+  const badge=document.getElementById('rank-period-badge'); if(badge) badge.textContent='📅 '+periods[app.rankPeriod];
+  const multipliers={alltime:1,year:.55,thismonth:.12,lastmonth:.1};
   app._rankMult = multipliers[app.rankPeriod]||1;
   app.lbTab = app.lbTab||'global';
   // Activate default tab
@@ -665,7 +665,7 @@ function renderLbTab(tab){
     <table class="rt" style="min-width:1100px;">
       <thead><tr>
         <th>PP Rank</th><th>Player</th><th>Career Status</th>
-        <th>Overall Rating</th><th>Perf Rank</th><th>9B Rank</th><th>10B Rank</th>
+        <th>Overall Rating</th><th>Perf Rank</th>
         <th>Total Matches</th><th>Win%</th><th>Last Active</th>
       </tr></thead>
       <tbody>
@@ -685,91 +685,9 @@ function renderLbTab(tab){
             <td>${tierBadge(tier)}</td>
             <td><div class="rating-val">${p.overall}</div><div class="rating-sub">combined</div></td>
             <td><span style="font-family:'DM Mono',monospace;font-size:.78rem;color:${perfRank<=3?'var(--gold)':'var(--chalk)'};">#${Math.max(1,perfRank)}</span></td>
-            <td><span style="font-family:'DM Mono',monospace;font-size:.78rem;">#${Math.max(1,rank9)}</span></td>
-            <td><span style="font-family:'DM Mono',monospace;font-size:.78rem;">#${Math.max(1,rank10)}</span></td>
             <td style="font-family:'DM Mono',monospace;">${p.mw+p.ml}</td>
             <td><div class="wrb"><div class="bt"><div class="bf" style="width:${wpct}%;"></div></div><span style="font-size:.72rem;">${wpct}%</span></div></td>
             <td style="font-size:.72rem;color:var(--chalk);">${lastActive}</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table></div>`;
-
-  /* ── 9-BALL LEADERBOARD ── */
-  } else if(tab==='9ball'){
-    const sorted=[...data].sort((a,b)=>b.r9-a.r9);
-    c.innerHTML=`
-    <div style="font-size:.72rem;color:var(--chalk);margin-bottom:.8rem;">9-Ball discipline ranking · Includes all players with verified 9-Ball matches.</div>
-    <div class="card" style="overflow-x:auto;padding:0;">
-    <table class="rt" style="min-width:1280px;">
-      <thead><tr>
-        <th>9B Rank</th><th>Player</th><th>Career Status</th>
-        <th>9B Rating</th><th>Matches</th><th>Win%</th>
-        <th>Avg Opp Rating</th><th>Tournament W-L</th><th>Money W-L</th><th>Exhibition W-L</th>
-        <th>Hcp Given</th><th>Hcp Taken</th><th>Avg Rack Margin</th><th>Peak Rating</th>
-      </tr></thead>
-      <tbody>
-        ${sorted.map((p,i)=>{
-          const tier=careerTier(p.mw,p.ml);
-          const wpct=Math.round(p.mw/(p.mw+p.ml||1)*100);
-          const margin=p.avgMargin>0?`<span class="rc-up">+${p.avgMargin}</span>`:`<span class="rc-dn">${p.avgMargin}</span>`;
-          return`<tr>
-            <td><div class="${rankClass(i)}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div></td>
-            <td><div class="pp"><div class="av" style="background:${p.colors||avcolors[i%8]}">${getInit(p.name)}</div>
-              <div><div style="font-weight:600;">${p.name}</div><div style="font-size:.62rem;color:var(--chalk);">${p.region}</div></div>
-            </div></td>
-            <td>${tierBadge(tier)}</td>
-            <td><div class="rating-val">${p.r9}</div></td>
-            <td style="font-family:'DM Mono',monospace;">${p.mw+p.ml}</td>
-            <td><div class="wrb"><div class="bt"><div class="bf" style="width:${wpct}%;"></div></div>${wpct}%</div></td>
-            <td style="font-family:'DM Mono',monospace;font-size:.75rem;color:var(--chalk);">${p.avgOpp}</td>
-            <td><span class="wl-rec"><span style="color:var(--grn3);">${p.tW}</span>–<span style="color:#e55;">${p.tL}</span></span></td>
-            <td><span class="wl-rec"><span style="color:var(--grn3);">${p.mngW}</span>–<span style="color:#e55;">${p.mngL}</span></span></td>
-            <td><span class="wl-rec"><span style="color:var(--grn3);">${p.exW}</span>–<span style="color:#e55;">${p.exL}</span></span></td>
-            <td style="font-family:'DM Mono',monospace;font-size:.75rem;color:var(--grn3);">${p.hcpGiven||'—'}</td>
-            <td style="font-family:'DM Mono',monospace;font-size:.75rem;color:#e55;">${p.hcpTaken||'—'}</td>
-            <td>${margin}</td>
-            <td><span style="font-family:'DM Mono',monospace;font-size:.75rem;color:var(--gold);">${p.peak}</span></td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table></div>`;
-
-  /* ── 10-BALL LEADERBOARD ── */
-  } else if(tab==='10ball'){
-    const sorted=[...data].sort((a,b)=>b.r10-a.r10);
-    c.innerHTML=`
-    <div style="font-size:.72rem;color:var(--chalk);margin-bottom:.8rem;">10-Ball discipline ranking · Separate from 9-Ball to respect each format's unique demands.</div>
-    <div class="card" style="overflow-x:auto;padding:0;">
-    <table class="rt" style="min-width:1280px;">
-      <thead><tr>
-        <th>10B Rank</th><th>Player</th><th>Career Status</th>
-        <th>10B Rating</th><th>Matches</th><th>Win%</th>
-        <th>Avg Opp Rating</th><th>Tournament W-L</th><th>Money W-L</th><th>Exhibition W-L</th>
-        <th>Hcp Given</th><th>Hcp Taken</th><th>Avg Rack Margin</th><th>Peak Rating</th>
-      </tr></thead>
-      <tbody>
-        ${sorted.map((p,i)=>{
-          const tier=careerTier(p.mw,p.ml);
-          const wpct=Math.round(p.mw/(p.mw+p.ml||1)*100);
-          const margin=p.avgMargin>0?`<span class="rc-up">+${p.avgMargin}</span>`:`<span class="rc-dn">${p.avgMargin}</span>`;
-          return`<tr>
-            <td><div class="${rankClass(i)}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div></td>
-            <td><div class="pp"><div class="av" style="background:${p.colors||avcolors[i%8]}">${getInit(p.name)}</div>
-              <div><div style="font-weight:600;">${p.name}</div><div style="font-size:.62rem;color:var(--chalk);">${p.region}</div></div>
-            </div></td>
-            <td>${tierBadge(tier)}</td>
-            <td><div class="rating-val">${p.r10}</div></td>
-            <td style="font-family:'DM Mono',monospace;">${p.mw+p.ml}</td>
-            <td><div class="wrb"><div class="bt"><div class="bf" style="width:${wpct}%;"></div></div>${wpct}%</div></td>
-            <td style="font-family:'DM Mono',monospace;font-size:.75rem;color:var(--chalk);">${p.avgOpp}</td>
-            <td><span class="wl-rec"><span style="color:var(--grn3);">${p.tW}</span>–<span style="color:#e55;">${p.tL}</span></span></td>
-            <td><span class="wl-rec"><span style="color:var(--grn3);">${p.mngW}</span>–<span style="color:#e55;">${p.mngL}</span></span></td>
-            <td><span class="wl-rec"><span style="color:var(--grn3);">${p.exW}</span>–<span style="color:#e55;">${p.exL}</span></span></td>
-            <td style="font-family:'DM Mono',monospace;font-size:.75rem;color:var(--grn3);">${p.hcpGiven||'—'}</td>
-            <td style="font-family:'DM Mono',monospace;font-size:.75rem;color:#e55;">${p.hcpTaken||'—'}</td>
-            <td>${margin}</td>
-            <td><span style="font-family:'DM Mono',monospace;font-size:.75rem;color:var(--gold);">${p.peak}</span></td>
           </tr>`;
         }).join('')}
       </tbody>

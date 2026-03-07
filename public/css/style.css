@@ -257,8 +257,9 @@ textarea{resize:vertical;min-height:75px;}
 .toast strong{color:var(--gold);}
 
 /* RANKINGS PERIOD TABS */
-.period-tabs{display:flex;gap:6px;margin-bottom:1.2rem;flex-wrap:wrap;}
-.pt{padding:7px 16px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--chalk);font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.period-tabs{display:inline-flex;gap:3px;margin-bottom:1.4rem;background:rgba(4,9,3,0.7);border:1px solid var(--border);border-radius:26px;padding:4px;}
+.pt{padding:6px 18px;border:1px solid transparent;border-radius:22px;background:transparent;color:var(--chalk);font-family:'Barlow Condensed',sans-serif;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.pt:hover{color:var(--gold);}
 .pt.act{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
 
 /* STREAM SHARE CARD */
@@ -347,11 +348,10 @@ textarea{resize:vertical;min-height:75px;}
 /* Score dropdowns in portal record form */
 .score-select{max-width:100px;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;text-align:center;color:var(--gold);border-color:rgba(200,168,75,.35);}
 /* Leaderboard tabs */
-.lb-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.2rem;flex-wrap:wrap;}
-.lb-tab{flex:1;min-width:100px;padding:10px 14px;background:transparent;border:none;border-right:1px solid var(--border);cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--chalk);transition:all .2s;text-align:center;}
-.lb-tab:last-child{border-right:none;}
-.lb-tab:hover{background:var(--gold-dim);color:var(--gold);}
-.lb-tab.act{background:linear-gradient(135deg,rgba(200,168,75,.18),rgba(200,168,75,.06));color:var(--gold);border-bottom:2px solid var(--gold);}
+.lb-tabs{display:flex;gap:3px;margin-bottom:1.2rem;background:rgba(4,9,3,0.7);border:1px solid var(--border);border-radius:26px;padding:4px;flex-wrap:wrap;}
+.lb-tab{flex:1;min-width:80px;padding:6px 12px;border:1px solid transparent;border-radius:22px;background:transparent;color:var(--chalk);font-family:'Barlow Condensed',sans-serif;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;text-align:center;}
+.lb-tab:hover{color:var(--gold);}
+.lb-tab.act{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
 /* Leaderboard rank badge */
 .lb-rank{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--chalk);text-align:center;min-width:32px;}
 .lb-rank.top1{color:var(--gold2);text-shadow:0 0 12px rgba(200,168,75,.4);}

@@ -345,25 +345,21 @@
 ══════════════════════════════════════════ -->
 <div id="view-rankings" class="view">
   <div class="ph">🏆 Official Leaderboard</div>
-  <div class="ps">PinoyPool National Rankings · 9-Ball &amp; 10-Ball Rating System · Only verified matches count</div>
+  <div class="ps">PinoyPool National Rankings · Unified Rating System · Only verified matches count</div>
 
   <!-- Period selector -->
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.8rem;margin-bottom:1.2rem;">
+  <div style="margin-bottom:.4rem;">
     <div class="period-tabs">
-      <button class="pt act" onclick="setRankPeriod(this,'alltime')">All-Time</button>
+      <button class="pt act" onclick="setRankPeriod(this,'thismonth')">This Month</button>
+      <button class="pt" onclick="setRankPeriod(this,'lastmonth')">Last Month</button>
       <button class="pt" onclick="setRankPeriod(this,'year')">2026</button>
-      <button class="pt" onclick="setRankPeriod(this,'month')">Feb 2026</button>
-      <button class="pt" onclick="setRankPeriod(this,'jan')">Jan 2026</button>
-      <button class="pt" onclick="setRankPeriod(this,'dec25')">Dec 2025</button>
+      <button class="pt" onclick="setRankPeriod(this,'alltime')">All Time</button>
     </div>
-    <div id="rank-period-badge" style="font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:2px;color:var(--gold);text-transform:uppercase;padding-top:4px;"></div>
   </div>
 
   <!-- Leaderboard type tabs -->
   <div class="lb-tabs" id="lb-tabs">
-    <button class="lb-tab act" onclick="lbTab(this,'global')">🌐 Global</button>
-    <button class="lb-tab" onclick="lbTab(this,'9ball')">🔵 9-Ball</button>
-    <button class="lb-tab" onclick="lbTab(this,'10ball')">🟣 10-Ball</button>
+    <button class="lb-tab act" onclick="lbTab(this,'global')">🌐 National</button>
     <button class="lb-tab" onclick="lbTab(this,'performance')">🔥 Performance</button>
     <button class="lb-tab" onclick="lbTab(this,'hcp')">⚡ Handicap</button>
     <button class="lb-tab" onclick="lbTab(this,'expanded')">📊 Expanded</button>
@@ -482,7 +478,7 @@
         <div class="fg"><label>First Name</label><input type="text" id="rfn" placeholder="Juan"></div>
         <div class="fg"><label>Last Name</label><input type="text" id="rln" placeholder="dela Cruz"></div>
       </div>
-      <div class="fg"><label>Email</label><input type="email" id="rem" placeholder="you@email.com"></div>
+      <div class="fg"><label>Email <span style="font-size:.6rem;color:var(--chalk2);letter-spacing:1px;">(optional)</span></label><input type="email" id="rem" placeholder="you@email.com"></div>
       <div class="fg"><label>Mobile (Philippines)</label><input type="tel" id="rph" placeholder="09xxxxxxxxx"></div>
       <div id="rf-player">
         <div class="fg"><label>Region / Province</label>
