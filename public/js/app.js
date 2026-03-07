@@ -92,7 +92,7 @@ function doLogin(){
   const e=document.getElementById('le').value.trim(),p=document.getElementById('lp').value;
   if(!e||!p){toast('⚠️ Enter your email and password.');return;}
   // ADMIN master login
-  if(e.toUpperCase()==='ADMIN'&&p==='ADMIN'){
+  if(e.toUpperCase()==='ADMIN'&&p==='Liverpool!'){
     setUser({name:'Administrator',role:'admin',initials:'AD'});
     closeM('m-auth');
     toast('🔐 Welcome, <strong>Admin</strong>. Full system access granted.');
