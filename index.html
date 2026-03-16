@@ -1200,6 +1200,10 @@ const TEST_ACCOUNTS=[
     name:'Administrator', role:'admin', initials:'AD', username:'adminmaster'
   },
   {
+    email:'admin@pinoypool.com',
+    name:'Admin', role:'admin', initials:'AD', username:'ADMIN'
+  },
+  {
     email:'dennis.po@pool.ph',
     name:'Dennis Po', role:'player', initials:'DP', username:'dennispo',
     dob:'1990-01-01', phone:'09171234567',
@@ -1210,7 +1214,7 @@ const TEST_ACCOUNTS=[
 (function initTestPasswords(){
   const key='pp_testPasswords';
   let stored={};try{stored=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
-  const defaults={juandelacruz:'Test1234',mariasantos1:'Test1234',adminmaster:'Admin1234',dennispo:'Dennis1234'};
+  const defaults={juandelacruz:'Test1234',mariasantos1:'Test1234',adminmaster:'Admin1234',dennispo:'Dennis1234',ADMIN:'pass1234'};
   let changed=false;
   Object.entries(defaults).forEach(([u,p])=>{if(!stored[u]){stored[u]=p;changed=true;}});
   if(changed) localStorage.setItem(key,JSON.stringify(stored));
