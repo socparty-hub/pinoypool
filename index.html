@@ -880,7 +880,6 @@ textarea{resize:vertical;min-height:75px;}
     <button class="adm-tab" onclick="admTab(this,'halls')">🏢 Hall Owners<span class="adm-badge" id="adm-b-halls">0</span></button>
     <button class="adm-tab" onclick="admTab(this,'matches')">⚡ Match Approvals<span class="adm-badge" id="adm-b-matches">0</span></button>
     <button class="adm-tab" onclick="admTab(this,'tournaments')">🏆 Tournaments<span class="adm-badge" id="adm-b-tournaments">0</span></button>
-    <button class="adm-tab" onclick="admTab(this,'register-hall')">➕ Register Hall Owner</button>
   </div>
   <div id="adm-content"></div>
 </div>
@@ -903,13 +902,6 @@ textarea{resize:vertical;min-height:75px;}
       <div class="fg"><label>Password</label><input type="password" id="lp" placeholder="••••••••"></div>
       <button class="btn btn-p btn-f" onclick="doLogin()" style="margin-top:.5rem;">Login to PinoyPool</button>
       <div style="text-align:center;margin-top:.9rem;font-size:.78rem;color:var(--chalk);">No account? <span class="lktxt" onclick="atab('register',null)">Register now</span></div>
-      <div style="margin-top:1.1rem;border:1px solid rgba(200,168,75,.15);border-radius:8px;padding:.75rem;background:rgba(200,168,75,.04);">
-        <div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-bottom:.6rem;">🧪 Test Account</div>
-        <div style="display:flex;flex-direction:column;gap:5px;">
-          <button onclick="quickLogin('adminmaster','Admin1234')" style="background:rgba(184,50,40,.1);border:1px solid rgba(184,50,40,.25);border-radius:6px;color:#e55;font-size:.75rem;padding:6px 10px;cursor:pointer;text-align:left;font-family:inherit;">⚙️ Admin — adminmaster / Admin1234</button>
-          <button onclick="quickLogin('dennispo','Dennis1234')" style="background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.2);border-radius:6px;color:var(--gold);font-size:.75rem;padding:6px 10px;cursor:pointer;text-align:left;font-family:inherit;">🎱 Dennis Po — dennispo / Dennis1234</button>
-        </div>
-      </div>
     </div>
     <div id="ar" style="display:none;">
       <div class="fg"><label>Account Type</label>
@@ -1083,15 +1075,14 @@ function applyMatchStepUI(){
 }
 /* ══════════════════ DASHBOARD ══════════════════ */
 function buildDashboard(){
-  // — Stat counters —
+  // — Stat counters — only admin-approved matches count as "Verified"
   const approvedAdminCount=typeof adminMatches!=='undefined'?adminMatches.filter(x=>x.status==='approved').length:0;
-  const totalMatches=hallHistory.length+approvedAdminCount;
   const el=n=>document.getElementById(n);
   if(el('stat-players')) el('stat-players').textContent=PLAYERS.length.toLocaleString();
-  if(el('stat-matches')) el('stat-matches').textContent=totalMatches.toLocaleString();
-  if(el('stat-halls'))   el('stat-halls').textContent=(typeof HALLS!=='undefined'?HALLS.length:0).toLocaleString();
+  if(el('stat-matches')) el('stat-matches').textContent=approvedAdminCount.toLocaleString();
+  if(el('stat-halls'))   el('stat-halls').textContent=(typeof adminHalls!=='undefined'?adminHalls.filter(h=>h.status==='active').length:0).toLocaleString();
 
-  // — Recent Verified Matches —
+  // — Recent Verified Matches — only admin-approved matches shown here
   const lc=el('dash-log');
   if(lc){
     const adminVer=typeof adminMatches!=='undefined'
@@ -1099,7 +1090,7 @@ function buildDashboard(){
           p1:x.p1,p2:x.p2,fmt:x.fmt,type:x.type,sc:x.score,date:x.date,ts:x.date,label:'Admin Approved'
         }))
       :[];
-    const allM=[...hallHistory.map(x=>({...x,label:'Verified'})),...adminVer];
+    const allM=[...adminVer];
     allM.sort((a,b)=>new Date(b.date)-new Date(a.date));
     const recent=allM.slice(0,5);
     if(recent.length===0){
@@ -1188,31 +1179,42 @@ function selRole(card,role){
   document.getElementById('rf-owner').style.display=role==='owner'?'block':'none';
 }
 function solo(btn){btn.closest('.tg').querySelectorAll('.tb').forEach(b=>b.classList.remove('act'));btn.classList.add('act');}
+// Passwords are NOT stored here — they live in localStorage key 'pp_testPasswords'.
+// On first load, defaults are seeded once by initTestPasswords() below.
 const TEST_ACCOUNTS=[
   {
-    email:'player@pinoypool.com', password:'Test1234',
+    email:'player@pinoypool.com',
     name:'Juan dela Cruz', role:'player', initials:'JD', username:'juandelacruz',
     dob:'1995-06-15', phone:'09123456789',
     email_addr:'player@pinoypool.com', region:'NCR – Metro Manila'
   },
   {
-    email:'owner@pinoypool.com', password:'Test1234',
+    email:'owner@pinoypool.com',
     name:'Maria Santos', role:'owner', initials:'MS', username:'mariasantos1',
     dob:'1988-03-22', phone:'09987654321',
     email_addr:'owner@pinoypool.com', region:'NCR – Metro Manila',
     hall:'Cue Masters Billiards'
   },
   {
-    email:'admin@pinoypool.com', password:'Admin1234',
+    email:'admin@pinoypool.com',
     name:'Administrator', role:'admin', initials:'AD', username:'adminmaster'
   },
   {
-    email:'dennis.po@pool.ph', password:'Dennis1234',
+    email:'dennis.po@pool.ph',
     name:'Dennis Po', role:'player', initials:'DP', username:'dennispo',
     dob:'1990-01-01', phone:'09171234567',
     email_addr:'dennis.po@pool.ph', region:'NCR'
   }
 ];
+// Seed default passwords into localStorage once — never hardcoded in HTML source.
+(function initTestPasswords(){
+  const key='pp_testPasswords';
+  let stored={};try{stored=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
+  const defaults={juandelacruz:'Test1234',mariasantos1:'Test1234',adminmaster:'Admin1234',dennispo:'Dennis1234'};
+  let changed=false;
+  Object.entries(defaults).forEach(([u,p])=>{if(!stored[u]){stored[u]=p;changed=true;}});
+  if(changed) localStorage.setItem(key,JSON.stringify(stored));
+})();
 
 // Stores accounts created via the Register form — persisted in localStorage so login survives page refresh
 const registeredUsers=(()=>{try{return JSON.parse(localStorage.getItem('pp_registeredUsers')||'[]');}catch{return [];}})();
@@ -1256,10 +1258,10 @@ function rebuildStatsFromMatches(){
   // Only process fully verified + approved matches
   const approvedMs=adminMatches.filter(m=>m.status==='approved'&&m.p1ok&&m.p2ok&&m.venueOk);
   if(!approvedMs.length) return;
-  // Skip rebuild if recorded stats are already consistent (totalMW+ML == matches*2)
+  // Skip rebuild ONLY if stats are exactly consistent — not >= (over-counted triggers rebuild too)
   const totalExpected=approvedMs.length*2;
   const totalActual=approvedPlayers.reduce((s,ap)=>(s+(ap.mw||0)+(ap.ml||0)),0);
-  if(totalActual>=totalExpected) return;
+  if(totalActual===totalExpected) return;
   // Reset all approved players to initial PPR / zeroed records
   approvedPlayers.forEach(ap=>{
     ap.ppr=INITIAL_PPR[ap.careerStatus]||1300;
@@ -1335,6 +1337,14 @@ function restoreApprovedHalls(){
     else{existing.status='active';}
     if(!HALLS.find(h=>h.n===ah.name)){
       HALLS.push({n:ah.name,c:ah.city,t:ah.tables||0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:ah.fb||'—'});
+    }
+  });
+  // Also restore pending hall applications so admin can review them after page reload
+  let _pendHalls=[];try{_pendHalls=JSON.parse(localStorage.getItem('pp_pendingHalls')||'[]');}catch{}
+  _pendHalls.forEach(ph=>{
+    // Only restore if not already in adminHalls (approved halls take precedence)
+    if(!adminHalls.find(h=>h.id===ph.id||h.email===ph.email)){
+      adminHalls.push({...ph,status:'pending'});
     }
   });
   _refreshVenueSelect();
@@ -1470,11 +1480,16 @@ function doRegister(){
     }
     // Hall owner: also add to adminHalls as a pending application for admin review
     if(role==='owner'&&!adminHalls.find(h=>h.email===em)){
-      adminHalls.unshift({
+      const newHall={
         id:backendId||'h'+Date.now(), name:hall||'Unknown Hall', owner:name, username:un,
         city:addr||region||'—', tables:0, contact:ph, email:em, fb:'—',
         status:'pending', submitted:new Date().toISOString().slice(0,10)
-      });
+      };
+      adminHalls.unshift(newHall);
+      // Persist pending hall application so it survives page reload for admin to review
+      let _pendHalls=[];try{_pendHalls=JSON.parse(localStorage.getItem('pp_pendingHalls')||'[]');}catch{}
+      if(!_pendHalls.find(h=>h.email===em)) _pendHalls.unshift(newHall);
+      try{localStorage.setItem('pp_pendingHalls',JSON.stringify(_pendHalls));}catch{}
     }
     closeM('m-auth');
     toast(`🎉 Welcome, <strong>@${un}</strong>! ${role==='player'?'Your account is pending admin verification.':`Your hall registration is pending admin approval.`}`);
@@ -2125,7 +2140,13 @@ function submitFinalScore(){
     const b2=[...hcpState.balls[1]].sort((a,b)=>a-b);
     if(b1.length) hcpParts.push(`${app.p1.split(' ')[0]} last ball ${b1.join(', ')}`);
     if(b2.length) hcpParts.push(`${app.p2.split(' ')[0]} last ball ${b2.join(', ')}`);
+    // Generate a shared ID used by both manualPending and adminMatches
+    const _mpId='m-'+Date.now();
+    const _mpHcpLabel=(hcpState.rack[0]||hcpState.rack[1])
+      ?`+${hcpState.rack[0]} / +${hcpState.rack[1]} racks`:'None';
+    const _mpVenueEntry=adminHalls.find(h=>h.owner===app.user?.name||h.username===app.user?.username);
     manualPending.push({
+      id:_mpId,  // shared with adminMatches entry for sync
       p1:app.p1,p2:app.p2,fmt:app.fmt||'9-Ball',type:app.matchType||'Tournament',
       sc:`${s1}-${s2}`,winner,hcp:hcpParts.join(' · ')||'None',
       hcpRack:[hcpState.rack[0]||0,hcpState.rack[1]||0],
@@ -2133,6 +2154,24 @@ function submitFinalScore(){
       status:'pending',ts:new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}),
       p1accept:false,p2accept:false
     });
+    // ── Immediately visible to Admin as 'owner-pending' — admin can approve at any time ──
+    adminMatches.push({
+      id:_mpId,
+      p1:app.p1, p2:app.p2,
+      score:`${s1}-${s2}`,
+      fmt:app.fmt||'9-Ball',
+      type:app.matchType||'Tournament',
+      hcp:_mpHcpLabel,
+      hcpRack:[hcpState.rack[0]||0,hcpState.rack[1]||0],
+      hcpBall:[hcpState.balls[0].size||0,hcpState.balls[1].size||0],
+      venue:_mpVenueEntry?.name||app.user?.hall||'—',
+      date:new Date().toISOString().slice(0,10),
+      status:'owner-pending',
+      p1ok:false, p2ok:false, venueOk:true,
+      submittedAt:new Date().toISOString(),
+      ownerName:app.user?.name||'Hall Owner'
+    });
+    saveAdminMatches();
     // Push to playerPendingMatches so both players see the invite in their portals.
     // Shared acceptance tracker — when either player confirms, both entries reflect it.
     const _mDate=new Date().toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
@@ -2158,24 +2197,37 @@ function submitFinalScore(){
     resetMatch();
     return;
   }
-  // Mark step 1 of chain
+  // Player-challenge flow: route to admin/venue verification (no direct approval)
+  const _chalVenue=(document.getElementById('sel-venue')?.value)||app.venue||'—';
+  const _chalHcpParts=[];
+  if(hcpState.rack[0]>0) _chalHcpParts.push(`${app.p1.split(' ')[0]} +${hcpState.rack[0]} racks`);
+  if(hcpState.rack[1]>0) _chalHcpParts.push(`${app.p2.split(' ')[0]} +${hcpState.rack[1]} racks`);
+  adminMatches.unshift({
+    id:'m-'+Date.now(), p1:app.p1||'Player 1', p2:app.p2||'Player 2',
+    fmt:app.fmt||'9-Ball', type:app.matchType||'Exhibition',
+    score:`${s1}–${s2}`,
+    venue:_chalVenue, date:new Date().toISOString().slice(0,10),
+    hcp:_chalHcpParts.join(' · ')||'None',
+    status:'player-pending',
+    p1ok:true, p2ok:true, venueOk:false,
+    submittedAt:new Date().toISOString(),
+    source:'player-challenge'
+  });
+  saveAdminMatches();
+  // Update chain UI — steps 1-3 done, step 4 awaiting admin verification
   document.getElementById('cs-actions').style.display='none';
   document.getElementById('cs-waiting').style.display='block';
-  setChain(1,'done','Confirmed');
-  setChain(2,'pending','Notified');
-  setChain(3,'wait','Pending');
-  toast('✅ Your score confirmed! Waiting for opponent…');
-  // Simulate opponent + venue confirm
-  setTimeout(()=>{
-    setChain(2,'done','Confirmed');
-    setChain(3,'pending','Notified');
-    toast(`✅ ${app.p2.split(' ')[0]} confirmed the score!`);
-    setTimeout(()=>{
-      setChain(3,'done','Validated');
-      toast('✅ Venue validated! Match is official. Rankings updated.');
-      setTimeout(()=>finalizeMatch(),700);
-    },2500);
-  },1800);
+  setChain(1,'done','Set Up');
+  setChain(2,'done','Accepted');
+  setChain(3,'done','Score Confirmed');
+  // Step 4 shows awaiting admin
+  const _c4i=document.getElementById('chain-4-icon');
+  const _c4s=document.getElementById('chain-4-status');
+  if(_c4i){_c4i.style.background='rgba(245,166,35,.15)';_c4i.style.borderColor='rgba(245,166,35,.4)';_c4i.style.color='#f5a623';_c4i.textContent='⏳';}
+  if(_c4s) _c4s.innerHTML='<span style="color:#f5a623;">Awaiting Admin</span>';
+  buildDashboard();
+  updateNavBadges();
+  toast('⏳ Score confirmed! Match is awaiting hall owner / Admin verification before rankings update.');
 }
 
 function setChain(n,state,label){
@@ -2461,9 +2513,10 @@ function computeAdvancedStats(playerName, currentPPR, careerStatus){
     // Real SoS: average calcSoS of all opponents faced
     const opp2=PLAYERS.find(p=>p.name===oppName);
     if(opp2){sosSum+=calcSoS(opp2.ppr);sosN++;}
-    // Activity: matches within last 60 days
-    const ts=parseInt((m.id||'').replace('m-',''))||0;
-    if(ts>sixtyDaysAgo) activity++;
+    // Activity: matches within last 60 days (use m.date first, fall back to ID timestamp)
+    const _mDate=m.date?new Date(m.date).getTime():0;
+    const _mTs=_mDate>0?_mDate:(parseInt((m.id||'').replace('m-',''))||0);
+    if(_mTs>sixtyDaysAgo) activity++;
   });
   // Career Growth: current PPR vs initial PPR for career status
   const initPPR=(typeof INITIAL_PPR!=='undefined'?INITIAL_PPR[careerStatus]:null)||1300;
@@ -2515,7 +2568,7 @@ function genPlayerStats(p, mult){
   const tW=tRec.w,tL=tRec.l,mngW=mRec.w,mngL=mRec.l,exW=eRec.w,exL=eRec.l;
   // Activity — real count of approved matches within last 60 days
   const _sixtyAgo=Date.now()-60*24*60*60*1000;
-  const activity=_playerMs.filter(am=>{const ts=parseInt((am.id||'').replace('m-',''))||0;return ts>_sixtyAgo;}).length;
+  const activity=_playerMs.filter(am=>{const _d=am.date?new Date(am.date).getTime():0;const _t=_d>0?_d:(parseInt((am.id||'').replace('m-',''))||0);return _t>_sixtyAgo;}).length;
   // Avg rack margin
   const avgMargin=((rw-rl)/(mw+ml||1)).toFixed(1);
   // Performance Ranking (PR, 0-100) — 0 until first match
@@ -2721,33 +2774,33 @@ function renderLbTab(tab){
       lbSum+=cnt; lbN++;
     });
     const avgLB=lbN?Math.round(lbSum/lbN*10)/10:0;
-    const hcpRows=[
-      {cat:'Level Match',impactColor:'var(--chalk)',impactBg:'rgba(255,255,255,.05)',
-       rec:{w:lvlW,l:lvlL},wpct:lvlW>0?50:0,noData:_lvlMs.length===0,
-       rackGiven:0,rackRec:0,lbGiven:0,lbRec:0,
-       impact:'Baseline',
-       desc:'Neither player gives handicap. Pure performance rating.'},
-      {cat:'Rack Adv. Given',impactColor:'var(--grn3)',impactBg:'rgba(31,140,78,.1)',
-       rec:{w:rgW,l:rgL},wpct:_wp(rgW,rgL),noData:rgN===0,
-       rackGiven:avgRG,rackRec:0,lbGiven:0,lbRec:0,
-       impact:'Accelerated Gain',
-       desc:'Giving opponent extra racks and still winning → big rating gain.'},
-      {cat:'Rack Adv. Received',impactColor:'#5dade2',impactBg:'rgba(52,130,219,.08)',
-       rec:{w:rrW,l:rrL},wpct:_wp(rrW,rrL),noData:rgN===0,
-       rackGiven:0,rackRec:avgRG,lbGiven:0,lbRec:0,
-       impact:'Slower Growth',
-       desc:'Receiving extra racks. Wins count for less; losses hurt more.'},
-      {cat:'Last Ball Given',impactColor:'var(--gold)',impactBg:'rgba(200,168,75,.08)',
-       rec:{w:lgW,l:lgL},wpct:_wp(lgW,lgL),noData:lbN===0,
-       rackGiven:0,rackRec:0,lbGiven:avgLB,lbRec:0,
-       impact:'Skill Multiplier',
-       desc:'Spotting last balls requires elite positioning. High reward.'},
-      {cat:'Last Ball Received',impactColor:'#e55',impactBg:'rgba(184,50,40,.08)',
-       rec:{w:lrW,l:lrL},wpct:_wp(lrW,lrL),noData:lbN===0,
-       rackGiven:0,rackRec:0,lbGiven:0,lbRec:avgLB,
-       impact:'Higher Risk Drop',
-       desc:'Receiving last ball spots. Difficult to gain rating this way.'},
-    ];
+    // Career Status handicap breakdown (rows = tier, cols = Matches / Even / Hcp Given / Hcp Rec'd)
+    const CAREER_TIERS=['Elite','Pro','Skilled','Amateur','Rookie'];
+    const tierHcpStats=CAREER_TIERS.map(tier=>{
+      const tierPlayers=data.filter(p=>(careerTier(p.mw,p.ml,p.status||p.careerStatus||'')||{}).label===tier);
+      if(!tierPlayers.length) return null;
+      // Use Sets to count unique matches (not per-player participations)
+      const seenTotal=new Set(),seenEven=new Set(),seenGiven=new Set(),seenRec=new Set();
+      tierPlayers.forEach(p=>{
+        const pMs=_ams.filter(m=>m.p1===p.name||m.p2===p.name);
+        pMs.forEach(m=>{
+          seenTotal.add(m.id);
+          const isEven=!m.hcp||m.hcp.trim()===''||m.hcp.trim().toLowerCase()==='none';
+          if(isEven){seenEven.add(m.id);}
+          else{
+            const rm=(m.hcp||'').match(/^(\w+)\s*\+\s*\d+/i);
+            if(rm){
+              const recvFn=rm[1].toLowerCase();
+              const playerFn=p.name.split(' ')[0].toLowerCase();
+              playerFn===recvFn?seenRec.add(m.id):seenGiven.add(m.id);
+            } else {seenEven.add(m.id);}
+          }
+        });
+      });
+      const totalMs=seenTotal.size,evenMs=seenEven.size,hcpGiven=seenGiven.size,hcpRec=seenRec.size;
+      const tierObj=careerTier(tierPlayers[0].mw,tierPlayers[0].ml,tierPlayers[0].status||tierPlayers[0].careerStatus||'');
+      return{tier,tierObj,count:tierPlayers.length,totalMs,evenMs,hcpGiven,hcpRec};
+    }).filter(Boolean);
 
     // Per-player hcp breakdown — only players with actual handicap matches
     const hcpSorted=[...data].filter(p=>(p.hcpMatchCount||0)>0).sort((a,b)=>b.hcpScore-a.hcpScore);
@@ -2775,35 +2828,44 @@ function renderLbTab(tab){
         }).join('');
 
     c.innerHTML=`
-    <!-- Handicap Performance Breakdown -->
+    <!-- Handicap Performance Breakdown by Career Status -->
     <div class="card" style="margin-bottom:1.1rem;">
       <div class="ct" style="margin-bottom:.5rem;">Handicap Performance Breakdown</div>
-      <p style="font-size:.74rem;color:var(--chalk2);margin-bottom:1.2rem;line-height:1.6;">How different handicap types affect your PinoyPool rating. <strong style="color:var(--gold);">Winning while giving handicap accelerates rating gain.</strong></p>
+      <p style="font-size:.74rem;color:var(--chalk2);margin-bottom:1.2rem;line-height:1.6;">Handicap match distribution by career tier. <strong style="color:var(--gold);">This reveals who usually gives weight.</strong></p>
       <div style="overflow-x:auto;">
       <table class="hcp-perf-tbl">
         <thead><tr>
-          <th>Match Type</th><th>Record</th><th>Win%</th>
-          <th>Rack Given</th><th>Rack Rec'd</th>
-          <th>Last Ball Given</th><th>Last Ball Rec'd</th>
-          <th>Impact</th>
+          <th>Career Status</th>
+          <th style="text-align:center;">Matches</th>
+          <th style="text-align:center;">Even Matches</th>
+          <th style="text-align:center;">Handicap Given</th>
+          <th style="text-align:center;">Handicap Received</th>
         </tr></thead>
         <tbody>
-          ${hcpRows.map(r=>{
-            const dash=`<span style="color:var(--chalk2);font-size:.8rem;">—</span>`;
-            const borderColor=r.impactColor==='var(--chalk)'?'rgba(170,164,144,.3)':r.impactColor==='var(--gold)'?'rgba(200,168,75,.4)':r.impactColor==='var(--grn3)'?'rgba(46,204,113,.3)':r.impactColor;
-            return`<tr>
-            <td>
-              <div style="font-weight:600;font-size:.82rem;">${r.cat}</div>
-              <div style="font-size:.67rem;color:var(--chalk2);margin-top:2px;">${r.desc}</div>
-            </td>
-            <td>${r.noData?dash:`<span class="wl-rec"><span style="color:var(--grn3);">${r.rec.w}</span>–<span style="color:#e55;">${r.rec.l}</span></span>`}</td>
-            <td>${r.noData?dash:`<div class="wrb" style="min-width:64px;"><div class="bt"><div class="bf" style="width:${r.wpct}%;"></div></div>${r.wpct}%</div>`}</td>
-            <td style="text-align:center;font-family:'DM Mono',monospace;font-size:.78rem;color:${r.rackGiven>0?'var(--grn3)':'var(--chalk2)'};">${r.rackGiven>0?'+'+r.rackGiven:'—'}</td>
-            <td style="text-align:center;font-family:'DM Mono',monospace;font-size:.78rem;color:${r.rackRec>0?'#e55':'var(--chalk2)'};">${r.rackRec>0?'+'+r.rackRec:'—'}</td>
-            <td style="text-align:center;font-family:'DM Mono',monospace;font-size:.78rem;color:${r.lbGiven>0?'var(--gold)':'var(--chalk2)'};">${r.lbGiven>0?'+'+r.lbGiven:'—'}</td>
-            <td style="text-align:center;font-family:'DM Mono',monospace;font-size:.78rem;color:${r.lbRec>0?'#e55':'var(--chalk2)'};">${r.lbRec>0?'+'+r.lbRec:'—'}</td>
-            <td><span class="impact-pill" style="background:${r.impactBg};color:${r.impactColor};border:1px solid ${borderColor};">${r.impact}</span></td>
-          </tr>`;}).join('')}
+          ${tierHcpStats.length===0
+            ?`<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--chalk2);font-size:.82rem;font-style:italic;">No handicap data yet — stats appear once matches with rack or last-ball handicap are approved.</td></tr>`
+            :tierHcpStats.map(t=>{
+              const evenPct=t.totalMs>0?Math.round(t.evenMs/t.totalMs*100):0;
+              const givenPct=t.totalMs>0?Math.round(t.hcpGiven/t.totalMs*100):0;
+              const recPct=t.totalMs>0?Math.round(t.hcpRec/t.totalMs*100):0;
+              const dash=`<span style="color:var(--chalk2);font-size:.8rem;">—</span>`;
+              return`<tr>
+                <td>${tierBadge(t.tierObj)}<span style="font-size:.65rem;color:var(--chalk2);margin-left:6px;">${t.count} player${t.count>1?'s':''}</span></td>
+                <td style="text-align:center;font-family:'DM Mono',monospace;font-size:.88rem;font-weight:600;">${t.totalMs}</td>
+                <td style="text-align:center;">
+                  ${t.evenMs>0?`<span style="font-family:'DM Mono',monospace;font-size:.85rem;color:var(--chalk);">${t.evenMs}</span>
+                  <span style="font-size:.65rem;color:var(--chalk2);margin-left:3px;">${evenPct}%</span>`:dash}
+                </td>
+                <td style="text-align:center;">
+                  ${t.hcpGiven>0?`<span style="font-family:'DM Mono',monospace;font-size:.85rem;color:var(--grn3);font-weight:600;">${t.hcpGiven}</span>
+                  <span style="font-size:.65rem;color:var(--chalk2);margin-left:3px;">${givenPct}%</span>`:dash}
+                </td>
+                <td style="text-align:center;">
+                  ${t.hcpRec>0?`<span style="font-family:'DM Mono',monospace;font-size:.85rem;color:#e55;font-weight:600;">${t.hcpRec}</span>
+                  <span style="font-size:.65rem;color:var(--chalk2);margin-left:3px;">${recPct}%</span>`:dash}
+                </td>
+              </tr>`;
+            }).join('')}
         </tbody>
       </table>
       </div>
@@ -3411,7 +3473,42 @@ function ppTab(btn,tab){
           </div>
         </div>`;
       }).join(''):'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:2rem 0;">🎉 No pending match confirmations</div>'}
-    </div>`;
+    </div>
+    ${(()=>{
+      // Show player-pending matches awaiting hall owner / admin verification
+      const myName=app.user?.name;
+      const _awaitingVerif=adminMatches.filter(m=>m.status==='player-pending'&&(m.p1===myName||m.p2===myName));
+      if(!_awaitingVerif.length) return '';
+      return`<div class="card" style="margin-top:1rem;border:1px solid rgba(255,183,29,.2);">
+        <div class="ct">🕐 Awaiting Venue / Admin Verification
+          <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;color:#f5a623;">${_awaitingVerif.length}</span>
+        </div>
+        <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">Both players confirmed these matches. Rankings will update once a hall owner or Admin verifies them.</p>
+        ${_awaitingVerif.map(m=>{
+          const isP1=(m.p1===myName);
+          const opp=isP1?m.p2:m.p1;
+          return`<div style="background:rgba(255,183,29,.04);border:1px solid rgba(255,183,29,.18);border-radius:10px;padding:1rem;margin-bottom:.7rem;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;">
+              <div>
+                <div style="font-weight:600;font-size:.9rem;">vs ${opp}</div>
+                <div style="font-size:.72rem;color:var(--chalk);margin-top:3px;">
+                  <span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span>
+                  <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
+                  · Score: <strong style="color:var(--gold);font-family:'DM Mono',monospace;">${m.score}</strong>
+                  ${m.hcp&&m.hcp!=='None'?`· <span style="color:#e55;">${m.hcp}</span>`:''}
+                </div>
+                <div style="font-size:.68rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue} · 📅 ${m.date}</div>
+              </div>
+              <span class="tag tgd" style="white-space:nowrap;color:#f5a623;border-color:#f5a623;">⏳ Pending Verification</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:.6rem;font-size:.7rem;flex-wrap:wrap;">
+              <span style="padding:2px 8px;border-radius:6px;border:1px solid var(--grn3);color:var(--grn3);">✓ Both Players Confirmed</span>
+              <span style="padding:2px 8px;border-radius:6px;border:1px solid #f5a623;color:#f5a623;">⏳ Awaiting Venue</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    })()}`;
 
   } else if(tab==='history'){
     let sort=app.ppSort||'date';
@@ -3648,26 +3745,23 @@ function playerAcceptMatch(i){
     const cs1=isP1?myParts[0]:myParts[1], cs2=isP1?myParts[1]:myParts[0];
     // Remove both entries for this match from the pending list
     playerPendingMatches.splice(i,1);
-    // Push to adminMatches as approved so both players see it in Match History
+    // Push to adminMatches as 'player-pending' — awaiting hall owner / admin verification
     adminMatches.unshift({
       id:'m-'+Date.now(), p1:p1name||'Player 1', p2:p2name||'Player 2',
       fmt:m.fmt, type:m.type,
       score:`${cs1}–${cs2}`,
-      venue:m.venue, date:m.date, hcp:m.hcp||'None',
-      status:'approved', approvedAt:new Date().toISOString(),
-      p1ok:true, p2ok:true, venueOk:true
+      venue:m.venue||'—', date:m.date||new Date().toISOString().slice(0,10),
+      hcp:m.hcp||'None',
+      status:'player-pending',
+      p1ok:true, p2ok:true, venueOk:false,
+      submittedAt:new Date().toISOString(),
+      source:'player-challenge'
     });
     saveAdminMatches();
-    // Update PPR / W-L for both players
-    const hcpRack=[0,0],hcpBall=[0,0];
-    if(m.hcp&&m.hcp!=='None'){
-      const rM=m.hcp.match(/(\w+) \+(\d+) racks/);
-      if(rM){ const gi=rM[1]===p1name?.split(' ')[0]?1:0; hcpRack[gi]=parseInt(rM[2]); }
-    }
-    updatePlayerPPR(p1name,p2name,cs1,cs2,m.type,hcpRack,hcpBall);
+    // Do NOT call updatePlayerPPR — rankings updated only after admin/hall-owner approval
     buildDashboard();
     if(app.lbTab) renderLbTab(app.lbTab);
-    toast(`✅ Match confirmed and now official! Rankings updated.`);
+    toast(`⏳ Match confirmed by both players! Awaiting hall owner / Admin verification before rankings update.`);
   } else {
     toast(`✅ Your confirmation recorded. Waiting for ${m.opponent.split(' ')[0]}…`);
   }
@@ -3778,9 +3872,18 @@ function buildPortal(){
 }
 
 function ptab(tab){
+  // ── GUARD: only approved halls can access portal tabs ──
+  const _u=app.user;
+  const _hallEntry=adminHalls.find(h=>h.email===_u?.email||h.username===_u?.username||h.owner===_u?.name);
+  const _isApproved=_hallEntry?.status==='active';
+  if(!_isApproved){
+    // Re-render the pending state and block tab navigation
+    buildPortal();
+    return;
+  }
   // Highlight active tile
   document.querySelectorAll('.pa-tile').forEach((t,i)=>{
-    const tabs=['matches','history','profile'];
+    const tabs=['matches','tournaments','history','profile'];
     t.style.borderColor=tabs[i]===tab?'var(--gold)':'var(--border)';
     t.style.background=tabs[i]===tab?'rgba(200,168,75,.08)':'';
   });
@@ -3790,6 +3893,22 @@ function ptab(tab){
 
   /* ── MATCH VALIDATION ── */
   if(tab==='matches'){
+    // ── Compute owner's hall name and player-set matches at this venue ──
+    const _ownerHallName=_hallEntry?.name||u?.hall||'';
+    const _playerSetMatches=adminMatches.filter(m=>
+      m.status==='player-pending'&&_ownerHallName&&m.venue&&m.venue.includes(_ownerHallName)
+    );
+    // ── 4-step progress helper for hall owner match rows ──
+    const _hoProgress=(steps)=>`
+      <div style="display:flex;align-items:center;gap:0;margin-top:8px;">
+        ${steps.map((s,i,arr)=>`
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div style="width:22px;height:22px;border-radius:50%;background:${s.done?'rgba(31,140,78,.25)':'rgba(245,166,35,.12)'};border:1.5px solid ${s.done?'var(--grn3)':'rgba(245,166,35,.5)'};display:flex;align-items:center;justify-content:center;font-size:.6rem;color:${s.done?'var(--grn3)':'#f5a623'};">${s.done?'✓':'⏳'}</div>
+            <div style="font-size:.5rem;color:var(--chalk2);margin-top:2px;white-space:nowrap;letter-spacing:.3px;">${s.label}</div>
+          </div>
+          ${i<arr.length-1?`<div style="flex:1;height:1px;background:${s.done?'var(--grn3)':'rgba(255,255,255,.12)'};min-width:12px;margin-bottom:14px;opacity:.6;"></div>`:''}`
+        ).join('')}
+      </div>`;
     c.innerHTML=`
     ${manualPending.length?`
     <div class="card" style="margin-bottom:1.1rem;">
@@ -3820,6 +3939,39 @@ function ptab(tab){
         </div>
       </div>`).join('')}
     </div>`:''}
+
+    <!-- ── PLAYER-SET MATCHES AWAITING HALL OWNER VERIFICATION ── -->
+    ${_playerSetMatches.length?`
+    <div class="card" style="margin-bottom:1.1rem;">
+      <div class="ct">🎱 Player-Set Matches <span style="background:rgba(245,166,35,.25);color:#f5a623;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${_playerSetMatches.length} need your verification</span></div>
+      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.1rem;">Both players confirmed these matches at your hall. As the venue owner, your verification will forward them to the Admin for final ranking update.</p>
+      ${_playerSetMatches.map(m=>`
+      <div style="background:rgba(245,166,35,.04);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:1.1rem;margin-bottom:.7rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:.92rem;">${m.p1} <span style="color:var(--chalk2);">vs</span> ${m.p2}</div>
+            <div style="font-size:.73rem;color:var(--chalk);margin-top:3px;">
+              <span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span>
+              <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
+              · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong>
+              ${m.hcp&&m.hcp!=='None'?`· <span style="color:#e55;font-size:.7rem;">Hcp: ${m.hcp}</span>`:''}
+            </div>
+            <div style="font-size:.7rem;color:var(--chalk2);margin-top:2px;">📅 ${m.date}${m.submittedAt?' · Submitted '+new Date(m.submittedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''}</div>
+            ${_hoProgress([
+              {label:m.p1.split(' ')[0], done:true},
+              {label:m.p2.split(' ')[0], done:true},
+              {label:'VENUE', done:false},
+              {label:'ADMIN', done:false}
+            ])}
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:.85rem;flex-wrap:wrap;">
+          <button class="btn btn-d btn-sm" onclick="ownerRejectPlayerMatch('${m.id}')" style="flex:1;min-width:120px;">✗ Reject</button>
+          <button class="btn btn-s btn-sm" onclick="ownerVerifyPlayerMatch('${m.id}')" style="flex:1;min-width:160px;">✓ Verify & Forward to Admin</button>
+        </div>
+      </div>`).join('')}
+    </div>`:''}
+
     <div class="card" style="margin-bottom:1.1rem;">
       <div class="ct">⚡ Match Validations <span style="background:#e55;color:#fff;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${pendVal.length} pending</span></div>
       <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.1rem;">You are the 3rd and final verification layer. Only validate matches that actually took place at your hall.</p>
@@ -4211,19 +4363,40 @@ function ownerConfirm(i,p){
   const m=manualPending[i];
   if(p===1){ if(m.p1accept) return; m.p1accept=true; }
   else      { if(m.p2accept) return; m.p2accept=true; }
+  // ── Sync confirmation flag onto the existing adminMatches entry ──
+  const _amEntry=m.id?adminMatches.find(x=>x.id===m.id):null;
+  if(_amEntry){
+    if(p===1) _amEntry.p1ok=true;
+    else      _amEntry.p2ok=true;
+  }
   if(m.p1accept&&m.p2accept){
     const done=manualPending.splice(i,1)[0];
-    hallHistory.unshift({...done,date:new Date().toISOString().slice(0,10),ts:'Just now'});
-    // Apply official PPR update when both players have confirmed
-    const _scParts=(done.sc||'0-0').split('-');
-    const _s1=parseInt(_scParts[0])||0, _s2=parseInt(_scParts[1])||0;
-    updatePlayerPPR(done.p1, done.p2, _s1, _s2, done.type||'Tournament',
-      done.hcpRack||[0,0], done.hcpBall||[0,0]);
-    buildDashboard();
-    toast(`✅ Both players confirmed! Match is official. Rankings updated.`);
+    const _today=new Date().toISOString().slice(0,10);
+    hallHistory.unshift({...done,date:_today,ts:'Just now'});
+    if(_amEntry){
+      // ── Upgrade existing entry from 'owner-pending' → 'pending' ──
+      _amEntry.status='pending';
+      _amEntry.p1ok=true; _amEntry.p2ok=true; _amEntry.venueOk=true;
+      _amEntry.bothConfirmedAt=new Date().toISOString();
+    } else {
+      // Fallback for old entries without a shared ID
+      const _hcpLabel=(done.hcpRack&&(done.hcpRack[0]||done.hcpRack[1]))
+        ?`+${done.hcpRack[0]} / +${done.hcpRack[1]} racks`:'None';
+      const _venueEntry=adminHalls.find(h=>h.owner===app.user?.name||h.username===app.user?.username);
+      adminMatches.push({
+        id:'m-'+Date.now(), p1:done.p1, p2:done.p2, score:done.sc||'0-0',
+        fmt:done.fmt||'9-Ball', type:done.type||'Tournament', tournament:done.tournament||null,
+        hcp:_hcpLabel, hcpRack:done.hcpRack||[0,0], hcpBall:done.hcpBall||[0,0],
+        venue:_venueEntry?.name||app.user?.hall||'—', date:_today, raceTo:done.raceTo||9,
+        status:'pending', submittedAt:new Date().toISOString(), p1ok:true, p2ok:true, venueOk:true
+      });
+    }
+    saveAdminMatches();
+    toast(`⏳ Both players confirmed! Match is awaiting <strong>Admin verification</strong> before rankings are updated.`);
   } else {
     const confirmed=p===1?m.p1:m.p2;
     const waiting =p===1?m.p2:m.p1;
+    saveAdminMatches(); // save partial p1ok/p2ok flag
     toast(`✅ ${confirmed.split(' ')[0]} confirmed. Waiting for ${waiting.split(' ')[0]}…`);
   }
   ptab('matches');
@@ -4231,6 +4404,13 @@ function ownerConfirm(i,p){
 }
 
 function submitTournament(){
+  const u=app.user;
+  // ── GUARD: hall must be admin-approved before submitting tournaments ──
+  const _hallEntry=adminHalls.find(h=>h.email===u?.email||h.username===u?.username||h.owner===u?.name);
+  if(!_hallEntry||_hallEntry.status!=='active'){
+    toast('⛔ Your hall must be verified and approved by Admin before you can register tournaments.');
+    return;
+  }
   const name=(document.getElementById('rt-name')?.value||'').trim();
   const fmt=document.getElementById('rt-fmt')?.value||'9-Ball';
   const date=document.getElementById('rt-date')?.value||'';
@@ -4238,7 +4418,6 @@ function submitTournament(){
   const notes=(document.getElementById('rt-notes')?.value||'').trim();
   if(!name){toast('⚠️ Tournament Name is required.');return;}
   if(!date){toast('⚠️ Start Date is required.');return;}
-  const u=app.user;
   const venue=u?.hall||adminHalls.find(h=>h.email===u?.email||h.owner===u?.name)?.name||'—';
   const id='tourn-'+Date.now();
   const entry={id,name,fmt,date,edate,notes,venue,
@@ -4255,6 +4434,32 @@ function valMatch(i,ok){
   ptab('matches');
   updateNavBadges();
   toast(ok?'✅ Match validated! Rankings updated.':'❌ Match rejected. Players notified.');
+}
+
+/* ── Hall Owner verifies a player-set match → forwards to admin for final approval ── */
+function ownerVerifyPlayerMatch(id){
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m) return;
+  m.venueOk=true;
+  m.status='pending'; // moves from player-pending → pending (admin Final Approvals queue)
+  m.verifiedByOwnerAt=new Date().toISOString();
+  saveAdminMatches();
+  updateNavBadges();
+  ptab('matches');
+  toast('✅ Match verified by venue! Forwarded to Admin for final approval. Rankings will update once Admin approves.');
+}
+
+/* ── Hall Owner rejects a player-set match ── */
+function ownerRejectPlayerMatch(id){
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m) return;
+  m.status='rejected';
+  m.rejectedBy='Hall Owner';
+  m.rejectedAt=new Date().toISOString();
+  saveAdminMatches();
+  updateNavBadges();
+  ptab('matches');
+  toast('❌ Match rejected by venue. Players have been notified.');
 }
 
 /* ══════════════════ PENDING NOTICE ══════════════════ */
@@ -4426,7 +4631,7 @@ function buildAdmin(){
   // Update stat badges — only count role==='player' entries for player pending
   const pendP=adminPlayers.filter(p=>p.role==='player'&&p.status==='pending').length;
   const pendH=adminHalls.filter(h=>h.status==='pending'||h.status==='review').length;
-  const pendM=adminMatches.filter(m=>m.status==='pending'||m.status==='review').length;
+  const pendM=adminMatches.filter(m=>m.status==='owner-pending'||m.status==='player-pending'||m.status==='pending'||m.status==='review').length;
   const pendT=adminTournaments.filter(t=>t.status==='pending').length;
   const el=id=>document.getElementById(id);
   el('adm-b-players').textContent=pendP;
@@ -4440,11 +4645,11 @@ function buildAdmin(){
       <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Players</div>
     </div>
     <div style="text-align:center;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);">${HALLS.length}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);">${adminHalls.filter(h=>h.status==='active').length}</div>
       <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Halls</div>
     </div>
     <div style="text-align:center;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#e55;">${pendP+pendH+pendM+pendT}</div>
+      <div id="adm-stat-pending" style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#e55;">${pendP+pendH+pendM+pendT}</div>
       <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Pending</div>
     </div>`;
   admTab(document.querySelector('.adm-tab.act')||document.querySelector('.adm-tab'), 'players');
@@ -4576,37 +4781,121 @@ function admTab(btn,tab){
 
   /* ── MATCH APPROVALS ── */
   } else if(tab==='matches'){
-    c.innerHTML=`
-    <div class="card">
-      <div class="ct">⚡ Final Match Approvals <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--chalk);">${adminMatches.filter(m=>m.status==='pending').length} awaiting approval</span></div>
-      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.1rem;">These matches have been confirmed by both players and the venue. Admin approval is the final step before rankings are updated.</p>
-      ${adminMatches.map((m,i)=>{
-        const sClass={pending:'sp-pending',approved:'sp-active',review:'sp-review',rejected:'sp-suspended'}[m.status]||'sp-pending';
-        return`<div class="adm-row">
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;font-size:.92rem;">${m.p1} <span style="color:var(--chalk2);">vs</span> ${m.p2}</div>
-            <div style="font-size:.73rem;color:var(--chalk);margin-top:3px;">
+    const _activePlayers=[...PLAYERS].sort((a,b)=>a.name.localeCompare(b.name));
+    const _activeHalls=adminHalls.filter(h=>h.status==='active');
+    const _activeTournaments=adminTournaments.filter(t=>t.status==='active');
+    const _ownerPending=adminMatches.filter(m=>m.status==='owner-pending');
+    const _playerPending=adminMatches.filter(m=>m.status==='player-pending');
+    const _pendingBoth=adminMatches.filter(m=>m.status==='pending');
+    const _totalPending=_ownerPending.length+_playerPending.length+_pendingBoth.length;
+    const _processed=[...adminMatches].filter(m=>m.status!=='owner-pending'&&m.status!=='player-pending'&&m.status!=='pending');
+    // ── Section divider helper ──
+    const _secDiv=(label,count,color)=>`
+      <div style="display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .9rem;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:2px;color:${color||'var(--chalk)'};">${label}</div>
+        ${count>0?`<span style="background:${color||'var(--chalk)'};color:#111;border-radius:8px;padding:1px 7px;font-family:'DM Mono',monospace;font-size:.6rem;font-weight:700;">${count}</span>`:''}
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,${color||'rgba(255,255,255,.08)'} 0%,transparent 100%);opacity:.35;"></div>
+      </div>`;
+    // ── 4-step progress tracker helper: [{label,done},...] ──
+    const _prog=(steps)=>`
+      <div style="display:flex;align-items:center;gap:0;margin-top:8px;">
+        ${steps.map((s,i,arr)=>`
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div style="width:22px;height:22px;border-radius:50%;background:${s.done?'rgba(31,140,78,.25)':'rgba(245,166,35,.1)'};border:1.5px solid ${s.done?'var(--grn3)':'rgba(245,166,35,.45)'};display:flex;align-items:center;justify-content:center;font-size:.6rem;color:${s.done?'var(--grn3)':'#f5a623'};">${s.done?'✓':'⏳'}</div>
+            <div style="font-size:.5rem;color:var(--chalk2);margin-top:2px;white-space:nowrap;letter-spacing:.3px;max-width:38px;overflow:hidden;text-overflow:ellipsis;text-align:center;">${s.label}</div>
+          </div>
+          ${i<arr.length-1?`<div style="flex:1;height:1px;background:${s.done?'var(--grn3)':'rgba(255,255,255,.12)'};min-width:10px;margin-bottom:14px;opacity:.55;"></div>`:''}`
+        ).join('')}
+      </div>`;
+    // ── Helper: renders a single match row with progress tracker ──
+    const _matchRow=(m,progSteps,statusLabel,btnHtml)=>`
+      <div style="background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;margin-bottom:.65rem;">
+        <div style="display:flex;align-items:flex-start;gap:.8rem;flex-wrap:wrap;">
+          <div style="flex:1;min-width:160px;">
+            <div style="font-weight:600;font-size:.9rem;">${m.p1} <span style="color:var(--chalk2);font-weight:400;">vs</span> ${m.p2}</div>
+            <div style="font-size:.72rem;color:var(--chalk);margin-top:3px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
               <span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span>
-              <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
-              · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong>
-              ${m.hcp!=='None'?`· <span style="color:#e55;">Hcp: ${m.hcp}</span>`:''}
+              <span class="tag tgd">${m.type}</span>
+              <span style="font-family:'DM Mono',monospace;color:var(--gold);font-size:.75rem;">${m.score}</span>
+              ${m.hcp&&m.hcp!=='None'?`<span style="color:#e55;font-size:.68rem;">· ${m.hcp}</span>`:''}
             </div>
-            <div style="font-size:.7rem;color:var(--chalk2);margin-top:2px;">📍 ${m.venue} · 📅 ${m.date}</div>
-            <div style="display:flex;gap:8px;margin-top:4px;font-size:.68rem;">
-              <span style="color:${m.p1ok?'var(--grn3)':'#e55'};">${m.p1ok?'✓':'✗'} ${m.p1.split(' ')[0]}</span>
-              <span style="color:${m.p2ok?'var(--grn3)':'#e55'};">${m.p2ok?'✓':'✗'} ${m.p2.split(' ')[0]}</span>
-              <span style="color:${m.venueOk?'var(--grn3)':'#e55'};">${m.venueOk?'✓':'✗'} Venue</span>
+            <div style="font-size:.68rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue} · 📅 ${m.date}</div>
+            ${_prog(progSteps)}
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-top:2px;">
+            <span class="status-pill sp-pending" style="font-size:.58rem;">● ${statusLabel}</span>
+            <div style="display:flex;gap:6px;">${btnHtml}</div>
+          </div>
+        </div>
+      </div>`;
+    c.innerHTML=`
+    <!-- ── TILE 1: ALL PENDING — NEEDS ACTION ── -->
+    <div class="card" style="margin-bottom:1.1rem;">
+      <div class="ct">⏳ Pending Matches
+        <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;color:${_totalPending?'#e55':'var(--chalk)'};">${_totalPending} pending</span>
+      </div>
+
+      ${_totalPending===0?`<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No pending matches — all clear ✓</div>`:`
+
+      <!-- SECTION 1: OWNER-RECORDED — AWAITING PLAYER CONFIRMATIONS -->
+      ${_ownerPending.length?`
+        ${_secDiv('⏳ Awaiting Player Confirmation',_ownerPending.length,'#e55')}
+        ${_ownerPending.map(m=>_matchRow(m,
+          [{label:'VENUE',done:true},{label:m.p1.split(' ')[0],done:!!m.p1ok},{label:m.p2.split(' ')[0],done:!!m.p2ok},{label:'ADMIN',done:false}],
+          'awaiting players',
+          `<button class="btn btn-d btn-sm" onclick="admRejectMatch('${m.id}')">✗ Reject</button>
+           <button class="btn btn-s btn-sm" onclick="admApproveMatch('${m.id}')">✓ Approve on Behalf</button>`
+        )).join('')}`:''}
+
+      <!-- SECTION 2: PLAYER-SET — AWAITING VENUE/ADMIN -->
+      ${_playerPending.length?`
+        ${_secDiv('🎱 Player-Set — Awaiting Venue',_playerPending.length,'#f5a623')}
+        ${_playerPending.map(m=>_matchRow(m,
+          [{label:m.p1.split(' ')[0],done:!!m.p1ok},{label:m.p2.split(' ')[0],done:!!m.p2ok},{label:'VENUE',done:!!m.venueOk},{label:'ADMIN',done:false}],
+          'awaiting venue',
+          `<button class="btn btn-d btn-sm" onclick="admRejectMatch('${m.id}')">✗ Reject</button>
+           <button class="btn btn-s btn-sm" onclick="admApproveMatch('${m.id}')">✓ Verify & Approve</button>`
+        )).join('')}`:''}
+
+      <!-- SECTION 3: ALL CONFIRMED — AWAITING ADMIN FINAL APPROVAL -->
+      ${_pendingBoth.length?`
+        ${_secDiv('✅ All Verified — Awaiting Admin Approval',_pendingBoth.length,'var(--grn3)')}
+        ${_pendingBoth.map(m=>_matchRow(m,
+          [{label:m.p1.split(' ')[0],done:true},{label:m.p2.split(' ')[0],done:true},{label:'VENUE',done:true},{label:'ADMIN',done:false}],
+          'ready to approve',
+          `<button class="btn btn-d btn-sm" onclick="admRejectMatch('${m.id}')">✗ Reject</button>
+           <button class="btn btn-s btn-sm" onclick="admApproveMatch('${m.id}')">✓ Approve & Update Rankings</button>`
+        )).join('')}`:''}
+      `}
+    </div>
+
+    <!-- ── TILE 2: VERIFIED MATCH RECORDS ── -->
+    <div class="card">
+      <div class="ct">✅ Verified Matches
+        <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;color:var(--chalk);">${_processed.length} records</span>
+      </div>
+      ${_processed.length===0
+        ?`<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No verified match records yet</div>`
+        :_processed.map(m=>{
+          const _isApproved=m.status==='approved';
+          const _isRejected=m.status==='rejected';
+          return`<div style="display:flex;align-items:center;gap:.7rem;padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.05);">
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:.88rem;font-weight:600;">${m.p1} <span style="color:var(--chalk2);font-weight:400;">vs</span> ${m.p2}</div>
+              <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+                <span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span>
+                <span class="tag tgd">${m.type}</span>
+                <span style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</span>
+                ${m.hcp&&m.hcp!=='None'?`<span style="color:#e55;font-size:.66rem;">${m.hcp}</span>`:''}
+              </div>
+              <div style="font-size:.67rem;color:var(--chalk2);margin-top:2px;">📍 ${m.venue} · 📅 ${m.date}</div>
             </div>
-          </div>
-          <div class="adm-actions">
-            <span class="status-pill ${sClass}">● ${m.status}</span>
-            ${m.status==='pending'||m.status==='review'?`
-              <button class="btn btn-d btn-sm" onclick="admRejectMatch('${m.id}')">✗ Reject</button>
-              <button class="btn btn-s btn-sm" onclick="admApproveMatch('${m.id}')">✓ Approve & Update Rankings</button>`
-            :`<span style="font-size:.75rem;color:var(--chalk2);">Processed</span>`}
-          </div>
-        </div>`;
-      }).join('')}
+            <div style="text-align:right;flex-shrink:0;">
+              <span class="status-pill ${_isApproved?'sp-active':_isRejected?'sp-suspended':'sp-pending'}" style="font-size:.58rem;">● ${m.status}</span>
+              ${_isApproved?`<div style="font-size:.62rem;color:var(--chalk2);margin-top:3px;">✓ ${m.p1.split(' ')[0]} · ✓ ${m.p2.split(' ')[0]} · ✓ Venue</div>`:''}
+            </div>
+          </div>`;
+        }).join('')}
     </div>`;
 
   /* ── TOURNAMENTS ── */
@@ -4673,48 +4962,117 @@ function admTab(btn,tab){
             <button class="btn btn-d btn-sm" onclick="admDeactivateTournament('${t.id}')">Deactivate</button>
           </div>`).join('')}
     </div>`;
-
-  /* ── REGISTER HALL OWNER ── */
-  } else if(tab==='register-hall'){
-    c.innerHTML=`
-    <div class="card" style="max-width:700px;">
-      <div class="ct">➕ Register New Hall Owner</div>
-      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.2rem;line-height:1.6;">Manually register a hall owner and grant them immediate portal access. They will be able to validate matches, manage their hall listing, and record matches at their venue.</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
-        <div class="fg"><label>Owner First Name</label><input type="text" id="rh-fn" placeholder="Juan"></div>
-        <div class="fg"><label>Owner Last Name</label><input type="text" id="rh-ln" placeholder="dela Cruz"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
-        <div class="fg"><label>Email Address</label><input type="email" id="rh-em" placeholder="owner@hallname.ph"></div>
-        <div class="fg"><label>Mobile Number</label><input type="tel" id="rh-ph" placeholder="09xxxxxxxxx"></div>
-      </div>
-      <div class="fg"><label>Billiard Hall Name</label><input type="text" id="rh-hn" placeholder="e.g. Supreme Cue Billiards"></div>
-      <div style="display:grid;grid-template-columns:2fr 1fr;gap:.8rem;">
-        <div class="fg"><label>Full Address</label><input type="text" id="rh-addr" placeholder="Street, Barangay, City, Province"></div>
-        <div class="fg"><label>Number of Tables</label><input type="number" id="rh-tables" placeholder="e.g. 12" min="1"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
-        <div class="fg"><label>Operating Hours</label><input type="text" id="rh-hrs" placeholder="9AM – 12MN daily"></div>
-        <div class="fg"><label>Game Formats Offered</label>
-          <div class="tg"><button class="tb act" onclick="solo(this)" id="rh-fmt-9">9-Ball</button><button class="tb" onclick="solo(this)" id="rh-fmt-10">10-Ball</button><button class="tb" onclick="solo(this)">Both</button></div>
-        </div>
-      </div>
-      <div class="fg"><label>Facebook Page URL</label><input type="url" id="rh-fb" placeholder="https://facebook.com/yourhall"></div>
-      <div style="background:rgba(200,168,75,.06);border:1px solid var(--border);border-radius:8px;padding:.9rem;margin-bottom:1rem;">
-        <div style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;">Access Credentials (auto-generated)</div>
-        <div style="font-size:.78rem;color:var(--chalk);">A temporary login will be created and sent to the owner's email. They can change their password on first login.</div>
-      </div>
-      <div style="display:flex;gap:.8rem;">
-        <button class="btn btn-g" style="flex:1;" onclick="admTab(null,'halls')">← Back</button>
-        <button class="btn btn-p" style="flex:2;" onclick="admRegisterHallOwner()">✓ Register Hall Owner & Grant Access</button>
-      </div>
-    </div>`;
   }
 }
 
-function admRefresh(){admTab(document.querySelector('.adm-tab.act'),app.admTab||'players');}
+function admRefresh(){
+  // Re-render tab content
+  admTab(document.querySelector('.adm-tab.act'),app.admTab||'players');
+  // ── Sync tab badges so they always reflect current data ──
+  const _el=id=>document.getElementById(id);
+  const _pendP=adminPlayers.filter(p=>p.role==='player'&&p.status==='pending').length;
+  const _pendH=adminHalls.filter(h=>h.status==='pending'||h.status==='review').length;
+  const _pendM=adminMatches.filter(m=>m.status==='owner-pending'||m.status==='player-pending'||m.status==='pending'||m.status==='review').length;
+  const _pendT=adminTournaments.filter(t=>t.status==='pending').length;
+  if(_el('adm-b-players')) _el('adm-b-players').textContent=_pendP;
+  if(_el('adm-b-halls'))   _el('adm-b-halls').textContent=_pendH;
+  if(_el('adm-b-matches')) _el('adm-b-matches').textContent=_pendM;
+  if(_el('adm-b-tournaments')) _el('adm-b-tournaments').textContent=_pendT;
+  // ── Sync stats header pending count via explicit ID ──
+  if(_el('adm-stat-pending')) _el('adm-stat-pending').textContent=(_pendP+_pendH+_pendM+_pendT);
+}
 
 /* ── Tournament actions ── */
+/* ── MATCH APPROVAL (admin final verification) ── */
+function admApproveMatch(id){
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m||m.status==='approved') return; // guard: prevent double-processing
+  m.status='approved';
+  // Force all confirmation flags — admin is approving on behalf of all parties
+  m.p1ok=true; m.p2ok=true; m.venueOk=true;
+  m.approvedAt=new Date().toISOString();
+  m.approvedBy='Administrator';
+  saveAdminMatches();
+  // ── Rebuild ALL player stats from the full approved-match list (prevents double-counting) ──
+  rebuildStatsFromMatches();
+  buildDashboard();
+  admRefresh();
+  toast(`✅ Match <strong>${m.p1} vs ${m.p2}</strong> approved! Rankings updated.`);
+}
+function admRejectMatch(id){
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m) return;
+  const _wasApproved=m.status==='approved';
+  m.status='rejected';
+  m.rejectedAt=new Date().toISOString();
+  saveAdminMatches();
+  // ── If un-approving a match, rebuild stats to remove its contribution ──
+  if(_wasApproved){ rebuildStatsFromMatches(); buildDashboard(); }
+  admRefresh();
+  toast(`✗ Match <strong>${m.p1} vs ${m.p2}</strong> rejected.`);
+}
+
+/* ── Admin records a match directly on behalf of a hall owner ── */
+function admRecordMatch(){
+  const p1 = (document.getElementById('arm-p1')?.value||'').trim();
+  const p2 = (document.getElementById('arm-p2')?.value||'').trim();
+  const s1 = parseInt(document.getElementById('arm-s1')?.value||'');
+  const s2 = parseInt(document.getElementById('arm-s2')?.value||'');
+  const fmt = document.getElementById('arm-fmt')?.value||'9-Ball';
+  const type = document.getElementById('arm-type')?.value||'Exhibition';
+  const race = parseInt(document.getElementById('arm-race')?.value||'9');
+  const venue = (document.getElementById('arm-venue')?.value||'').trim();
+  const date = document.getElementById('arm-date')?.value||new Date().toISOString().slice(0,10);
+  const tournId = document.getElementById('arm-tourn')?.value||null;
+  const tournName = tournId
+    ? (adminTournaments.find(t=>t.id===tournId)?.name||null)
+    : null;
+  // ── Validation ──
+  if(!p1) { toast('⚠️ Please select Player 1.'); return; }
+  if(!p2) { toast('⚠️ Please select Player 2.'); return; }
+  if(p1===p2) { toast('⚠️ Player 1 and Player 2 must be different.'); return; }
+  if(isNaN(s1)||s1<0) { toast('⚠️ Enter a valid score for Player 1.'); return; }
+  if(isNaN(s2)||s2<0) { toast('⚠️ Enter a valid score for Player 2.'); return; }
+  if(s1===s2) { toast('⚠️ Scores cannot be tied — one player must win.'); return; }
+  if(!venue) { toast('⚠️ Please select a venue / hall.'); return; }
+  // ── Build match entry — pre-approved by admin on behalf of all parties ──
+  const _now = new Date().toISOString();
+  const newMatch = {
+    id: 'm-' + Date.now(),
+    p1, p2,
+    score: `${s1}-${s2}`,
+    fmt,
+    type,
+    raceTo: race,
+    tournament: tournName,
+    hcp: 'None',
+    hcpRack: [0,0],
+    hcpBall: [0,0],
+    venue,
+    date,
+    status: 'approved',
+    p1ok: true, p2ok: true, venueOk: true,
+    submittedAt: _now,
+    approvedAt: _now,
+    approvedBy: 'Administrator (on behalf of hall owner)',
+    adminRecorded: true
+  };
+  adminMatches.push(newMatch);
+  saveAdminMatches();
+  // ── Rebuild all player stats from the full approved-match list ──
+  rebuildStatsFromMatches();
+  buildDashboard();
+  // ── Collapse the form and reset fields ──
+  document.getElementById('adm-rec-body').style.display='none';
+  document.getElementById('adm-rec-arr').textContent='▸';
+  ['arm-p1','arm-p2','arm-s1','arm-s2','arm-venue'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  admRefresh();
+  toast(`✅ Match <strong>${p1} vs ${p2}</strong> recorded &amp; approved by Admin. Rankings updated.`);
+}
+
 function admApproveTournament(id){
   const t=adminTournaments.find(x=>x.id===id);
   if(!t) return;
@@ -4855,6 +5213,10 @@ function admApproveHall(id){
   if(ahIdx===-1) approvedHalls.push({...h});
   else approvedHalls[ahIdx]={...approvedHalls[ahIdx],...h};
   saveApprovedHalls();
+  // Remove from pending halls list
+  let _pendHalls=[];try{_pendHalls=JSON.parse(localStorage.getItem('pp_pendingHalls')||'[]');}catch{}
+  _pendHalls=_pendHalls.filter(ph=>ph.id!==id&&ph.email!==h.email);
+  try{localStorage.setItem('pp_pendingHalls',JSON.stringify(_pendHalls));}catch{}
   // Add to public HALLS list
   if(!HALLS.find(x=>x.n===h.name))
     HALLS.push({n:h.name,c:h.city,t:h.tables||0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:h.fb&&h.fb!=='—'?h.fb.replace('fb.com/',''):'—'});
@@ -4880,65 +5242,7 @@ function admRejectHall(id){
   toast(`✗ <strong>${h.name}</strong> application rejected. Owner notified.`);
 }
 
-/* ── Match actions ── */
-function admApproveMatch(id){
-  const m=adminMatches.find(x=>x.id===id);
-  if(!m)return;
-  m.status='approved';
-  // Parse score e.g. "7–5" or "9-3"
-  const parts=(m.score||'').split(/[-–]/).map(s=>parseInt(s.trim())).filter(n=>!isNaN(n));
-  if(parts.length===2){
-    const [s1,s2]=parts;
-    const p1Win=s1>s2;
-    // Update PLAYERS array
-    const updateP=(name,won,myScore,oppScore)=>{
-      const pl=PLAYERS.find(p=>p.name===name);
-      const adm=adminPlayers.find(p=>p.name===name);
-      if(!pl&&!adm) return;
-      const oppPl=PLAYERS.find(p=>p.name===(won?(m.p2===name?m.p1:m.p2):(m.p1===name?m.p2:m.p1)));
-      const oppPPR=oppPl?.ppr||1500;
-      if(pl){
-        pl.mw=pl.mw+(won?1:0); pl.ml=pl.ml+(won?0:1);
-        pl.rw=(pl.rw||0)+myScore; pl.rl=(pl.rl||0)+oppScore;
-        const delta=calcMatchPPR(pl.ppr,oppPPR,pl.status||'Amateur',m.type,myScore,oppScore,1.0);
-        pl.ppr=Math.max(100,Math.round(pl.ppr+delta));
-        pl.mi=(pl.mi||0)+(won?1:-1);
-      }
-      if(adm){
-        adm.mw=(adm.mw||0)+(won?1:0); adm.ml=(adm.ml||0)+(won?0:1);
-        adm.rw=(adm.rw||0)+myScore; adm.rl=(adm.rl||0)+oppScore;
-        if(pl) adm.ppr=pl.ppr;
-      }
-    };
-    updateP(m.p1,p1Win,s1,s2);
-    updateP(m.p2,!p1Win,s2,s1);
-    // Re-sort rankings
-    PLAYERS.sort((a,b)=>b.ppr-a.ppr).forEach((pl,i)=>pl.rank=i+1);
-    // Persist updated stats to localStorage
-    approvedPlayers.forEach(ap=>{
-      const pl=PLAYERS.find(p=>p.name===ap.name);
-      if(pl){ap.ppr=pl.ppr;ap.mw=pl.mw||0;ap.ml=pl.ml||0;ap.rw=pl.rw||0;ap.rl=pl.rl||0;ap.mi=pl.mi||0;}
-    });
-    // Track peak rank — only improves (lower number = better)
-    PLAYERS.forEach((pl,i)=>{
-      const ap=approvedPlayers.find(a=>a.name===pl.name);
-      if(ap){const curr=i+1;if(!ap.peakRank||curr<ap.peakRank)ap.peakRank=curr;}
-    });
-    saveApprovedPlayers();
-    saveAdminMatches();
-  }
-  buildAdmin();
-  buildDashboard();
-  if(app.lbTab) renderLbTab(app.lbTab);
-  toast(`✅ Match <strong>${m.p1} vs ${m.p2}</strong> approved! Rankings updated.`);
-}
-function admRejectMatch(id){
-  const m=adminMatches.find(x=>x.id===id);
-  if(!m)return;
-  m.status='rejected';
-  buildAdmin();
-  toast(`✗ Match rejected. Both players and venue have been notified.`);
-}
+/* ── duplicate stale match-action stubs removed — canonical versions above ── */
 
 /* ── Register Hall Owner ── */
 function admRegisterHallOwner(){
@@ -5109,40 +5413,21 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
   adminMatches.forEach(m=>{
     if(!m.fmt){m.fmt='9-Ball';changed=true;}
     if(!m.type){m.type='Exhibition';changed=true;}
-    if(!m.venue){m.venue='Sharks Arena QC';changed=true;}
+    if(!m.venue){m.venue='—';changed=true;}
   });
   if(changed) saveAdminMatches();
 })();
 
-// ── Match 4: Dennis Po vs Macky Leyva — 9-Ball Race to 25 · Dennis gives 3 racks ──
-// Hall owner (Handly Mariano / Sharks Arena QC) verified the result.
-(function injectMatch_DennisMacky(){
-  const MID='m-1742083200000'; // fixed ID = 2026-03-15, ensures chronological order
-  // Remove stale entry if it exists but is missing fmt (so corrected record is saved)
-  const existIdx=adminMatches.findIndex(m=>m.id===MID);
-  if(existIdx>=0&&adminMatches[existIdx].fmt) return; // already complete — skip
-  if(existIdx>=0) adminMatches.splice(existIdx,1); // remove stale entry to re-add
-  adminMatches.push({
-    id: MID,
-    p1: 'Dennis Po',
-    p2: 'Macky Leyva',
-    score: '20-25',         // Macky wins 25–20 in race to 25
-    fmt: '9-Ball',
-    type: 'Exhibition',
-    hcp: 'Macky +3 racks',  // Dennis gives 3 racks to Macky (Macky is receiver)
-    venue: 'Sharks Arena QC',
-    date: '2026-03-15',
-    raceTo: 25,
-    status: 'approved',
-    approvedAt: '2026-03-15T10:00:00.000Z',
-    submittedAt: '2026-03-15T09:00:00.000Z',
-    p1ok: true,   // Dennis confirmed
-    p2ok: true,   // Macky confirmed
-    venueOk: true // Hall owner (Sharks Arena QC) verified
+// ── Remove any hardcoded/stale match IDs that were previously seeded ──
+// Only admin-approved matches from the real flow should exist.
+(function purgeHardcodedMatches(){
+  const staleIds=['m-1773547200000','m-1742083200000'];
+  let removed=0;
+  staleIds.forEach(id=>{
+    const idx=adminMatches.findIndex(m=>m.id===id);
+    if(idx>=0){adminMatches.splice(idx,1);removed++;}
   });
-  saveAdminMatches();
-  // Force rebuild — new match raises totalExpected above totalActual, guard fires
-  rebuildStatsFromMatches();
+  if(removed){saveAdminMatches();rebuildStatsFromMatches();}
 })();
 
 // Demo auto-login via URL param: ?demo=player | owner | scout
