@@ -2,12 +2,14 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
-const COMING_SOON = process.env.COMING_SOON === 'true';
+
+// Domains that show the coming soon page
+const COMING_SOON_HOSTS = ['pinoypool.com', 'www.pinoypool.com'];
 
 app.use(express.static(path.join(__dirname)));
 
 app.get('*', (req, res) => {
-  if (COMING_SOON) {
+  if (COMING_SOON_HOSTS.includes(req.hostname)) {
     res.sendFile(path.join(__dirname, 'coming-soon.html'));
   } else {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -15,5 +17,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`PinoyPool running on port ${PORT} | Coming soon: ${COMING_SOON}`);
+  console.log(`PinoyPool running on port ${PORT}`);
 });
