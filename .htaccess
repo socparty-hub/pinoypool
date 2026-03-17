@@ -1,0 +1,11 @@
+DirectoryIndex coming-soon.html index.html
+
+RewriteEngine On
+
+# Serve real files/folders as-is
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Everything else → coming soon
+RewriteRule ^ coming-soon.html [L]
