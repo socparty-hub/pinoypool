@@ -59,6 +59,10 @@ node_modules/
 # Environment
 .env
 
+# Runtime data — live database file (contains user data, never commit)
+pinoypool-data.json
+pinoypool.db
+
 # Large files
 *.dmg
 *.pdf
