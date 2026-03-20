@@ -1183,38 +1183,15 @@ function solo(btn){btn.closest('.tg').querySelectorAll('.tb').forEach(b=>b.class
 // On first load, defaults are seeded once by initTestPasswords() below.
 const TEST_ACCOUNTS=[
   {
-    email:'player@pinoypool.com',
-    name:'Juan dela Cruz', role:'player', initials:'JD', username:'juandelacruz',
-    dob:'1995-06-15', phone:'09123456789',
-    email_addr:'player@pinoypool.com', region:'NCR – Metro Manila'
-  },
-  {
-    email:'owner@pinoypool.com',
-    name:'Maria Santos', role:'owner', initials:'MS', username:'mariasantos1',
-    dob:'1988-03-22', phone:'09987654321',
-    email_addr:'owner@pinoypool.com', region:'NCR – Metro Manila',
-    hall:'Cue Masters Billiards'
-  },
-  {
-    email:'admin@pinoypool.com',
-    name:'Administrator', role:'admin', initials:'AD', username:'adminmaster'
-  },
-  {
     email:'admin@pinoypool.com',
     name:'Admin', role:'admin', initials:'AD', username:'ADMIN'
-  },
-  {
-    email:'dennis.po@pool.ph',
-    name:'Dennis Po', role:'player', initials:'DP', username:'dennispo',
-    dob:'1990-01-01', phone:'09171234567',
-    email_addr:'dennis.po@pool.ph', region:'NCR'
   }
 ];
 // Seed default passwords into localStorage once — never hardcoded in HTML source.
 (function initTestPasswords(){
   const key='pp_testPasswords';
   let stored={};try{stored=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
-  const defaults={juandelacruz:'Test1234',mariasantos1:'Test1234',adminmaster:'Admin1234',dennispo:'Dennis1234',ADMIN:'pass1234'};
+  const defaults={ADMIN:'PPool@Admin2026'};
   let changed=false;
   Object.entries(defaults).forEach(([u,p])=>{if(!stored[u]){stored[u]=p;changed=true;}});
   if(changed) localStorage.setItem(key,JSON.stringify(stored));
@@ -5434,28 +5411,6 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
   if(removed){saveAdminMatches();rebuildStatsFromMatches();}
 })();
 
-// Demo auto-login via URL param: ?demo=player | owner | scout
-(function(){
-  const params=new URLSearchParams(window.location.search);
-  const demo=params.get('demo');
-  if(!demo) return;
-  const DEMOS={
-    player:{name:'Efren Reyes Jr.',role:'player',initials:'ER',_toast:'🎱 Logged in as <strong>Efren Reyes Jr.</strong> — Player view'},
-    owner:{name:'Ramon Dela Cruz',role:'owner',initials:'RC',hall:'Cue Masters Billiards',_toast:'🏢 Logged in as <strong>Ramon Dela Cruz</strong> — Hall Owner view'},
-    scout:{name:'Mia Santos',role:'fan',initials:'MS',_toast:'👁 Logged in as <strong>Mia Santos</strong> — Scout / Fan view'},
-    admin:{name:'Administrator',role:'admin',initials:'AD',_toast:'🔐 Logged in as <strong>Admin</strong> — Full system access'},
-    dennis:{name:'Dennis Po',role:'player',initials:'DP',region:'NCR',_toast:'🎱 Logged in as <strong>Dennis Po</strong> — Player view'}
-  };
-  const u=DEMOS[demo];
-  if(!u) return;
-  const {_toast,...user}=u;
-  setUser(user);
-  setTimeout(()=>toast(_toast),400);
-  // Auto-navigate to relevant portal
-  if(demo==='owner') setTimeout(()=>sv('portal',document.getElementById('nb-portal')),800);
-  if(demo==='player'||demo==='dennis') setTimeout(()=>sv('player-portal',document.getElementById('nb-player-portal')),800);
-  if(demo==='admin') setTimeout(()=>sv('admin',document.getElementById('nb-admin')),800);
-})();
 </script>
 <nav id="mob-nav">
   <button class="mnb act" id="mnb-home" onclick="sv('dashboard',null);mobSync('home')"><span class="mnb-icon">🏠</span>Home</button>

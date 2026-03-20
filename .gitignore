@@ -1,0 +1,63 @@
+# macOS
+.DS_Store
+
+# Old version files (development artifacts)
+pinoypool-v3.html
+pinoypool-v4.html
+pinoypool-v5.html
+pinoypool-v5_1.html
+pinoypool-v5_2.html
+pinoypool-v5_3.html
+pinoypool-v5_4.html
+pinoypool-v5_5.html
+pinoypool-v6.html
+pinoypool-v6-owner.html
+pinoypool-v6-owner_1.html
+pinoypool-v6-player.html
+pinoypool-v6-scout.html
+pinoypool-v7.html
+pinoypool-v7_1.html
+pinoypool-v7-owner.html
+pinoypool-v7-owner_1.html
+pinoypool-v7-player.html
+pinoypool-v7-player_1.html
+pinoypool-v7-scout.html
+pinoypool-v7-scout_1.html
+pinoypool-v8.html
+pinoypool-v8_1.html
+pinoypool-v8-admin.html
+pinoypool-v8-owner.html
+pinoypool-v8-owner_1.html
+pinoypool-v8-player.html
+pinoypool-v8-player_1.html
+pinoypool-v8-scout.html
+pinoypool-v9.html
+pinoypool-v9-admin.html
+pinoypool-v9-admin_1.html
+pinoypool-v9-owner.html
+pinoypool-v9-owner_1.html
+pinoypool-v9-player.html
+pinoypool-v9-player_1.html
+pinoypool-v9-scout.html
+pinoypool-v9-scout_1.html
+pinoypool-v10-admin.html
+pinoypool-v10-owner.html
+pinoypool-v10-player.html
+pinoypool-v10-scout.html
+
+# Other dev artifacts
+ph-billiards-app.html
+sikad-ph-v2.html
+preview-server.js
+PinoyPoolV10.zip
+PinoyPoolV10_extracted/
+
+# Local resources / node_modules
+Resources/
+
+# Large files
+*.dmg
+*.pdf
+
+# Claude internal
+.claude/

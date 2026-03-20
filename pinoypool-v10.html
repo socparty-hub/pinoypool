@@ -1183,38 +1183,15 @@ function solo(btn){btn.closest('.tg').querySelectorAll('.tb').forEach(b=>b.class
 // On first load, defaults are seeded once by initTestPasswords() below.
 const TEST_ACCOUNTS=[
   {
-    email:'player@pinoypool.com',
-    name:'Juan dela Cruz', role:'player', initials:'JD', username:'juandelacruz',
-    dob:'1995-06-15', phone:'09123456789',
-    email_addr:'player@pinoypool.com', region:'NCR – Metro Manila'
-  },
-  {
-    email:'owner@pinoypool.com',
-    name:'Maria Santos', role:'owner', initials:'MS', username:'mariasantos1',
-    dob:'1988-03-22', phone:'09987654321',
-    email_addr:'owner@pinoypool.com', region:'NCR – Metro Manila',
-    hall:'Cue Masters Billiards'
-  },
-  {
-    email:'admin@pinoypool.com',
-    name:'Administrator', role:'admin', initials:'AD', username:'adminmaster'
-  },
-  {
     email:'admin@pinoypool.com',
     name:'Admin', role:'admin', initials:'AD', username:'ADMIN'
-  },
-  {
-    email:'dennis.po@pool.ph',
-    name:'Dennis Po', role:'player', initials:'DP', username:'dennispo',
-    dob:'1990-01-01', phone:'09171234567',
-    email_addr:'dennis.po@pool.ph', region:'NCR'
   }
 ];
 // Seed default passwords into localStorage once — never hardcoded in HTML source.
 (function initTestPasswords(){
   const key='pp_testPasswords';
   let stored={};try{stored=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
-  const defaults={juandelacruz:'Test1234',mariasantos1:'Test1234',adminmaster:'Admin1234',dennispo:'Dennis1234',ADMIN:'pass1234'};
+  const defaults={ADMIN:'PPool@Admin2026'};
   let changed=false;
   Object.entries(defaults).forEach(([u,p])=>{if(!stored[u]){stored[u]=p;changed=true;}});
   if(changed) localStorage.setItem(key,JSON.stringify(stored));
@@ -4816,7 +4793,7 @@ function admTab(btn,tab){
       <div style="background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;margin-bottom:.65rem;">
         <div style="display:flex;align-items:flex-start;gap:.8rem;flex-wrap:wrap;">
           <div style="flex:1;min-width:160px;">
-            <div style="font-weight:600;font-size:.9rem;">${m.p1} <span style="color:var(--chalk2);font-weight:400;">vs</span> ${m.p2}</div>
+            <div style="font-weight:600;font-size:.9rem;line-height:1.5;">${m.p1} <span style="color:var(--chalk2);font-weight:400;">vs</span> ${m.p2} <span class="status-pill sp-pending" style="font-size:.55rem;font-weight:400;vertical-align:middle;white-space:nowrap;">● ${statusLabel}</span></div>
             <div style="font-size:.72rem;color:var(--chalk);margin-top:3px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
               <span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span>
               <span class="tag tgd">${m.type}</span>
@@ -4826,10 +4803,7 @@ function admTab(btn,tab){
             <div style="font-size:.68rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue} · 📅 ${m.date}</div>
             ${_prog(progSteps)}
           </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-top:2px;">
-            <span class="status-pill sp-pending" style="font-size:.58rem;">● ${statusLabel}</span>
-            <div style="display:flex;gap:6px;">${btnHtml}</div>
-          </div>
+          <div style="display:flex;flex-direction:row;gap:6px;padding-top:2px;min-width:200px;">${btnHtml}</div>
         </div>
       </div>`;
     c.innerHTML=`
@@ -4847,8 +4821,8 @@ function admTab(btn,tab){
         ${_ownerPending.map(m=>_matchRow(m,
           [{label:'VENUE',done:true},{label:m.p1.split(' ')[0],done:!!m.p1ok},{label:m.p2.split(' ')[0],done:!!m.p2ok},{label:'ADMIN',done:false}],
           'awaiting players',
-          `<button class="btn btn-d btn-sm" onclick="admRejectMatch('${m.id}')">✗ Reject</button>
-           <button class="btn btn-s btn-sm" onclick="admApproveMatch('${m.id}')">✓ Approve on Behalf</button>`
+          `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admApproveMatch('${m.id}')">✓ Approve on Behalf</button>
+           <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
 
       <!-- SECTION 2: PLAYER-SET — AWAITING VENUE/ADMIN -->
@@ -4857,8 +4831,8 @@ function admTab(btn,tab){
         ${_playerPending.map(m=>_matchRow(m,
           [{label:m.p1.split(' ')[0],done:!!m.p1ok},{label:m.p2.split(' ')[0],done:!!m.p2ok},{label:'VENUE',done:!!m.venueOk},{label:'ADMIN',done:false}],
           'awaiting venue',
-          `<button class="btn btn-d btn-sm" onclick="admRejectMatch('${m.id}')">✗ Reject</button>
-           <button class="btn btn-s btn-sm" onclick="admApproveMatch('${m.id}')">✓ Verify & Approve</button>`
+          `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admApproveMatch('${m.id}')">✓ Verify & Approve</button>
+           <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
 
       <!-- SECTION 3: ALL CONFIRMED — AWAITING ADMIN FINAL APPROVAL -->
@@ -4867,8 +4841,8 @@ function admTab(btn,tab){
         ${_pendingBoth.map(m=>_matchRow(m,
           [{label:m.p1.split(' ')[0],done:true},{label:m.p2.split(' ')[0],done:true},{label:'VENUE',done:true},{label:'ADMIN',done:false}],
           'ready to approve',
-          `<button class="btn btn-d btn-sm" onclick="admRejectMatch('${m.id}')">✗ Reject</button>
-           <button class="btn btn-s btn-sm" onclick="admApproveMatch('${m.id}')">✓ Approve & Update Rankings</button>`
+          `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admApproveMatch('${m.id}')">✓ Approve & Update Rankings</button>
+           <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
       `}
     </div>
@@ -5422,40 +5396,7 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
   if(changed) saveAdminMatches();
 })();
 
-// ── Remove any hardcoded/stale match IDs that were previously seeded ──
-// Only admin-approved matches from the real flow should exist.
-(function purgeHardcodedMatches(){
-  const staleIds=['m-1773547200000','m-1742083200000'];
-  let removed=0;
-  staleIds.forEach(id=>{
-    const idx=adminMatches.findIndex(m=>m.id===id);
-    if(idx>=0){adminMatches.splice(idx,1);removed++;}
-  });
-  if(removed){saveAdminMatches();rebuildStatsFromMatches();}
-})();
 
-// Demo auto-login via URL param: ?demo=player | owner | scout
-(function(){
-  const params=new URLSearchParams(window.location.search);
-  const demo=params.get('demo');
-  if(!demo) return;
-  const DEMOS={
-    player:{name:'Efren Reyes Jr.',role:'player',initials:'ER',_toast:'🎱 Logged in as <strong>Efren Reyes Jr.</strong> — Player view'},
-    owner:{name:'Ramon Dela Cruz',role:'owner',initials:'RC',hall:'Cue Masters Billiards',_toast:'🏢 Logged in as <strong>Ramon Dela Cruz</strong> — Hall Owner view'},
-    scout:{name:'Mia Santos',role:'fan',initials:'MS',_toast:'👁 Logged in as <strong>Mia Santos</strong> — Scout / Fan view'},
-    admin:{name:'Administrator',role:'admin',initials:'AD',_toast:'🔐 Logged in as <strong>Admin</strong> — Full system access'},
-    dennis:{name:'Dennis Po',role:'player',initials:'DP',region:'NCR',_toast:'🎱 Logged in as <strong>Dennis Po</strong> — Player view'}
-  };
-  const u=DEMOS[demo];
-  if(!u) return;
-  const {_toast,...user}=u;
-  setUser(user);
-  setTimeout(()=>toast(_toast),400);
-  // Auto-navigate to relevant portal
-  if(demo==='owner') setTimeout(()=>sv('portal',document.getElementById('nb-portal')),800);
-  if(demo==='player'||demo==='dennis') setTimeout(()=>sv('player-portal',document.getElementById('nb-player-portal')),800);
-  if(demo==='admin') setTimeout(()=>sv('admin',document.getElementById('nb-admin')),800);
-})();
 </script>
 <nav id="mob-nav">
   <button class="mnb act" id="mnb-home" onclick="sv('dashboard',null);mobSync('home')"><span class="mnb-icon">🏠</span>Home</button>
