@@ -14,6 +14,51 @@ app.use(express.json({ limit: '10mb' }));
 // so our app.get('*') route can inject server data into it first
 app.use(express.static(path.join(__dirname), { index: false }));
 
+/* ── API: list registered users (buildAdmin fetches this to populate adminPlayers) ── */
+app.get('/api/registrations', (req, res) => {
+  const store = db.getAll();
+  let users = [];
+  try { users = JSON.parse(store['pp_registeredUsers'] || '[]'); } catch(e) {}
+  const registrations = users.map(u => {
+    const parts = (u.name || '').trim().split(' ');
+    return {
+      id:          u.id,
+      firstName:   parts[0] || '',
+      lastName:    parts.slice(1).join(' ') || '',
+      username:    u.username    || '',
+      email:       u.email       || '',
+      phone:       u.phone       || '',
+      role:        u.role        || 'player',
+      region:      u.region      || '',
+      status:      u.verificationStatus || 'pending',
+      submittedAt: u.submittedAt || '',
+      careerStatus:u.careerStatus|| 'Amateur',
+      ppr:         u.ppr         || 0,
+      hallName:    u.hall || u.hallName || '',
+      city:        u.city        || '',
+    };
+  });
+  res.json(registrations);
+});
+
+/* ── API: update registration status (called when admin approves a player) ── */
+app.patch('/api/registrations/:id', (req, res) => {
+  const { id } = req.params;
+  const { status, careerStatus, ppr, approvedAt } = req.body;
+  const store = db.getAll();
+  let users = [];
+  try { users = JSON.parse(store['pp_registeredUsers'] || '[]'); } catch(e) {}
+  const user = users.find(u => String(u.id) === String(id));
+  if (user) {
+    if (status)           user.verificationStatus = status;
+    if (careerStatus)     user.careerStatus = careerStatus;
+    if (typeof ppr === 'number') user.ppr = ppr;
+    if (approvedAt)       user.approvedAt = approvedAt;
+    db.set('pp_registeredUsers', JSON.stringify(users));
+  }
+  res.json({ ok: true });
+});
+
 /* ── API: save a single pp_* key to SQLite ── */
 app.post('/api/store/:key', (req, res) => {
   const { key }   = req.params;

@@ -4703,6 +4703,41 @@ const adminPlayers = PLAYERS.map((p,i)=>({
 // Hall owner pending applications
 const adminHalls = []; // Populated as hall owners register
 
+// ── Merge registeredUsers into adminPlayers / adminHalls on every page load ──
+// registeredUsers is pre-populated from the server (via window.__SD__ injection)
+// before this script runs, so all cross-browser registrations are immediately visible.
+(function initFromRegistered(){
+  registeredUsers.forEach(function(u){
+    if(u.role==='owner'){
+      if(!adminHalls.find(function(h){return h.email===u.email||String(h.id)===String(u.id);})){
+        adminHalls.push({
+          id:u.id, name:u.hall||u.hallName||'Unknown Hall',
+          owner:u.name||'', username:u.username||'',
+          city:u.city||u.region||'', contact:u.phone||'',
+          email:u.email||'', region:u.region||'',
+          status:u.verificationStatus||'pending',
+          submitted:(u.submittedAt||new Date().toISOString()).slice(0,10),
+          fb:u.fb||''
+        });
+      }
+    } else {
+      if(!adminPlayers.find(function(p){return p.email===u.email||p.username===u.username;})){
+        adminPlayers.unshift({
+          id:u.id, name:u.name||'', username:u.username||'',
+          role:u.role||'player',
+          status:u.verificationStatus||'pending',
+          email:u.email||'', phone:u.phone||'', region:u.region||'',
+          submittedAt:u.submittedAt||new Date().toISOString(),
+          careerStatus:u.careerStatus||'Amateur', ppr:u.ppr||0,
+          tier:'C', colors:'#1a3a22', joined:u.joined||''
+        });
+      }
+    }
+  });
+  // Restore any previously approved statuses
+  if(typeof restoreApprovals==='function') restoreApprovals();
+})();
+
 // Pending match approvals (fully confirmed by both players, awaiting admin final sign-off)
 const adminMatches=(()=>{try{return JSON.parse(localStorage.getItem('pp_adminMatches')||'[]');}catch{return [];}})();
 function saveAdminMatches(){const v=JSON.stringify(adminMatches);try{localStorage.setItem('pp_adminMatches',v);}catch{}apiPersist('pp_adminMatches',v);}
