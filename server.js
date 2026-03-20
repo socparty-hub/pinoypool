@@ -10,7 +10,9 @@ const PORT          = process.env.PORT || 3000;
 const PREVIEW_TOKEN = process.env.PREVIEW_TOKEN;
 
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(path.join(__dirname)));
+// index: false — prevents express.static from serving index.html directly
+// so our app.get('*') route can inject server data into it first
+app.use(express.static(path.join(__dirname), { index: false }));
 
 /* ── API: save a single pp_* key to SQLite ── */
 app.post('/api/store/:key', (req, res) => {
