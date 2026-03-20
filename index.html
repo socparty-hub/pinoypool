@@ -1060,15 +1060,23 @@ textarea{resize:vertical;min-height:75px;}
 
 <div class="toast" id="toast"></div>
 
+<!-- __SERVER_DATA__ -->
 <script>
-/* ── Staging data reset — bumping APP_DATA_VERSION wipes all pp_* localStorage keys ── */
-(function resetDataIfNeeded(){
-  const APP_DATA_VERSION='v1.0-staging';
-  if(localStorage.getItem('pp_data_version')!==APP_DATA_VERSION){
-    Object.keys(localStorage).filter(function(k){return k.startsWith('pp_');}).forEach(function(k){localStorage.removeItem(k);});
-    localStorage.setItem('pp_data_version',APP_DATA_VERSION);
-  }
+/* ── Restore server-persisted data into localStorage before any reads ── */
+(function restoreServerData(){
+  if(!window.__SD__) return;
+  Object.keys(window.__SD__).forEach(function(k){
+    var v=window.__SD__[k]; if(v) localStorage.setItem(k,v);
+  });
+  delete window.__SD__;
 })();
+
+/* ── apiPersist: fire-and-forget save to backend SQLite ── */
+function apiPersist(key,value){
+  if(typeof fetch==='undefined') return;
+  fetch('/api/store/'+key,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({value:value})}).catch(function(){});
+}
 
 /* ══════════════════ DATA ══════════════════ */
 const PLAYERS = []; // Populated via admin approval — no hardcoded sample data
@@ -1240,17 +1248,20 @@ const TEST_ACCOUNTS=[
   const key='pp_testPasswords';
   let pws={};
   try{pws=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
-  // Admin password is always enforced
-  pws['ADMIN']='12345678';
-  localStorage.setItem(key,JSON.stringify(pws));
+  // Set ADMIN default only if not already stored (allows password changes to persist)
+  if(!pws['ADMIN']) pws['ADMIN']='12345678';
+  const v=JSON.stringify(pws);
+  localStorage.setItem(key,v);
+  apiPersist(key,v);
 })();
 
 // Stores accounts created via the Register form — persisted in localStorage so login survives page refresh
 const registeredUsers=(()=>{try{return JSON.parse(localStorage.getItem('pp_registeredUsers')||'[]');}catch{return [];}})();
+function saveRegisteredUsers(){const v=JSON.stringify(registeredUsers);try{localStorage.setItem('pp_registeredUsers',v);}catch{}apiPersist('pp_registeredUsers',v);}
 
 // Persists admin-approved player statuses so they survive page reload
 const approvedPlayers=(()=>{try{return JSON.parse(localStorage.getItem('pp_approvedPlayers')||'[]');}catch{return [];}})();
-function saveApprovedPlayers(){try{localStorage.setItem('pp_approvedPlayers',JSON.stringify(approvedPlayers));}catch{}}
+function saveApprovedPlayers(){const v=JSON.stringify(approvedPlayers);try{localStorage.setItem('pp_approvedPlayers',v);}catch{}apiPersist('pp_approvedPlayers',v);}
 function restoreApprovals(){
   approvedPlayers.forEach(ap=>{
     const adm=adminPlayers.find(p=>p.email===ap.email||p.username===ap.username);
@@ -1348,7 +1359,7 @@ function savePendingChallenges(){try{localStorage.setItem('pp_pending_challenges
 
 // Persists admin-approved halls so they survive page reload
 const approvedHalls=(()=>{try{return JSON.parse(localStorage.getItem('pp_approvedHalls')||'[]');}catch{return [];}})();
-function saveApprovedHalls(){try{localStorage.setItem('pp_approvedHalls',JSON.stringify(approvedHalls));}catch{}}
+function saveApprovedHalls(){const v=JSON.stringify(approvedHalls);try{localStorage.setItem('pp_approvedHalls',v);}catch{}apiPersist('pp_approvedHalls',v);}
 function restoreApprovedHalls(){
   // Deduplicate pp_approvedHalls by hall name (keep first occurrence) and save if cleaned
   const seenNames=new Set();
@@ -1381,7 +1392,7 @@ function restoreApprovedHalls(){
 
 // Tournaments — submitted by hall owners or admin, approved by admin
 const adminTournaments=(()=>{try{return JSON.parse(localStorage.getItem('pp_tournaments')||'[]');}catch{return [];}})();
-function saveAdminTournaments(){try{localStorage.setItem('pp_tournaments',JSON.stringify(adminTournaments));}catch{}}
+function saveAdminTournaments(){const v=JSON.stringify(adminTournaments);try{localStorage.setItem('pp_tournaments',v);}catch{}apiPersist('pp_tournaments',v);}
 function restoreTournaments(){
   // Load approved tournaments into the public TOURNAMENTS array and sel-tournament dropdown
   const approved=adminTournaments.filter(t=>t.status==='active');
@@ -1499,7 +1510,7 @@ function doRegister(){
     // Save to session-registered users for login; persist in localStorage so it survives page refresh
     if(!registeredUsers.find(u=>u.username===un)){
       registeredUsers.push({id:pid,name,username:un,email:em,phone:ph,password:pw,role,dob,region,moniker:moniker||'',hall:hall||null,addr:addr||null,verificationStatus:vStatus});
-      try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{}
+      saveRegisteredUsers();
     }
     setUser({name,role,initials:getInit(name),username:un,hall,dob,email:em,phone:ph,region,moniker:moniker||'',verificationStatus:vStatus});
     // Store personal details in adminPlayers for both players and hall owners
@@ -1542,7 +1553,7 @@ function setUser(u){
     app.user.verificationStatus='active';
     app.user.careerStatus=apEntry.careerStatus;
     const ru=registeredUsers.find(r=>r.email===u.email||r.username===u.username);
-    if(ru){ru.verificationStatus='active';try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{}}
+    if(ru){ru.verificationStatus='active';saveRegisteredUsers();}
   }
 
   // Check for pending approval notification (set by admApprovePlayer)
@@ -3855,7 +3866,7 @@ function savePlayerProfile(){
   app.user.fb=fb;
   // Update registeredUsers localStorage
   const ru=registeredUsers.find(r=>r.email===app.user.email||r.username===app.user.username);
-  if(ru){ ru.moniker=moniker; ru.fb=fb; try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{} }
+  if(ru){ ru.moniker=moniker; ru.fb=fb; saveRegisteredUsers(); }
   // Update approvedPlayers localStorage
   const ap=approvedPlayers.find(r=>r.email===app.user.email||r.username===app.user.username);
   if(ap){ ap.moniker=moniker; ap.fb=fb; saveApprovedPlayers(); }
@@ -3879,7 +3890,7 @@ function changePassword(curId,newId,cnfId){
   if(ru){
     if(ru.password&&ru.password!==cur){ toast('✗ Incorrect current password.'); return; }
     ru.password=newPw;
-    try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{}
+    saveRegisteredUsers();
     [curId,newId,cnfId].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     toast('🔑 Password updated successfully!');
     return;
@@ -3893,7 +3904,9 @@ function changePassword(curId,newId,cnfId){
     if(activePw&&activePw!==cur){ toast('✗ Incorrect current password.'); return; }
     stored[ta.username]=newPw;
     ta.password=newPw; // update in-memory so current session reflects change
-    try{localStorage.setItem('pp_testPasswords',JSON.stringify(stored));}catch{}
+    const _tpv=JSON.stringify(stored);
+    try{localStorage.setItem('pp_testPasswords',_tpv);}catch{}
+    apiPersist('pp_testPasswords',_tpv);
     [curId,newId,cnfId].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     toast('🔑 Password updated successfully!');
     return;
@@ -4692,7 +4705,7 @@ const adminHalls = []; // Populated as hall owners register
 
 // Pending match approvals (fully confirmed by both players, awaiting admin final sign-off)
 const adminMatches=(()=>{try{return JSON.parse(localStorage.getItem('pp_adminMatches')||'[]');}catch{return [];}})();
-function saveAdminMatches(){try{localStorage.setItem('pp_adminMatches',JSON.stringify(adminMatches));}catch{}}
+function saveAdminMatches(){const v=JSON.stringify(adminMatches);try{localStorage.setItem('pp_adminMatches',v);}catch{}apiPersist('pp_adminMatches',v);}
 
 const CAREER_STATUS_LIST=['Amateur','Skilled','Semi-Pro','Pro','Elite'];
 const STATUS_OPTS=['active','suspended','pending','review'];
@@ -5281,7 +5294,7 @@ function admApprovePlayer(id){
   saveApprovedPlayers();
   // Also sync verificationStatus in registeredUsers so .catch() fallback doesn't re-show as pending
   const ru=registeredUsers.find(r=>r.email===p.email||r.username===p.username);
-  if(ru){ru.verificationStatus='active';try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{}}
+  if(ru){ru.verificationStatus='active';saveRegisteredUsers();}
   // Persist approval to backend
   fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({status:'active',careerStatus,ppr:initPPR,approvedAt:new Date().toISOString()})
