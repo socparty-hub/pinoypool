@@ -1179,6 +1179,15 @@ function selRole(card,role){
   document.getElementById('rf-owner').style.display=role==='owner'?'block':'none';
 }
 function solo(btn){btn.closest('.tg').querySelectorAll('.tb').forEach(b=>b.classList.remove('act'));btn.classList.add('act');}
+// ── Staging reset: wipe all app localStorage if build version changed ──
+(function purgeStaleStorage(){
+  const BUILD='2026.03.20-staging1';
+  if(localStorage.getItem('pp_build')===BUILD) return;
+  const keep=['pp_build'];
+  Object.keys(localStorage).filter(k=>k.startsWith('pp_')&&!keep.includes(k)).forEach(k=>localStorage.removeItem(k));
+  localStorage.setItem('pp_build',BUILD);
+})();
+
 // Passwords are NOT stored here — they live in localStorage key 'pp_testPasswords'.
 // On first load, defaults are seeded once by initTestPasswords() below.
 const TEST_ACCOUNTS=[
