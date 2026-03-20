@@ -10,9 +10,9 @@ pinoypool-v5_2.html
 pinoypool-v5_3.html
 pinoypool-v5_4.html
 pinoypool-v5_5.html
+pinoypool-v5_5.html
 pinoypool-v6.html
 pinoypool-v6-owner.html
-pinoypool-v6-owner_1.html
 pinoypool-v6-player.html
 pinoypool-v6-scout.html
 pinoypool-v7.html
@@ -54,6 +54,10 @@ PinoyPoolV10_extracted/
 
 # Local resources / node_modules
 Resources/
+node_modules/
+
+# Environment
+.env
 
 # Large files
 *.dmg
@@ -61,3 +65,4 @@ Resources/
 
 # Claude internal
 .claude/
+.claude/settings.local.json

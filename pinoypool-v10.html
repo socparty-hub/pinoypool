@@ -84,6 +84,12 @@ textarea{resize:vertical;min-height:75px;}
 .btn-s{background:var(--grn2);border:1px solid rgba(31,140,78,.5);color:var(--grn3);}
 .btn-f{width:100%;}
 .btn-sm{padding:6px 13px;font-size:.8rem;letter-spacing:1.5px;}
+.hero-btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;max-width:460px;margin:0 auto;}
+.hero-btns .btn{flex:1 1 0;min-width:130px;}
+@media(max-width:480px){.hero-btns{flex-direction:column;}.hero-btns .btn{flex:none;width:100%;}}
+/* Advanced metrics table responsive — sm cols hidden ≤600px */
+.adv-tbl{min-width:600px;}
+@media(max-width:600px){.adv-hide-sm{display:none;}.adv-tbl{min-width:480px;}}
 
 .tg{display:flex;gap:5px;flex-wrap:wrap;}
 .tb{flex:1;min-width:52px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:rgba(4,9,3,.65);color:var(--chalk);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;cursor:pointer;transition:all .2s;text-align:center;}
@@ -308,6 +314,9 @@ textarea{resize:vertical;min-height:75px;}
   /* Win-bar too cramped on mobile — hide it, keep % */
   .bt{display:none;}
   .wrb{gap:4px;}
+  /* Advanced table responsive columns */
+  .adv-hide-xs{display:none;}
+  .adv-tbl{min-width:520px;}
   /* Rankings table compact */
   .rt th,.rt td{padding:7px 7px;font-size:.75rem;}
   .rt th{white-space:nowrap;font-size:.55rem;}
@@ -458,11 +467,19 @@ textarea{resize:vertical;min-height:75px;}
 /* Score dropdowns in portal record form */
 .score-select{max-width:100px;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;text-align:center;color:var(--gold);border-color:rgba(200,168,75,.35);}
 /* Leaderboard tabs */
-.lb-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.2rem;flex-wrap:wrap;}
-.lb-tab{flex:1;min-width:100px;padding:10px 14px;background:transparent;border:none;border-right:1px solid var(--border);cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--chalk);transition:all .2s;text-align:center;}
+.lb-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.2rem;flex-wrap:nowrap;}
+.lb-tab{flex:1;min-width:0;padding:10px 14px;background:transparent;border:none;border-right:1px solid var(--border);cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--chalk);transition:all .2s;text-align:center;white-space:nowrap;}
 .lb-tab:last-child{border-right:none;}
 .lb-tab:hover{background:var(--gold-dim);color:var(--gold);}
 .lb-tab.act{background:linear-gradient(135deg,rgba(200,168,75,.18),rgba(200,168,75,.06));color:var(--gold);border-bottom:2px solid var(--gold);}
+/* Mobile: 3-column grid → row 1: PPR · Performance · Handicap, row 2: Expanded · Advanced */
+@media(max-width:600px){
+  .lb-tabs{flex-wrap:wrap;}
+  .lb-tab{flex:1 1 33%;min-width:0;padding:9px 4px;font-size:.68rem;letter-spacing:1px;border-bottom:1px solid var(--border);}
+  .lb-tab:nth-child(3){border-right:none;}
+  .lb-tab:nth-child(4),.lb-tab:nth-child(5){flex:1 1 50%;border-bottom:none;}
+  .lb-tab:nth-child(5){border-right:none;}
+}
 /* Leaderboard rank badge */
 .lb-rank{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--chalk);text-align:center;min-width:32px;}
 .lb-rank.top1{color:var(--gold2);text-shadow:0 0 12px rgba(200,168,75,.4);}
@@ -527,7 +544,7 @@ textarea{resize:vertical;min-height:75px;}
     <div style="font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:.7rem;">🇵🇭 The Official Home of Philippine Pool</div>
     <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,8vw,5.5rem);line-height:.9;text-shadow:0 4px 38px rgba(0,0,0,.5);margin-bottom:.9rem;">WHERE LEGENDS<br><span style="color:var(--gold);">ARE DISCOVERED</span></h2>
     <p style="color:var(--chalk);max-width:460px;margin:0 auto 1.4rem;line-height:1.65;font-size:.93rem;">Verified matches. National rankings. Real talent, real recognition.</p>
-    <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap;">
+    <div class="hero-btns">
       <button class="btn btn-p" id="hero-cta" onclick="openAuth()">🎱 Join PinoyPool</button>
       <button class="btn btn-o" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">View Rankings</button>
       <button class="btn btn-g" onclick="sv('live',document.querySelectorAll('.nb')[2])">📺 Watch Now</button>
@@ -601,7 +618,7 @@ textarea{resize:vertical;min-height:75px;}
       <div>
         <!-- PLAYER 1 -->
         <div class="card" style="margin-bottom:1.1rem;">
-          <div class="ct">🎱 Player 1 (You)</div>
+          <div class="ct" id="p1-card-title">🎱 Player 1</div>
           <div class="fg">
             <label>Search Registered Player</label>
             <div class="ac-wrap">
@@ -631,7 +648,7 @@ textarea{resize:vertical;min-height:75px;}
 
         <!-- PLAYER 2 -->
         <div class="card" style="margin-bottom:1.1rem;">
-          <div class="ct">🎯 Player 2 (Opponent)</div>
+          <div class="ct" id="p2-card-title">🎯 Player 2</div>
           <div class="fg">
             <label>Search Registered Player</label>
             <div class="ac-wrap">
@@ -915,15 +932,19 @@ textarea{resize:vertical;min-height:75px;}
         <div class="fg"><label>Last Name</label><input type="text" id="rln" placeholder="dela Cruz"></div>
       </div>
       <div class="fg">
-        <label>Username <span style="color:#e55;font-size:.8rem;">*</span> <span style="color:var(--chalk2);font-size:.7rem;font-weight:400;">8+ chars · letters &amp; numbers only · no punctuation</span></label>
-        <input type="text" id="run" placeholder="e.g. juanpool99" maxlength="30" autocomplete="off"
-          oninput="this.value=this.value.replace(/[^a-zA-Z0-9]/g,'').toLowerCase()"
+        <label>Username <span style="color:#e55;font-size:.8rem;">*</span> <span style="color:var(--chalk2);font-size:.7rem;font-weight:400;">exactly 8 chars · letters &amp; numbers only · 4+ unique chars</span></label>
+        <input type="text" id="run" placeholder="e.g. jpool199" maxlength="8" autocomplete="off"
+          oninput="this.value=this.value.replace(/[^a-zA-Z0-9]/g,'').toLowerCase().slice(0,8)"
           style="font-family:'DM Mono',monospace;letter-spacing:.5px;">
       </div>
       <div class="fg"><label>Email</label><input type="email" id="rem" placeholder="you@email.com"></div>
       <div class="fg"><label>Mobile (Philippines)</label><input type="tel" id="rph" placeholder="09xxxxxxxxx" maxlength="11" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       <div class="fg"><label>Date of Birth</label><input type="date" id="rdob" style="width:100%;color:var(--fg);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.65rem .8rem;font-size:.88rem;font-family:inherit;"></div>
       <div id="rf-player">
+        <div class="fg">
+          <label>Moniker / Also Known As <span style="color:var(--chalk2);font-size:.7rem;font-weight:400;">optional · e.g. "The Magician"</span></label>
+          <input type="text" id="rmoniker" placeholder="Your nickname or alias" maxlength="40" autocomplete="off">
+        </div>
         <div class="fg"><label>Region / Province</label>
           <select id="rreg"><option>Select region...</option><option>NCR – Metro Manila</option><option>Region III – Central Luzon</option><option>Region IV-A – CALABARZON</option><option>Region VI – Western Visayas</option><option>Region VII – Central Visayas</option><option>Region XI – Davao Region</option></select>
         </div>
@@ -1040,6 +1061,15 @@ textarea{resize:vertical;min-height:75px;}
 <div class="toast" id="toast"></div>
 
 <script>
+/* ── Staging data reset — bumping APP_DATA_VERSION wipes all pp_* localStorage keys ── */
+(function resetDataIfNeeded(){
+  const APP_DATA_VERSION='v1.0-staging';
+  if(localStorage.getItem('pp_data_version')!==APP_DATA_VERSION){
+    Object.keys(localStorage).filter(function(k){return k.startsWith('pp_');}).forEach(function(k){localStorage.removeItem(k);});
+    localStorage.setItem('pp_data_version',APP_DATA_VERSION);
+  }
+})();
+
 /* ══════════════════ DATA ══════════════════ */
 const PLAYERS = []; // Populated via admin approval — no hardcoded sample data
 
@@ -1179,31 +1209,40 @@ function selRole(card,role){
   document.getElementById('rf-owner').style.display=role==='owner'?'block':'none';
 }
 function solo(btn){btn.closest('.tg').querySelectorAll('.tb').forEach(b=>b.classList.remove('act'));btn.classList.add('act');}
-// ── Staging reset: wipe all app localStorage if build version changed ──
-(function purgeStaleStorage(){
-  const BUILD='2026.03.20-staging1';
-  if(localStorage.getItem('pp_build')===BUILD) return;
-  const keep=['pp_build'];
-  Object.keys(localStorage).filter(k=>k.startsWith('pp_')&&!keep.includes(k)).forEach(k=>localStorage.removeItem(k));
-  localStorage.setItem('pp_build',BUILD);
-})();
-
 // Passwords are NOT stored here — they live in localStorage key 'pp_testPasswords'.
 // On first load, defaults are seeded once by initTestPasswords() below.
 const TEST_ACCOUNTS=[
   {
+    email:'player@pinoypool.com',
+    name:'Juan dela Cruz', role:'player', initials:'JD', username:'juandelacruz',
+    dob:'1995-06-15', phone:'09123456789',
+    email_addr:'player@pinoypool.com', region:'NCR – Metro Manila'
+  },
+  {
+    email:'owner@pinoypool.com',
+    name:'Maria Santos', role:'owner', initials:'MS', username:'mariasantos1',
+    dob:'1988-03-22', phone:'09987654321',
+    email_addr:'owner@pinoypool.com', region:'NCR – Metro Manila',
+    hall:'Cue Masters Billiards'
+  },
+  {
     email:'admin@pinoypool.com',
-    name:'Admin', role:'admin', initials:'AD', username:'ADMIN'
+    name:'Administrator', role:'admin', initials:'AD', username:'ADMIN'
+  },
+  {
+    email:'dennis.po@pool.ph',
+    name:'Dennis Po', role:'player', initials:'DP', username:'dennispo',
+    dob:'1990-01-01', phone:'09171234567',
+    email_addr:'dennis.po@pool.ph', region:'NCR'
   }
 ];
-// Seed default passwords into localStorage once — never hardcoded in HTML source.
 (function initTestPasswords(){
   const key='pp_testPasswords';
-  let stored={};try{stored=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
-  const defaults={ADMIN:'PPool@Admin2026'};
-  let changed=false;
-  Object.entries(defaults).forEach(([u,p])=>{if(!stored[u]){stored[u]=p;changed=true;}});
-  if(changed) localStorage.setItem(key,JSON.stringify(stored));
+  let pws={};
+  try{pws=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
+  // Admin password is always enforced
+  pws['ADMIN']='12345678';
+  localStorage.setItem(key,JSON.stringify(pws));
 })();
 
 // Stores accounts created via the Register form — persisted in localStorage so login survives page refresh
@@ -1372,15 +1411,15 @@ function _refreshVenueSelect(){
 
 function validateUsername(uname){
   if(!uname) return 'Username is required.';
-  if(uname.length<8) return 'Username must be at least 8 characters.';
+  if(uname.length!==8) return 'Username must be exactly 8 characters.';
   if(!/^[a-zA-Z0-9]+$/.test(uname)) return 'Username can only contain letters and numbers — no punctuation.';
-  // Uniqueness: check against system accounts + backend-synced records (adminPlayers/adminHalls)
-  // NOTE: registeredUsers (localStorage) is intentionally excluded — it can hold stale/abandoned
-  // entries from previous sessions and would produce false "already taken" errors.
+  if(new Set(uname.toLowerCase()).size<4) return 'Username must contain at least 4 unique characters.';
+  // Uniqueness: check all known accounts — test accounts, admin-approved players/halls, and registered users
   const taken=[
     ...TEST_ACCOUNTS.map(a=>a.username||''),
     ...(typeof adminPlayers!=='undefined'?adminPlayers.map(p=>p.username||''):[]),
-    ...(typeof adminHalls!=='undefined'?adminHalls.map(h=>h.username||''):[])
+    ...(typeof adminHalls!=='undefined'?adminHalls.map(h=>h.username||''):[]),
+    ...(typeof registeredUsers!=='undefined'?registeredUsers.map(u=>u.username||''):[])
   ].map(u=>u.toLowerCase()).filter(Boolean);
   if(taken.includes(uname.toLowerCase())) return 'Username already taken — please choose another.';
   return null;
@@ -1392,7 +1431,7 @@ function doLogin(){
   // Match session-registered users by username only
   const ru=registeredUsers.find(a=>a.username&&a.username.toLowerCase()===el&&a.password===p);
   if(ru){
-    setUser({name:ru.name,role:ru.role,initials:getInit(ru.name),username:ru.username,dob:ru.dob||'',phone:ru.phone||'',email:ru.email,region:ru.region||'',hall:ru.hall||null,verificationStatus:ru.verificationStatus||null});
+    setUser({name:ru.name,role:ru.role,initials:getInit(ru.name),username:ru.username,dob:ru.dob||'',phone:ru.phone||'',email:ru.email,region:ru.region||'',moniker:ru.moniker||'',hall:ru.hall||null,verificationStatus:ru.verificationStatus||null});
     closeM('m-auth');
     const fn=ru.name.split(' ')[0];
     if(ru.role==='admin'){toast('🔐 Welcome, <strong>Admin</strong>. Full system access granted.');setTimeout(()=>sv('admin',document.getElementById('nb-admin')),600);}
@@ -1440,6 +1479,7 @@ function doRegister(){
   const pw=document.getElementById('rpw').value;
   const pw2=document.getElementById('rpw2').value;
   const role=document.querySelector('.rc.sel')?.dataset.role||'player';
+  const moniker=(document.getElementById('rmoniker')?.value||'').trim();
   if(!fn||!ln||!em){toast('⚠️ Fill in all required fields.');return;}
   const unErr=validateUsername(un);
   if(unErr){toast('⚠️ '+unErr);return;}
@@ -1458,10 +1498,10 @@ function doRegister(){
     const pid=backendId||Date.now();
     // Save to session-registered users for login; persist in localStorage so it survives page refresh
     if(!registeredUsers.find(u=>u.username===un)){
-      registeredUsers.push({id:pid,name,username:un,email:em,phone:ph,password:pw,role,dob,region,hall:hall||null,addr:addr||null,verificationStatus:vStatus});
+      registeredUsers.push({id:pid,name,username:un,email:em,phone:ph,password:pw,role,dob,region,moniker:moniker||'',hall:hall||null,addr:addr||null,verificationStatus:vStatus});
       try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{}
     }
-    setUser({name,role,initials:getInit(name),username:un,hall,dob,email:em,phone:ph,region,verificationStatus:vStatus});
+    setUser({name,role,initials:getInit(name),username:un,hall,dob,email:em,phone:ph,region,moniker:moniker||'',verificationStatus:vStatus});
     // Store personal details in adminPlayers for both players and hall owners
     if(!adminPlayers.find(p=>p.email===em)){
       adminPlayers.unshift({id:pid,name,username:un,email:em,phone:ph,region,
@@ -1488,7 +1528,7 @@ function doRegister(){
   fetch('/api/register',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({firstName:fn,lastName:ln,username:un,email:em,phone:ph,dob,role,hallName:hall,city:addr,region})
+    body:JSON.stringify({firstName:fn,lastName:ln,username:un,email:em,phone:ph,dob,role,moniker:moniker||'',hallName:hall,city:addr,region})
   })
   .then(r=>r.json())
   .then(data=>{if(!data.ok){toast('⚠️ '+(data.message||'Registration failed.'));return;}_finalize(data.id||null);})
@@ -1564,6 +1604,8 @@ function setUser(u){
 
   // Role-specific prefills for Record Match
   if(u.role==='player'){
+    const _p1t=document.getElementById('p1-card-title');if(_p1t)_p1t.textContent='🎱 Player 1 (You)';
+    const _p2t=document.getElementById('p2-card-title');if(_p2t)_p2t.textContent='🎯 Player 2 (Opponent)';
     const inp=document.getElementById('p1-inp');
     inp.value=u.name; app.p1=u.name;
     // Look in PLAYERS first; fall back to adminPlayers(active) in case initFromBackend hasn't finished
@@ -1574,6 +1616,11 @@ function setUser(u){
     inp.style.color='var(--gold)';
     inp.style.cursor='default';
   } else if(u.role==='owner'){
+    // Reset card titles — no (You)/(Opponent) for owner
+    const _p1t=document.getElementById('p1-card-title');if(_p1t)_p1t.textContent='🎱 Player 1';
+    const _p2t=document.getElementById('p2-card-title');if(_p2t)_p2t.textContent='🎯 Player 2';
+    const _p1inp=document.getElementById('p1-inp');if(_p1inp){_p1inp.value='';_p1inp.readOnly=false;_p1inp.style.color='';_p1inp.style.cursor='';}
+    app.p1=''; app.p1id='';
     const venSel=document.getElementById('sel-venue');
     if(u.hall){
       let found=false;
@@ -1925,6 +1972,9 @@ function onTournamentSelect(sel){
   if(!tourn) return;
   app.tournament=tourn.name;
   app.tournamentId=tourn.id;
+  // Auto-highlight Tournament type button
+  const _tBtn=document.querySelector('[onclick*="setMatchType"][onclick*="Tournament"]');
+  if(_tBtn) setMatchType(_tBtn,'Tournament');
   // Auto-set game format from tournament
   if(tourn.fmt==='9-Ball'||tourn.fmt==='10-Ball'){
     app.fmt=tourn.fmt;
@@ -2142,7 +2192,8 @@ function submitFinalScore(){
       hcpRack:[hcpState.rack[0]||0,hcpState.rack[1]||0],
       hcpBall:[hcpState.balls[0].size||0,hcpState.balls[1].size||0],
       status:'pending',ts:new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}),
-      p1accept:false,p2accept:false
+      p1accept:false,p2accept:false,
+      venue:_mpVenueEntry?.name||app.user?.hall||'—'
     });
     // ── Immediately visible to Admin as 'owner-pending' — admin can approve at any time ──
     adminMatches.push({
@@ -2171,8 +2222,8 @@ function submitFinalScore(){
     const _p2Rank=PLAYERS.find(p=>p.name===app.p2)?.rank||99;
     const _hcpStr=hcpParts.join(' · ')||'None';
     const _accept={p1accept:false,p2accept:false};
-    const _mkPPEntry=(me,opp,oppRank,sc)=>{
-      const e={id:'mp-'+Date.now(),me,opponent:opp,opponentRank:oppRank,
+    const _mkPPEntry=(me,player,opp,oppRank,sc)=>{
+      const e={id:'mp-'+Date.now(),me,player,opponent:opp,opponentRank:oppRank,
         venue:_mVenue,date:_mDate,time:_mTime,
         fmt:app.fmt||'9-Ball',type:app.matchType||'Tournament',
         score:sc,hcp:_hcpStr,myScore:parseInt(sc)};
@@ -2180,8 +2231,9 @@ function submitFinalScore(){
       Object.defineProperty(e,'p2accept',{get(){return _accept.p2accept;},set(v){_accept.p2accept=v;},enumerable:true,configurable:true});
       return e;
     };
-    playerPendingMatches.unshift(_mkPPEntry('p2',app.p1,_p1Rank,`${s2}-${s1}`));
-    playerPendingMatches.unshift(_mkPPEntry('p1',app.p2,_p2Rank,`${s1}-${s2}`));
+    // Each entry scoped to its player so portals only show their own entry
+    playerPendingMatches.unshift(_mkPPEntry('p2',app.p2,app.p1,_p1Rank,`${s2}-${s1}`));
+    playerPendingMatches.unshift(_mkPPEntry('p1',app.p1,app.p2,_p2Rank,`${s1}-${s2}`));
     updateNavBadges();
     toast(`📨 Match recorded! Awaiting confirmation from <strong>${app.p1.split(' ')[0]}</strong> & <strong>${app.p2.split(' ')[0]}</strong>. View in Hall Portal.`);
     resetMatch();
@@ -2256,6 +2308,10 @@ function finalizeMatch(){
   const _hcpParts2=[];
   if(_hcpR[0]>0) _hcpParts2.push(`${app.p1.split(' ')[0]} +${_hcpR[0]} racks`);
   if(_hcpR[1]>0) _hcpParts2.push(`${app.p2.split(' ')[0]} +${_hcpR[1]} racks`);
+  const _hcpB2a=[...hcpState.balls[0]].sort((a,b)=>a-b);
+  const _hcpB2b=[...hcpState.balls[1]].sort((a,b)=>a-b);
+  if(_hcpB2a.length) _hcpParts2.push(`${app.p1.split(' ')[0]} last ball ${_hcpB2a.join(', ')}`);
+  if(_hcpB2b.length) _hcpParts2.push(`${app.p2.split(' ')[0]} last ball ${_hcpB2b.join(', ')}`);
   adminMatches.unshift({
     id:'m-'+Date.now(), p1:app.p1, p2:app.p2,
     fmt:app.fmt||'9-Ball', type:app.matchType||'Tournament',
@@ -2458,9 +2514,9 @@ function computeHcpStats(playerName){
       if(iReceiver){ won?s.rackRecW++:s.rackRecL++; }
       else         { won?s.rackGivenW++:s.rackGivenL++; }
     }
-    // Last-ball handicap: "Jonas +1 ball" or "ball" in hcp string
-    if(hcpL.includes('ball')&&!hcpL.includes('rack')){
-      const iReceiver=hcpL.includes(fn+' +');
+    // Last-ball handicap: detect independently of rack (can coexist)
+    if(hcpL.includes('last ball')){
+      const iReceiver=hcpL.includes(fn+' last ball');
       if(iReceiver){ won?s.lbRecW++:s.lbRecL++; }
       else         { won?s.lbGivenW++:s.lbGivenL++; }
     }
@@ -2496,8 +2552,9 @@ function computeAdvancedStats(playerName, currentPPR, careerStatus){
       const opp=PLAYERS.find(p=>p.name===oppName);
       if(opp&&opp.ppr>(biggestUpset||0)) biggestUpset=opp.ppr;
     }
-    // Clutch Win% — close matches where score gap ≤ 5
-    if(Math.abs(myScore-oppScore)<=5){clutchTotal++;if(won)clutchWins++;}
+    // Clutch Win% — loser reached ≥75% of winner's score (relative to race)
+    const _winnerSc=Math.max(myScore,oppScore),_loserSc=Math.min(myScore,oppScore);
+    if(_winnerSc>0&&_loserSc/_winnerSc>=0.75){clutchTotal++;if(won)clutchWins++;}
     // Rack margin for consistency
     margins.push(myScore-oppScore);
     // Real SoS: average calcSoS of all opponents faced
@@ -3028,26 +3085,25 @@ function renderLbTab(tab){
     const sorted=[...data].sort((a,b)=>b.overall-a.overall);
     c.innerHTML=`
     <div style="font-size:.72rem;color:var(--chalk);margin-bottom:.8rem;line-height:1.8;">
-      Advanced performance metrics for serious analysis. <span style="color:var(--chalk2);">Consistency, dominance, clutch performance &amp; career arc.</span>
+      Advanced performance metrics for serious analysis. <span style="color:var(--chalk2);">Dominance, clutch performance, schedule strength &amp; career arc.</span>
     </div>
 
     <!-- Advanced Metrics Table -->
     <div class="card" style="overflow-x:auto;padding:0;margin-bottom:1.1rem;">
       <div class="ct" style="padding:1.4rem 1.4rem .8rem;">🔬 Advanced Player Metrics</div>
-      <table class="rt" style="min-width:1200px;">
+      <table class="rt adv-tbl">
         <thead>
           <tr>
-            <th>PP Rank</th>
+            <th style="width:60px;">Rank</th>
             <th>Player</th>
-            <th>Status</th>
-            <th title="Highest rated player defeated">Biggest Upset</th>
-            <th title="Weighted rack margin × match quality">Dominance Index</th>
-            <th title="Win% in hill-hill situations">Clutch Win%</th>
-            <th title="Average rating of opponents faced">Strength of Schedule</th>
-            <th title="Matches last 60 days">Activity Score</th>
-            <th title="Rating change since first verified match">Career Growth</th>
-            <th title="Performance stability measure">Consistency</th>
-            <th title="Highest PinoyPool Rank achieved">Peak Rank</th>
+            <th class="adv-hide-xs">Status</th>
+            <th title="Highest rated player defeated" style="text-align:center;">Upset</th>
+            <th title="Weighted rack margin × match quality" style="text-align:center;">Dom.</th>
+            <th title="Win% in close matches (loser ≥75% of winner)" style="text-align:center;">Clutch%</th>
+            <th title="Average rating of opponents faced" class="adv-hide-sm" style="text-align:center;">SOS</th>
+            <th title="Matches last 60 days" style="text-align:center;">Activity</th>
+            <th title="Rating change since first verified match" class="adv-hide-sm" style="text-align:center;">Growth</th>
+            <th title="Highest PinoyPool Rank achieved" style="text-align:center;">Peak</th>
           </tr>
         </thead>
         <tbody>
@@ -3061,31 +3117,28 @@ function renderLbTab(tab){
             const domIdx=nm?null:((p.avgMargin*0.6)+(p.mw/(p.mw+p.ml||1)*0.4)*3).toFixed(2);
             const clutchPct=adv.clutchTotal>0?Math.round((adv.clutchWins/adv.clutchTotal)*100):null;
             const careerGrowth=nm?null:adv.careerGrowth;
-            const consistency=nm?null:adv.consistency;
             const activity=adv.activity;
             const sosDisplay=nm?null:(adv.sosAvg!=null?adv.sosAvg:p.sos);
             // Peak rank: tracked in approvedPlayers, fallback to current rank
             const apEntry=approvedPlayers.find(a=>a.name===p.name);
             const peakRank=apEntry&&apEntry.peakRank?apEntry.peakRank:i+1;
-            const consistColor=consistency==null?'var(--chalk2)':consistency>=80?'var(--gold)':consistency>=65?'var(--grn3)':'var(--chalk)';
             const actColor=activity>=8?'var(--grn3)':activity>=5?'var(--gold)':activity>=1?'var(--chalk)':'var(--chalk2)';
             const growthColor=careerGrowth==null?'var(--chalk2)':careerGrowth>200?'var(--gold)':careerGrowth>0?'var(--grn3)':careerGrowth<0?'#e55':'var(--chalk)';
             const clutchColor=clutchPct==null?'var(--chalk2)':clutchPct>=60?'var(--gold)':clutchPct>=50?'var(--grn3)':'#e55';
             return`<tr>
-              <td><div class="${rankClass(i)}" style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;">#${i+1}</div></td>
-              <td><div class="pp"><div class="av" style="background:${p.colors||avcolors[i%8]};width:28px;height:28px;font-size:.7rem;">${getInit(p.name)}</div>
-                <div><div style="font-weight:600;font-size:.82rem;">${p.name}</div>
-                <div style="font-size:.6rem;color:var(--chalk);">${p.region}</div></div>
+              <td><div class="${rankClass(i)}" style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;">#${i+1}</div></td>
+              <td><div class="pp"><div class="av" style="background:${p.colors||avcolors[i%8]};width:26px;height:26px;font-size:.65rem;">${getInit(p.name)}</div>
+                <div><div style="font-weight:600;font-size:.8rem;">${p.name}</div>
+                <div style="font-size:.58rem;color:var(--chalk);">${p.region}</div></div>
               </div></td>
-              <td>${tierBadge(tier)}</td>
-              <td>${upsetRating==null?dash:`<div style="font-family:'DM Mono',monospace;font-size:.82rem;color:var(--gold);">${upsetRating}</div><div style="font-size:.6rem;color:var(--chalk2);">opp rating</div>`}</td>
-              <td>${nm?dash:`<div style="font-family:'DM Mono',monospace;font-size:.88rem;color:${parseFloat(domIdx)>1.5?'var(--gold)':parseFloat(domIdx)>0?'var(--grn3)':'#e55'};">${domIdx}</div>`}</td>
-              <td>${clutchPct==null?dash:`<div class="wrb" style="min-width:65px;"><div class="bt"><div class="bf" style="width:${clutchPct}%;"></div></div><span style="font-size:.72rem;color:${clutchColor};">${clutchPct}%</span></div>`}</td>
-              <td>${sosDisplay==null?dash:`<span style="font-family:'DM Mono',monospace;font-size:.78rem;">${sosDisplay}</span>`}</td>
-              <td><div style="display:flex;align-items:center;gap:4px;"><span class="act-dot" style="background:${actColor};"></span><span style="font-family:'DM Mono',monospace;font-size:.75rem;color:${actColor};">${activity} <span style="color:var(--chalk2);font-size:.65rem;">/ 60d</span></span></div></td>
-              <td>${careerGrowth==null?dash:`<span style="font-family:'DM Mono',monospace;font-size:.82rem;color:${growthColor};font-weight:600;">${careerGrowth>0?'+':''}${careerGrowth}</span>`}</td>
-              <td>${consistency==null?dash:`<div class="wrb" style="min-width:65px;"><div class="bt"><div class="bf" style="width:${consistency}%;"></div></div><span style="font-size:.72rem;color:${consistColor};">${consistency}%</span></div>`}</td>
-              <td><span style="font-family:'DM Mono',monospace;font-size:.78rem;color:var(--gold);">#${peakRank}</span></td>
+              <td class="adv-hide-xs">${tierBadge(tier)}</td>
+              <td style="text-align:center;">${upsetRating==null?dash:`<span style="font-family:'DM Mono',monospace;font-size:.8rem;color:var(--gold);">${upsetRating}</span>`}</td>
+              <td style="text-align:center;">${nm?dash:`<span style="font-family:'DM Mono',monospace;font-size:.85rem;color:${parseFloat(domIdx)>1.5?'var(--gold)':parseFloat(domIdx)>0?'var(--grn3)':'#e55'};">${domIdx}</span>`}</td>
+              <td style="text-align:center;">${clutchPct==null?dash:`<div style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;min-width:52px;"><div class="bt" style="width:52px;height:4px;border-radius:2px;"><div class="bf" style="width:${clutchPct}%;height:4px;border-radius:2px;"></div></div><span style="font-size:.72rem;color:${clutchColor};font-family:'DM Mono',monospace;">${clutchPct}%</span></div>`}</td>
+              <td class="adv-hide-sm" style="text-align:center;">${sosDisplay==null?dash:`<span style="font-family:'DM Mono',monospace;font-size:.78rem;">${sosDisplay}</span>`}</td>
+              <td style="text-align:center;"><div style="display:inline-flex;align-items:center;gap:3px;"><span class="act-dot" style="background:${actColor};flex-shrink:0;"></span><span style="font-family:'DM Mono',monospace;font-size:.72rem;color:${actColor};">${activity}</span></div></td>
+              <td class="adv-hide-sm" style="text-align:center;">${careerGrowth==null?dash:`<span style="font-family:'DM Mono',monospace;font-size:.8rem;color:${growthColor};font-weight:600;">${careerGrowth>0?'+':''}${careerGrowth}</span>`}</td>
+              <td style="text-align:center;"><span style="font-family:'DM Mono',monospace;font-size:.78rem;color:var(--gold);">#${peakRank}</span></td>
             </tr>`;
           }).join('')}
         </tbody>
@@ -3099,11 +3152,10 @@ function renderLbTab(tab){
         ${[
           {m:'Biggest Upset',why:'The highest-rated player you have defeated. Defines your ceiling.'},
           {m:'Dominance Index',why:'Weighted rack margin × match quality. Shows how convincingly you win.'},
-          {m:'Clutch Win%',why:'Your win rate in hill-hill (match point) situations. Pressure performance.'},
-          {m:'Strength of Schedule',why:'Average rating of all opponents. Winning hard schedules means more.'},
-          {m:'Activity Score',why:'Matches played last 60 days. Active players get fresher rating signals.'},
+          {m:'Clutch Win%',why:'Win rate in close matches where the loser reached ≥75% of the winner\'s score. True pressure performance.'},
+          {m:'Strength of Schedule (SOS)',why:'Average rating of all opponents faced. Winning tough schedules means more.'},
+          {m:'Activity Score',why:'Matches played in the last 60 days. Active players receive fresher rating signals.'},
           {m:'Career Growth',why:'Rating change since your first verified match. Your overall improvement arc.'},
-          {m:'Consistency Score',why:'How stable your performance is. High = reliable, low = volatile.'},
           {m:'Peak Rank',why:'The highest national rank you ever achieved. Career legacy recognition.'},
         ].map(g=>`<div style="background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:8px;padding:.75rem .9rem;">
           <div style="font-family:'Bebas Neue',sans-serif;font-size:.88rem;letter-spacing:1.5px;color:var(--gold);margin-bottom:3px;">${g.m}</div>
@@ -3124,11 +3176,8 @@ function buildHalls(){
       </div>
       <div style="font-size:.76rem;color:var(--chalk);margin-bottom:7px;">📍 ${h.c}</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:6px;">
-        <span class="tag tgd">${h.t} Tables</span>
         <span style="font-size:.7rem;color:var(--chalk);">👥 ${h.ap} active</span>
       </div>
-      <div style="font-size:.7rem;color:var(--chalk2);margin-bottom:7px;">${h.fmt}</div>
-      <a href="https://${h.fb}" onclick="event.stopPropagation();toast('📘 Opening ${h.n} Facebook page…');" style="font-size:.7rem;color:var(--gold);text-decoration:none;">📘 ${h.fb}</a>
     </div>`).join('');
 }
 function openRegHall(){
@@ -3420,20 +3469,33 @@ function ppTab(btn,tab){
   document.querySelectorAll('.pp-tab').forEach(b=>b.classList.remove('act'));
   if(btn) btn.classList.add('act');
   const c=document.getElementById('pp-content');
-  const p=PLAYERS.find(x=>x.name===app.user?.name)||PLAYERS[0];
+  const p=PLAYERS.find(x=>x.name===app.user?.name)||PLAYERS[0]||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||'Amateur',status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
 
   if(tab==='validation'){
-    const pending=playerPendingMatches;
+    // Filter out entries whose match is already approved in adminMatches
+    const _myName=app.user?.name||'';
+    for(let _pi=playerPendingMatches.length-1;_pi>=0;_pi--){
+      const _pm=playerPendingMatches[_pi];
+      const _approved=adminMatches.find(am=>am.status==='approved'&&
+        ((am.p1===_myName&&am.p2===_pm.opponent)||(am.p2===_myName&&am.p1===_pm.opponent)));
+      if(_approved) playerPendingMatches.splice(_pi,1);
+    }
+    // Only show entries belonging to the current player
+    const pending=playerPendingMatches.filter(m=>!m.player||m.player===_myName);
     c.innerHTML=`
     <div class="card">
-      <div class="ct">⚡ Pending Match Confirmations <span style="background:#e55;color:#fff;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${pending.length} pending</span></div>
+      <div class="ct">⚡ Pending Match Confirmations ${pending.length?`<span style="background:#e55;color:#fff;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${pending.length} pending</span>`:''}</div>
       <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.2rem;line-height:1.6;">These matches were recorded by a Hall Owner and require your confirmation. A match is only official after <strong style="color:var(--gold);">both players confirm</strong>.</p>
       ${pending.length?pending.map((m,i)=>{
         const myAccepted=m.me==='p1'?m.p1accept:m.p2accept;
         const oppAccepted=m.me==='p1'?m.p2accept:m.p1accept;
-        const statusLabel=myAccepted&&oppAccepted?'Fully Validated':myAccepted?'Accepted by You — Awaiting Opponent':oppAccepted?'Accepted by Opponent — Awaiting You':'Pending Both Players';
-        const statusClass=myAccepted&&oppAccepted?'status-validated':oppAccepted?'status-partial':'status-pending';
-        return`<div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.8rem;">
+        // Check if venue has already verified this match
+        const _realIdx=playerPendingMatches.indexOf(m);
+        const _amEntry=adminMatches.find(am=>(am.p1===_myName||am.p2===_myName)&&(am.p1===m.opponent||am.p2===m.opponent));
+        const venueVerified=_amEntry&&(_amEntry.venueOk||_amEntry.status==='pending'||_amEntry.status==='approved');
+        const statusLabel=venueVerified?'Verified by Venue':myAccepted&&oppAccepted?'Fully Validated':myAccepted?'Accepted by You — Awaiting Opponent':oppAccepted?'Accepted by Opponent — Awaiting You':'Pending Both Players';
+        const statusClass=venueVerified?'status-validated':myAccepted&&oppAccepted?'status-validated':oppAccepted?'status-partial':'status-pending';
+        return`<div style="background:rgba(255,255,255,.03);border:1px solid ${venueVerified?'rgba(31,140,78,.3)':'var(--border)'};border-radius:10px;padding:1.1rem;margin-bottom:.8rem;">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.8rem;">
             <div>
               <div style="font-weight:600;font-size:.92rem;">vs ${m.opponent} <span style="color:var(--chalk2);font-size:.75rem;">(#${m.opponentRank})</span></div>
@@ -3447,20 +3509,22 @@ function ppTab(btn,tab){
             </div>
             <span class="tag ${statusClass}" style="white-space:nowrap;">${statusLabel}</span>
           </div>
+          ${venueVerified?`
+          <div style="display:flex;gap:6px;align-items:center;font-size:.75rem;flex-wrap:wrap;">
+            <span style="padding:3px 10px;border-radius:6px;background:rgba(31,140,78,.15);border:1px solid var(--grn3);color:var(--grn3);">✓ Result Accepted</span>
+            <span style="padding:3px 10px;border-radius:6px;background:rgba(31,140,78,.15);border:1px solid var(--grn3);color:var(--grn3);">✓ Venue Verified</span>
+            <span style="padding:3px 10px;border-radius:6px;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:var(--gold);font-size:.68rem;">⏳ Awaiting Admin</span>
+          </div>`:`
           <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
             <div style="display:flex;gap:4px;align-items:center;font-size:.75rem;flex:1;">
-              <div style="width:18px;height:18px;border-radius:50%;background:${myAccepted?'var(--grn2)':'rgba(255,255,255,.05)'};border:2px solid ${myAccepted?'var(--grn3)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:.6rem;">
-                ${myAccepted?'✓':'—'}
-              </div>
+              <div style="width:18px;height:18px;border-radius:50%;background:${myAccepted?'var(--grn2)':'rgba(255,255,255,.05)'};border:2px solid ${myAccepted?'var(--grn3)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:.6rem;">${myAccepted?'✓':'—'}</div>
               <span style="color:${myAccepted?'var(--grn3)':'var(--chalk2)'};">You — ${myAccepted?'Confirmed':'Not yet confirmed'}</span>
               <span style="margin:0 6px;color:var(--border);">|</span>
-              <div style="width:18px;height:18px;border-radius:50%;background:${oppAccepted?'var(--grn2)':'rgba(255,255,255,.05)'};border:2px solid ${oppAccepted?'var(--grn3)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:.6rem;">
-                ${oppAccepted?'✓':'—'}
-              </div>
+              <div style="width:18px;height:18px;border-radius:50%;background:${oppAccepted?'var(--grn2)':'rgba(255,255,255,.05)'};border:2px solid ${oppAccepted?'var(--grn3)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:.6rem;">${oppAccepted?'✓':'—'}</div>
               <span style="color:${oppAccepted?'var(--grn3)':'var(--chalk2)'};">${m.opponent.split(' ')[0]} — ${oppAccepted?'Confirmed':'Waiting'}</span>
             </div>
-            ${!myAccepted?`<button class="btn btn-s btn-sm" onclick="playerAcceptMatch(${i})">✓ Accept Result</button>`:''}
-          </div>
+            ${!myAccepted?`<button class="btn btn-s btn-sm" onclick="playerAcceptMatch(${_realIdx})">✓ Accept Result</button>`:''}
+          </div>`}
         </div>`;
       }).join(''):'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:2rem 0;">🎉 No pending match confirmations</div>'}
     </div>
@@ -3548,14 +3612,36 @@ function ppTab(btn,tab){
     const tierName=ct.label;
     const isOfficial=totalMatches>=10;
 
-    // SVG ranking graph
-    const pts=rankHistory;
-    const maxRank=Math.max(...pts.map(p=>p.rank))+1;
+    // SVG ranking graph — built from real approved match data
+    const _pName=p.name;
+    const _pMatches=adminMatches
+      .filter(m=>m.status==='approved'&&(m.p1===_pName||m.p2===_pName))
+      .sort((a,b)=>(a.approvedAt||a.date||'').localeCompare(b.approvedAt||b.date||''));
+    const _totalPlayers=Math.max(approvedPlayers.length||1,p.rank);
+    let pts;
+    if(_pMatches.length===0){
+      pts=[{month:'—',rank:p.rank},{month:'Now',rank:p.rank}];
+    } else {
+      const _initRank=Math.min(_totalPlayers,p.rank+_pMatches.length);
+      pts=[{month:'Start',rank:_initRank}];
+      let _simRank=_initRank;
+      _pMatches.forEach(m=>{
+        const _sc=(m.score||'0-0').split(/[-–]/);
+        const _my=parseInt(m.p1===_pName?_sc[0]:_sc[1])||0;
+        const _op=parseInt(m.p1===_pName?_sc[1]:_sc[0])||0;
+        _simRank=Math.max(1,_my>_op?_simRank-1:Math.min(_totalPlayers,_simRank+1));
+        const _d=new Date(m.approvedAt||m.date||Date.now());
+        pts.push({month:_d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),rank:_simRank});
+      });
+      pts[pts.length-1].rank=p.rank; // snap to actual current rank
+    }
+    if(pts.length<2) pts=[{month:'—',rank:p.rank},{month:'Now',rank:p.rank}];
+    const maxRank=Math.max(...pts.map(pt=>pt.rank),p.rank)+1;
     const gW=500,gH=140,padL=30,padR=10,padT=15,padB=25;
-    const xStep=(gW-padL-padR)/(pts.length-1);
+    const xStep=(gW-padL-padR)/Math.max(1,pts.length-1);
     const yScale=(gH-padT-padB)/(maxRank);
-    const polyPts=pts.map((p,i)=>`${padL+i*xStep},${padT+(p.rank-1)*yScale}`).join(' ');
-    const areaPath=`M${padL+0*xStep},${gH-padB} `+pts.map((p,i)=>`L${padL+i*xStep},${padT+(p.rank-1)*yScale}`).join(' ')+` L${padL+(pts.length-1)*xStep},${gH-padB} Z`;
+    const polyPts=pts.map((pt,i)=>`${padL+i*xStep},${padT+(pt.rank-1)*yScale}`).join(' ');
+    const areaPath=`M${padL},${gH-padB} `+pts.map((pt,i)=>`L${padL+i*xStep},${padT+(pt.rank-1)*yScale}`).join(' ')+` L${padL+(pts.length-1)*xStep},${gH-padB} Z`;
 
     c.innerHTML=`
     <div class="g2" style="margin-bottom:1.1rem;">
@@ -3899,14 +3985,21 @@ function ptab(tab){
           ${i<arr.length-1?`<div style="flex:1;height:1px;background:${s.done?'var(--grn3)':'rgba(255,255,255,.12)'};min-width:12px;margin-bottom:14px;opacity:.6;"></div>`:''}`
         ).join('')}
       </div>`;
+    // ── Filter manualPending to only show matches at this owner's hall ──
+    const _ownedPending=manualPending.filter(m=>!_ownerHallName||!m.venue||m.venue===_ownerHallName);
+    const _totalActions=_ownedPending.length+_playerSetMatches.length+pendVal.length;
     c.innerHTML=`
-    ${manualPending.length?`
     <div class="card" style="margin-bottom:1.1rem;">
-      <div class="ct">⏳ Pending Player Confirmations <span style="background:rgba(200,168,75,.2);color:var(--gold);border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${manualPending.length}</span></div>
-      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.1rem;">These matches need player sign-off. You can confirm on behalf of any player who was physically present at your hall.</p>
-      ${manualPending.map((m,i)=>`
+      <div class="ct">⚡ Pending Match Actions
+        ${_totalActions>0?`<span style="background:rgba(200,168,75,.2);color:var(--gold);border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${_totalActions}</span>`:''}
+      </div>
+      ${_totalActions===0?`<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No pending actions — all clear ✓</div>`:`
+      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.1rem;">Matches recorded at your hall awaiting confirmation or validation. You can confirm on behalf of any player who was physically present.</p>
+      ${_ownedPending.map(m=>{
+        const realIdx=manualPending.indexOf(m);
+        return `
       <div style="background:rgba(200,168,75,.04);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.7rem;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.85rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.7rem;">
           <div>
             <div style="font-weight:600;">${m.p1} vs ${m.p2}</div>
             <div style="font-size:.73rem;color:var(--chalk);margin-top:3px;">
@@ -3916,25 +4009,20 @@ function ptab(tab){
               · 🏆 <strong style="color:var(--grn3);">${m.winner?.split(' ')[0]||'—'} wins</strong>
             </div>
             ${m.hcp!=='None'?`<div style="font-size:.7rem;color:#e55;margin-top:2px;">Hcp: ${m.hcp}</div>`:''}
+            <div style="font-size:.65rem;color:var(--chalk2);margin-top:3px;">⏳ Awaiting player sign-offs</div>
           </div>
           <div style="font-size:.7rem;color:var(--chalk2);">${m.ts}</div>
         </div>
-        <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
-          <button class="btn btn-sm" onclick="ownerConfirm(${i},1)" ${m.p1accept?'disabled':''} style="flex:1;min-width:130px;background:${m.p1accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.1)'};border-color:${m.p1accept?'rgba(31,140,78,.5)':'var(--border)'};color:${m.p1accept?'var(--grn3)':'var(--chalk)'};cursor:${m.p1accept?'default':'pointer'};">
-            ${m.p1accept?`✓ ${m.p1.split(' ')[0]} Confirmed`:`✋ Confirm for ${m.p1.split(' ')[0]}`}
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button class="btn btn-sm" onclick="ownerConfirm(${realIdx},1)" ${m.p1accept?'disabled':''} style="flex:1;min-width:110px;background:${m.p1accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.1)'};border-color:${m.p1accept?'rgba(31,140,78,.5)':'var(--border)'};color:${m.p1accept?'var(--grn3)':'var(--chalk)'};cursor:${m.p1accept?'default':'pointer'};">
+            ${m.p1accept?`✓ ${m.p1.split(' ')[0]}`:`✋ ${m.p1.split(' ')[0]}`}
           </button>
-          <button class="btn btn-sm" onclick="ownerConfirm(${i},2)" ${m.p2accept?'disabled':''} style="flex:1;min-width:130px;background:${m.p2accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.1)'};border-color:${m.p2accept?'rgba(31,140,78,.5)':'var(--border)'};color:${m.p2accept?'var(--grn3)':'var(--chalk)'};cursor:${m.p2accept?'default':'pointer'};">
-            ${m.p2accept?`✓ ${m.p2.split(' ')[0]} Confirmed`:`✋ Confirm for ${m.p2.split(' ')[0]}`}
+          <button class="btn btn-sm" onclick="ownerConfirm(${realIdx},2)" ${m.p2accept?'disabled':''} style="flex:1;min-width:110px;background:${m.p2accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.1)'};border-color:${m.p2accept?'rgba(31,140,78,.5)':'var(--border)'};color:${m.p2accept?'var(--grn3)':'var(--chalk)'};cursor:${m.p2accept?'default':'pointer'};">
+            ${m.p2accept?`✓ ${m.p2.split(' ')[0]}`:`✋ ${m.p2.split(' ')[0]}`}
           </button>
+          <button class="btn btn-sm" onclick="cancelOwnerMatch('${m.id}')" style="min-width:80px;flex:none;background:rgba(229,85,85,.1);border-color:rgba(229,85,85,.3);color:#e55;">✗ Cancel</button>
         </div>
-      </div>`).join('')}
-    </div>`:''}
-
-    <!-- ── PLAYER-SET MATCHES AWAITING HALL OWNER VERIFICATION ── -->
-    ${_playerSetMatches.length?`
-    <div class="card" style="margin-bottom:1.1rem;">
-      <div class="ct">🎱 Player-Set Matches <span style="background:rgba(245,166,35,.25);color:#f5a623;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${_playerSetMatches.length} need your verification</span></div>
-      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.1rem;">Both players confirmed these matches at your hall. As the venue owner, your verification will forward them to the Admin for final ranking update.</p>
+      </div>`;}).join('')}
       ${_playerSetMatches.map(m=>`
       <div style="background:rgba(245,166,35,.04);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:1.1rem;margin-bottom:.7rem;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
@@ -3947,39 +4035,29 @@ function ptab(tab){
               ${m.hcp&&m.hcp!=='None'?`· <span style="color:#e55;font-size:.7rem;">Hcp: ${m.hcp}</span>`:''}
             </div>
             <div style="font-size:.7rem;color:var(--chalk2);margin-top:2px;">📅 ${m.date}${m.submittedAt?' · Submitted '+new Date(m.submittedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''}</div>
-            ${_hoProgress([
-              {label:m.p1.split(' ')[0], done:true},
-              {label:m.p2.split(' ')[0], done:true},
-              {label:'VENUE', done:false},
-              {label:'ADMIN', done:false}
-            ])}
+            <div style="font-size:.65rem;color:#f5a623;margin-top:3px;">⏳ Both players confirmed — awaiting your venue verification</div>
+            ${_hoProgress([{label:m.p1.split(' ')[0],done:true},{label:m.p2.split(' ')[0],done:true},{label:'VENUE',done:false},{label:'ADMIN',done:false}])}
           </div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:.85rem;flex-wrap:wrap;">
-          <button class="btn btn-d btn-sm" onclick="ownerRejectPlayerMatch('${m.id}')" style="flex:1;min-width:120px;">✗ Reject</button>
-          <button class="btn btn-s btn-sm" onclick="ownerVerifyPlayerMatch('${m.id}')" style="flex:1;min-width:160px;">✓ Verify & Forward to Admin</button>
+        <div style="display:flex;gap:.5rem;margin-top:.85rem;flex-wrap:wrap;">
+          <button class="btn btn-d btn-sm" onclick="ownerRejectPlayerMatch('${m.id}')" style="flex:1;min-width:100px;">✗ Reject</button>
+          <button class="btn btn-s btn-sm" onclick="ownerVerifyPlayerMatch('${m.id}')" style="flex:1;min-width:150px;">✓ Verify & Forward</button>
         </div>
       </div>`).join('')}
-    </div>`:''}
-
-    <div class="card" style="margin-bottom:1.1rem;">
-      <div class="ct">⚡ Match Validations <span style="background:#e55;color:#fff;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${pendVal.length} pending</span></div>
-      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.1rem;">You are the 3rd and final verification layer. Only validate matches that actually took place at your hall.</p>
-      ${pendVal.length?pendVal.map((m,i)=>`
-        <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.7rem;">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-            <div>
-              <div style="font-weight:600;">${m.p1} vs ${m.p2}</div>
-              <div style="font-size:.73rem;color:var(--chalk);margin-top:3px;"><span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span> · Score: <strong style="color:var(--gold);">${m.sc}</strong> · ${m.time}</div>
-              <div style="font-size:.7rem;color:var(--chalk2);margin-top:3px;">✓ Both players confirmed</div>
-            </div>
-            <div style="display:flex;gap:7px;">
-              <button class="btn btn-d btn-sm" onclick="valMatch(${i},false)">✗ Reject</button>
-              <button class="btn btn-s btn-sm" onclick="valMatch(${i},true)">✓ Validate</button>
-            </div>
-          </div>
-        </div>`).join('')
-      :'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No pending validations</div>'}
+      ${pendVal.map((m,i)=>`
+      <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.7rem;">
+        <div style="margin-bottom:.7rem;">
+          <div style="font-weight:600;">${m.p1} vs ${m.p2}</div>
+          <div style="font-size:.73rem;color:var(--chalk);margin-top:3px;"><span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span> · Score: <strong style="color:var(--gold);">${m.sc}</strong> · ${m.time}</div>
+          <div style="font-size:.65rem;color:var(--chalk2);margin-top:3px;">✓ Both players confirmed — awaiting your validation</div>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button class="btn btn-d btn-sm" onclick="valMatch(${i},false)" style="flex:1;min-width:90px;">✗ Reject</button>
+          <button class="btn btn-s btn-sm" onclick="valMatch(${i},true)" style="flex:1;min-width:110px;">✓ Validate</button>
+          <button class="btn btn-sm" onclick="cancelPendVal(${i})" style="min-width:80px;flex:none;background:rgba(229,85,85,.1);border-color:rgba(229,85,85,.3);color:#e55;">✗ Cancel</button>
+        </div>
+      </div>`).join('')}
+      `}
     </div>
 
     `;
@@ -4000,7 +4078,7 @@ function ptab(tab){
       <div style="overflow-x:auto;">
         <table class="rt" style="min-width:720px;" id="history-table">
           <thead><tr>
-            <th>Players</th><th>Format</th><th>Type</th><th>Score</th><th>Race To</th><th>Handicap</th><th>Date & Time</th>
+            <th>Players</th><th>Format</th><th>Type</th><th>Score</th><th>Handicap</th><th>Date & Time</th>
           </tr></thead>
           <tbody id="history-tbody"></tbody>
         </table>
@@ -4010,7 +4088,9 @@ function ptab(tab){
 
   /* ── TOURNAMENTS ── */
   } else if(tab==='tournaments'){
-    const myTournaments=adminTournaments.filter(t=>t.ownerEmail===u.email||t.ownerName===u.name);
+    const _ownerHall=adminHalls.find(h=>h.email===u.email||h.username===u.username||h.owner===u.name);
+    const _ownerHallName=_ownerHall?.name||u.hall||'';
+    const myTournaments=adminTournaments.filter(t=>t.ownerEmail===u.email||t.ownerName===u.name||(_ownerHallName&&t.venue&&t.venue===_ownerHallName));
     c.innerHTML=`
     <div class="card" style="margin-bottom:1.1rem;">
       <div class="ct">🏆 Register a Tournament</div>
@@ -4081,11 +4161,22 @@ function ptab(tab){
 /* ── History filter ── */
 function filterHistory(btn, period){
   if(btn){document.querySelectorAll('#portal-content .tb').forEach(b=>b.classList.remove('act'));btn.classList.add('act');}
-  const today='2026-02-22',thisMonth='2026-02',thisYear='2026';
-  let data=hallHistory;
+  // Use real current date
+  const _now=new Date();
+  const today=_now.toISOString().slice(0,10);
+  const thisMonth=today.slice(0,7);
+  const thisYear=today.slice(0,4);
+  // Source: approved adminMatches at this owner's venue
+  const _u=app.user;
+  const _hallEntry=adminHalls.find(h=>h.email===_u?.email||h.username===_u?.username||h.owner===_u?.name);
+  const _venueName=_hallEntry?.name||_u?.hall||'';
+  const _base=adminMatches.filter(m=>m.status==='approved'&&_venueName&&m.venue&&m.venue===_venueName);
+  let data=_base;
   if(period==='day') data=data.filter(m=>m.date===today);
-  else if(period==='month') data=data.filter(m=>m.date.startsWith(thisMonth));
-  else if(period==='year') data=data.filter(m=>m.date.startsWith(thisYear));
+  else if(period==='month') data=data.filter(m=>m.date&&m.date.startsWith(thisMonth));
+  else if(period==='year') data=data.filter(m=>m.date&&m.date.startsWith(thisYear));
+  // Sort newest first
+  data=[...data].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
 
   // Summary stats
   const p9=data.filter(m=>m.fmt==='9-Ball').length;
@@ -4110,19 +4201,22 @@ function filterHistory(btn, period){
   const tbody=document.getElementById('history-tbody');
   if(!data.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--chalk2);padding:2rem;">No matches found for this period</td></tr>`;return;}
   tbody.innerHTML=data.map(m=>{
-    const w=parseInt(m.sc)>parseInt(m.sc.split('-')[1])?m.p1:m.p2;
-    const s=m.sc.split('-');
+    // Normalize score field (adminMatches uses 'score', hallHistory uses 'sc')
+    const sc=m.score||m.sc||'—';
+    const parts=sc.split('-');
+    const s1=parseInt(parts[0])||0, s2=parseInt(parts[1])||0;
+    const winner=m.winner||(s1>s2?m.p1:s1<s2?m.p2:'—');
+    const timeLabel=m.approvedAt?new Date(m.approvedAt).toLocaleString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):m.date||'—';
     return`<tr>
       <td>
         <div style="font-weight:600;font-size:.85rem;">${m.p1} <span style="color:var(--chalk2);">vs</span> ${m.p2}</div>
-        <div style="font-size:.65rem;color:var(--grn3);margin-top:2px;">🏆 ${w} wins</div>
+        <div style="font-size:.65rem;color:var(--grn3);margin-top:2px;">🏆 ${winner}</div>
       </td>
-      <td><span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span></td>
-      <td style="font-size:.76rem;color:var(--chalk);">${m.type}</td>
-      <td><span style="font-family:'DM Mono',monospace;font-size:.9rem;color:var(--gold);">${m.sc}</span></td>
-      <td style="font-size:.76rem;color:var(--chalk);">Race to ${m.raceTo}</td>
-      <td style="font-size:.76rem;color:${m.hcp==='None'?'var(--chalk2)':'#e55'}">${m.hcp}</td>
-      <td style="font-size:.72rem;color:var(--chalk2);">${m.ts}</td>
+      <td><span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt||'—'}</span></td>
+      <td style="font-size:.76rem;color:var(--chalk);">${m.type||'—'}</td>
+      <td><span style="font-family:'DM Mono',monospace;font-size:.9rem;color:var(--gold);">${sc}</span></td>
+      <td style="font-size:.76rem;color:${(!m.hcp||m.hcp==='None')?'var(--chalk2)':'#e55'}">${m.hcp||'None'}</td>
+      <td style="font-size:.72rem;color:var(--chalk2);">${timeLabel}</td>
     </tr>`;
   }).join('');
 }
@@ -4278,7 +4372,8 @@ function submitManualMatch(){
     hcpBall:[mEntry.balls[0].size||0,mEntry.balls[1].size||0],
     status:'pending',
     ts:new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}),
-    p1accept:false,p2accept:false
+    p1accept:false,p2accept:false,
+    venue:adminHalls.find(h=>h.owner===app.user?.name||h.username===app.user?.username)?.name||app.user?.hall||'—'
   };
   manualPending.push(entry);
   renderManualPending();
@@ -4363,6 +4458,11 @@ function ownerConfirm(i,p){
     const done=manualPending.splice(i,1)[0];
     const _today=new Date().toISOString().slice(0,10);
     hallHistory.unshift({...done,date:_today,ts:'Just now'});
+    // ── Remove matching playerPendingMatches entries so player portals stay clean ──
+    for(let _pi=playerPendingMatches.length-1;_pi>=0;_pi--){
+      const _pm=playerPendingMatches[_pi];
+      if(_pm.opponent===done.p1||_pm.opponent===done.p2) playerPendingMatches.splice(_pi,1);
+    }
     if(_amEntry){
       // ── Upgrade existing entry from 'owner-pending' → 'pending' ──
       _amEntry.status='pending';
@@ -4391,6 +4491,24 @@ function ownerConfirm(i,p){
   }
   ptab('matches');
   updateNavBadges();
+}
+
+function cancelOwnerMatch(id){
+  const idx=manualPending.findIndex(m=>m.id===id);
+  if(idx>=0) manualPending.splice(idx,1);
+  const amIdx=adminMatches.findIndex(m=>m.id===id);
+  if(amIdx>=0) adminMatches.splice(amIdx,1);
+  saveAdminMatches();
+  ptab('matches');
+  updateNavBadges();
+  toast('🗑️ Match cancelled and removed.');
+}
+
+function cancelPendVal(i){
+  pendVal.splice(i,1);
+  ptab('matches');
+  updateNavBadges();
+  toast('🗑️ Match cancelled.');
 }
 
 function submitTournament(){
@@ -4642,7 +4760,9 @@ function buildAdmin(){
       <div id="adm-stat-pending" style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#e55;">${pendP+pendH+pendM+pendT}</div>
       <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Pending</div>
     </div>`;
-  admTab(document.querySelector('.adm-tab.act')||document.querySelector('.adm-tab'), 'players');
+  const _activeTab=app.admTab||'players';
+  const _activeBtn=Array.from(document.querySelectorAll('.adm-tab')).find(b=>b.getAttribute('onclick')?.includes(`'${_activeTab}'`))||document.querySelector('.adm-tab');
+  admTab(_activeBtn, _activeTab);
   } // end renderAdminContent
 }
 
@@ -4710,7 +4830,7 @@ function admTab(btn,tab){
             <div style="min-width:0;">
               <div style="font-weight:600;font-size:.9rem;">${p.name}</div>
               <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;">${p.email||'—'} · ${p.region||'—'} · #${p.rank||'—'} National</div>
-              <div style="font-size:.68rem;color:var(--chalk2);margin-top:1px;">Joined ${p.joined||'—'} · <span class="${p.fmt==='9-Ball'?'tag tn':'tag tt'}" style="font-size:.52rem;">${p.fmt||'9-Ball'}</span> · W:${p.mw} L:${p.ml}</div>
+              <div style="font-size:.68rem;color:var(--chalk2);margin-top:1px;">Joined ${p.joined||'—'} · W:${p.mw} L:${p.ml}</div>
             </div>
           </div>
           <div class="adm-actions">
@@ -4778,7 +4898,7 @@ function admTab(btn,tab){
     const _playerPending=adminMatches.filter(m=>m.status==='player-pending');
     const _pendingBoth=adminMatches.filter(m=>m.status==='pending');
     const _totalPending=_ownerPending.length+_playerPending.length+_pendingBoth.length;
-    const _processed=[...adminMatches].filter(m=>m.status!=='owner-pending'&&m.status!=='player-pending'&&m.status!=='pending');
+    const _processed=[...adminMatches].filter(m=>m.status!=='owner-pending'&&m.status!=='player-pending'&&m.status!=='pending').sort((a,b)=>(b.approvedAt||b.date||'').localeCompare(a.approvedAt||a.date||''));
     // ── Section divider helper ──
     const _secDiv=(label,count,color)=>`
       <div style="display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .9rem;">
@@ -4889,7 +5009,7 @@ function admTab(btn,tab){
   } else if(tab==='tournaments'){
     const pendingT=adminTournaments.filter(t=>t.status==='pending');
     const activeT=adminTournaments.filter(t=>t.status==='active');
-    const HALLS_LIST=[...new Set([...adminHalls.map(h=>h.name),...HALLS.map(h=>h.n)])].filter(Boolean);
+    const HALLS_LIST=adminHalls.map(h=>h.name).filter(Boolean);
     c.innerHTML=`
     <!-- Pending approvals -->
     <div class="card" style="margin-bottom:1.1rem;">
@@ -5404,6 +5524,7 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
   });
   if(changed) saveAdminMatches();
 })();
+
 
 
 </script>
