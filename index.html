@@ -386,6 +386,7 @@ textarea{resize:vertical;min-height:75px;}
 .status-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;cursor:default;}
 .sp-pending{background:rgba(200,168,75,.12);border:1px solid rgba(200,168,75,.3);color:var(--gold);}
 .sp-active{background:var(--grn2);border:1px solid rgba(31,140,78,.3);color:var(--grn3);}
+.sp-inactive{background:rgba(120,120,120,.12);border:1px solid rgba(120,120,120,.3);color:#888;}
 .sp-suspended{background:var(--red2);border:1px solid var(--red3);color:#e55;}
 .sp-review{background:rgba(52,130,219,.12);border:1px solid rgba(52,130,219,.3);color:#5dade2;}
 /* SVG Ranking Graph */
@@ -1147,7 +1148,7 @@ function buildDashboard(){
   // — National Top 5 —
   const tbody=document.querySelector('#dash-top5 tbody');
   if(tbody){
-    const top5=[...PLAYERS].sort((a,b)=>b.ppr-a.ppr).slice(0,5);
+    const top5=[...PLAYERS].filter(p=>!p._hidden).sort((a,b)=>b.ppr-a.ppr).slice(0,5);
     if(top5.length===0){
       tbody.innerHTML=`<tr><td colspan="4" style="text-align:center;color:var(--chalk2);padding:1.2rem;font-size:.82rem;">No registered players yet.</td></tr>`;
     } else {
@@ -1265,16 +1266,17 @@ function saveApprovedPlayers(){const v=JSON.stringify(approvedPlayers);try{local
 function restoreApprovals(){
   approvedPlayers.forEach(ap=>{
     const adm=adminPlayers.find(p=>p.email===ap.email||p.username===ap.username);
+    const apStatus=ap.status||'active';
     if(adm){
       // Update existing entry to reflect approved status
-      adm.status='active'; adm.careerStatus=ap.careerStatus; adm.ppr=ap.ppr;
+      adm.status=apStatus; adm.careerStatus=ap.careerStatus; adm.ppr=ap.ppr;
       adm.mw=ap.mw||adm.mw||0; adm.ml=ap.ml||adm.ml||0;
     } else {
       // No adminPlayers entry yet (fresh reload) — create one from approvedPlayers data
       adminPlayers.push({
         id:ap.id, name:ap.name, username:ap.username||'', email:ap.email||'',
         phone:ap.phone||'', region:ap.region||'', role:'player',
-        status:'active', careerStatus:ap.careerStatus, ppr:ap.ppr,
+        status:apStatus, careerStatus:ap.careerStatus, ppr:ap.ppr,
         mw:ap.mw||0, ml:ap.ml||0, rw:ap.rw||0, rl:ap.rl||0, mi:ap.mi||0, sos:0,
         colors:ap.colors||'#1a3a22', fmt:ap.fmt||'9-Ball',
         joined:ap.approvedAt?ap.approvedAt.slice(0,10):'',
@@ -1283,11 +1285,17 @@ function restoreApprovals(){
     }
     const existing=PLAYERS.find(p=>p.name===ap.name||p.email===ap.email);
     if(!existing){
-      PLAYERS.push({id:ap.id,name:ap.name,region:ap.region||'',status:ap.careerStatus,
+      const entry={id:ap.id,name:ap.name,region:ap.region||'',status:ap.careerStatus,
         fmt:ap.fmt||'9-Ball',colors:ap.colors||'#1a3a22',
         mw:ap.mw||0,ml:ap.ml||0,rw:ap.rw||0,rl:ap.rl||0,
-        ppr:ap.ppr,pr:0,mi:ap.mi||0,sos:0,rank:0});
-    } else {existing.status=ap.careerStatus;existing.ppr=ap.ppr;}
+        ppr:ap.ppr,pr:0,mi:ap.mi||0,sos:0,rank:0};
+      if(apStatus==='inactive') entry._hidden=true;
+      PLAYERS.push(entry);
+    } else {
+      existing.status=ap.careerStatus; existing.ppr=ap.ppr;
+      if(apStatus==='inactive') existing._hidden=true;
+      else delete existing._hidden;
+    }
   });
   if(approvedPlayers.length) PLAYERS.sort((a,b)=>b.ppr-a.ppr).forEach((pl,i)=>pl.rank=i+1);
 }
@@ -2710,7 +2718,7 @@ function buildRankings(){
 
 function renderLbTab(tab){
   const m=app._rankMult||1;
-  const data=PLAYERS.map(p=>genPlayerStats(p,m));
+  const data=PLAYERS.filter(p=>!p._hidden).map(p=>genPlayerStats(p,m));
   const c=document.getElementById('lb-content');
 
   /* ── GLOBAL PPR LEADERBOARD (official PinoyPool Ranking System) ── */
@@ -4743,7 +4751,7 @@ const adminMatches=(()=>{try{return JSON.parse(localStorage.getItem('pp_adminMat
 function saveAdminMatches(){const v=JSON.stringify(adminMatches);try{localStorage.setItem('pp_adminMatches',v);}catch{}apiPersist('pp_adminMatches',v);}
 
 const CAREER_STATUS_LIST=['Amateur','Skilled','Semi-Pro','Pro','Elite'];
-const STATUS_OPTS=['active','suspended','pending','review'];
+const STATUS_OPTS=['active','inactive','pending','suspended'];
 
 function buildAdmin(){
   if(app.user?.role!=='admin'){toast('⚠️ Admin access only.');return;}
@@ -4759,7 +4767,7 @@ function buildAdmin(){
         if(r.role==='player'||r.role==='fan'){
           const existing=adminPlayers.find(p=>p.id===r.id||p.email===r.email);
           if(!existing){
-            adminPlayers.unshift({id:r.id,name:name.trim(),username:r.username||'',status:r.status||'pending',email:r.email,phone:r.phone,region:r.region,submittedAt:r.submittedAt,careerStatus:r.careerStatus||'Amateur',ppr:r.ppr||0,tier:'C',colors:'#1a3a22'});
+            adminPlayers.unshift({id:r.id,name:name.trim(),username:r.username||'',role:r.role||'player',status:r.status||'pending',email:r.email,phone:r.phone,region:r.region,submittedAt:r.submittedAt,careerStatus:r.careerStatus||'Amateur',ppr:r.ppr||0,tier:'C',colors:'#1a3a22'});
             changed=true;
           } else if(existing.status!==r.status){
             // Sync status changes from backend (e.g. approved on another device)
@@ -4831,6 +4839,10 @@ function admTab(btn,tab){
       (p.status==='active'||p.status==='suspended') &&
       (!searchQ||p.name.toLowerCase().includes(searchQ))
     );
+    const inactive = adminPlayers.filter(p=>
+      p.status==='inactive' &&
+      (!searchQ||p.name.toLowerCase().includes(searchQ))
+    );
     const REGIONS=['NCR','CAR','Region I','Region II','Region III','Region IV-A','Region IV-B','Region V','Region VI','Region VII','Region VIII','Region IX','Region X','Region XI','Region XII','Region XIII','BARMM'];
     c.innerHTML=`
 
@@ -4874,7 +4886,7 @@ function admTab(btn,tab){
         <input type="text" id="adm-psearch" placeholder="Search player name…" value="${app.admPlayerQ||''}" oninput="app.admPlayerQ=this.value;admRefresh()" style="max-width:280px;flex:1;">
       </div>
       ${registered.map(p=>{
-        const sClass={active:'sp-active',suspended:'sp-suspended'}[p.status]||'sp-active';
+        const sClass={active:'sp-active',inactive:'sp-inactive',suspended:'sp-suspended',pending:'sp-pending'}[p.status]||'sp-active';
         return`<div class="adm-row">
           <div style="display:flex;align-items:center;gap:.9rem;min-width:0;flex:1;">
             <div class="av" style="background:${p.colors||'#1a3a22'};flex-shrink:0;">${getInit(p.name)}</div>
@@ -4897,7 +4909,31 @@ function admTab(btn,tab){
         </div>`;
       }).join('')}
       ${!registered.length?`<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No registered players found</div>`:''}
-    </div>`;
+    </div>
+
+    <!-- ③ INACTIVE PLAYERS -->
+    ${inactive.length?`<div class="card">
+      <div class="ct" style="color:#888;">Inactive Players
+        <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;">${inactive.length} players</span>
+      </div>
+      <p style="font-size:.78rem;color:var(--chalk2);margin-bottom:1rem;">These players are hidden from public rankings. Their profile remains accessible.</p>
+      ${inactive.map(p=>`<div class="adm-row" style="opacity:.7;">
+        <div style="display:flex;align-items:center;gap:.9rem;min-width:0;flex:1;">
+          <div class="av" style="background:#333;flex-shrink:0;">${getInit(p.name)}</div>
+          <div style="min-width:0;">
+            <div style="font-weight:600;font-size:.9rem;">${p.name}</div>
+            <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;">${p.email||'—'} · ${p.region||'—'}</div>
+            <div style="font-size:.68rem;color:var(--chalk2);margin-top:1px;">${p.careerStatus||'Amateur'} · PPR ${p.ppr||0}</div>
+          </div>
+        </div>
+        <div class="adm-actions">
+          <span class="status-pill sp-inactive">● inactive</span>
+          <select style="width:auto;padding:5px 9px;font-size:.78rem;" onchange="admSetPlayerStatus('${p.id}',this.value)">
+            ${STATUS_OPTS.map(s=>`<option value="${s}"${p.status===s?' selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+          </select>
+        </div>
+      </div>`).join('')}
+    </div>`:''}`;
 
   /* ── HALL OWNERS ── */
   } else if(tab==='halls'){
@@ -4926,18 +4962,20 @@ function admTab(btn,tab){
       })()}
     </div>
     <div class="card">
-      <div class="ct">✅ Registered Halls <span style="font-size:.7rem;font-family:'Barlow Condensed',sans-serif;font-weight:400;text-transform:none;letter-spacing:0;color:var(--chalk);">${HALLS.length} approved venues</span></div>
-      ${HALLS.map(h=>`
-        <div class="adm-row">
+      <div class="ct">✅ Registered Halls <span style="font-size:.7rem;font-family:'Barlow Condensed',sans-serif;font-weight:400;text-transform:none;letter-spacing:0;color:var(--chalk);">${adminHalls.filter(h=>h.status==='active').length} approved venues</span></div>
+      ${adminHalls.filter(h=>h.status==='active').map(h=>`
+        <div class="adm-row" id="hall-row-${h.id}">
           <div style="flex:1;">
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:1px;">${h.n}</div>
-            <div style="font-size:.73rem;color:var(--chalk);">📍 ${h.c} · ${h.t} tables · ${h.fmt}</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:1px;">${h.name}</div>
+            <div style="font-size:.73rem;color:var(--chalk);">📍 ${h.city||'—'}</div>
+            <div style="font-size:.7rem;color:var(--chalk2);margin-top:2px;">${h.email||''}</div>
           </div>
           <div class="adm-actions">
-            <span class="status-pill ${h.open?'sp-active':'sp-suspended'}">● ${h.open?'Open':'Closed'}</span>
-            <button class="btn btn-g btn-sm" onclick="toast('✏️ Edit feature — ${h.n}')">✏️ Edit</button>
+            <span class="status-pill ${h.open===false?'sp-suspended':'sp-active'}">● ${h.open===false?'Closed':'Open'}</span>
+            <button class="btn btn-g btn-sm" onclick="admEditHall('${h.id}')">✏️ Edit</button>
           </div>
-        </div>`).join('')}
+        </div>
+        <div id="hall-edit-${h.id}" style="display:none;background:rgba(255,255,255,.04);border-radius:10px;padding:1rem;margin-bottom:.8rem;"></div>`).join('')}
     </div>`;
 
   /* ── MATCH APPROVALS ── */
@@ -5301,8 +5339,30 @@ function admSetPlayerStatus(id,status){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
   if(!p)return;
   p.status=status;
+  // Sync status to approvedPlayers and persist
+  const ap=approvedPlayers.find(x=>x.id===p.id||x.email===p.email);
+  if(ap) ap.status=status;
+  saveApprovedPlayers();
+  // Sync to backend
+  fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({status})}).catch(()=>{});
+  // Inactive: hide from rankings but keep player data intact
+  if(status==='inactive'){
+    const pi=PLAYERS.findIndex(x=>x.id===p.id||x.name===p.name);
+    if(pi>=0) PLAYERS[pi]._hidden=true;
+  } else if(status==='active'){
+    // Re-show in rankings
+    const pl=PLAYERS.find(x=>x.id===p.id||x.name===p.name);
+    if(pl) delete pl._hidden;
+    else PLAYERS.push({id:p.id,name:p.name,region:p.region||'',status:p.careerStatus,
+      fmt:'9-Ball',colors:p.colors||'#1a3a22',mw:p.mw||0,ml:p.ml||0,
+      rw:p.rw||0,rl:p.rl||0,ppr:p.ppr||1300,pr:0,mi:0,sos:0,rank:PLAYERS.length+1});
+    PLAYERS.sort((a,b)=>b.ppr-a.ppr).forEach((pl,i)=>pl.rank=i+1);
+  }
+  if(app.lbTab) renderLbTab(app.lbTab);
   admRefresh();
-  toast(`✅ <strong>${p.name}</strong> status set to <strong>${status}</strong>.`);
+  const label=status==='inactive'?'set to Inactive — hidden from rankings, profile still accessible':`set to <strong>${status}</strong>`;
+  toast(`✅ <strong>${p.name}</strong> ${label}.`);
 }
 function admSetCareer(id,tier){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
@@ -5413,6 +5473,86 @@ function admRejectHall(id){
   buildAdmin();
   toast(`✗ <strong>${h.name}</strong> application rejected. Owner notified.`);
 }
+function admEditHall(id){
+  const h=adminHalls.find(x=>x.id===id);
+  if(!h)return;
+  const panel=document.getElementById('hall-edit-'+id);
+  if(!panel)return;
+  if(panel.style.display!=='none'){panel.style.display='none';return;}
+  // Pre-fill from registration data for any missing fields
+  const reg=registeredUsers.find(r=>r.email===h.email||r.username===h.username);
+  const contact=h.contact||reg?.phone||'';
+  const city=h.city||reg?.city||reg?.region||'';
+  panel.style.display='block';
+  panel.innerHTML=`
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--gold);margin-bottom:.8rem;">✏️ Edit Hall — ${h.name}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.7rem;">
+      <div>
+        <label style="font-size:.68rem;letter-spacing:1px;color:var(--chalk);text-transform:uppercase;">Hall Name</label>
+        <input id="he-name-${id}" class="inp" value="${h.name||''}" style="width:100%;margin-top:3px;">
+      </div>
+      <div>
+        <label style="font-size:.68rem;letter-spacing:1px;color:var(--chalk);text-transform:uppercase;">City / Location</label>
+        <input id="he-city-${id}" class="inp" value="${city}" style="width:100%;margin-top:3px;">
+      </div>
+      <div>
+        <label style="font-size:.68rem;letter-spacing:1px;color:var(--chalk);text-transform:uppercase;">Contact</label>
+        <input id="he-contact-${id}" class="inp" value="${contact}" style="width:100%;margin-top:3px;">
+      </div>
+      <div>
+        <label style="font-size:.68rem;letter-spacing:1px;color:var(--chalk);text-transform:uppercase;">Facebook Page</label>
+        <input id="he-fb-${id}" class="inp" value="${h.fb&&h.fb!=='—'?h.fb:''}" placeholder="facebook.com/..." style="width:100%;margin-top:3px;">
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:.8rem;">
+      <label style="font-size:.78rem;color:var(--chalk);display:flex;align-items:center;gap:.4rem;cursor:pointer;">
+        <input id="he-open-${id}" type="checkbox" ${h.open===false?'':'checked'}> Hall is currently Open
+      </label>
+    </div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+      <button class="btn btn-s btn-sm" onclick="admSaveHall('${id}')">💾 Save Changes</button>
+      <button class="btn btn-sm" style="background:transparent;border:1px solid var(--chalk2);color:var(--chalk);" onclick="document.getElementById('hall-edit-${id}').style.display='none'">Cancel</button>
+      <button class="btn btn-d btn-sm" style="margin-left:auto;" onclick="admRemoveHall('${id}')">🗑 Remove Hall</button>
+    </div>`;
+}
+function admSaveHall(id){
+  const h=adminHalls.find(x=>x.id===id);
+  if(!h)return;
+  const g=s=>document.getElementById(s);
+  const oldName=h.name;
+  h.name    = g(`he-name-${id}`)?.value.trim()||h.name;
+  h.city    = g(`he-city-${id}`)?.value.trim()||h.city;
+  h.contact = g(`he-contact-${id}`)?.value.trim();
+  h.fb      = g(`he-fb-${id}`)?.value.trim()||'—';
+  h.open    = g(`he-open-${id}`)?.checked!==false;
+  // Sync into HALLS public array (match by old name or id)
+  const pub=HALLS.find(x=>x.n===oldName||x.id===h.id);
+  if(pub){pub.n=h.name;pub.c=h.city;pub.open=h.open;pub.fb=h.fb;}
+  else{HALLS.push({n:h.name,c:h.city,t:0,fmt:'9-Ball, 10-Ball',open:h.open,fb:h.fb,ap:0});}
+  // Sync into approvedHalls and persist
+  const ai=approvedHalls.findIndex(x=>x.id===h.id||x.email===h.email);
+  if(ai>=0) approvedHalls[ai]={...approvedHalls[ai],...h}; else approvedHalls.push({...h});
+  saveApprovedHalls();
+  // Refresh owner portal if active so changes appear immediately
+  const view=document.getElementById('view-portal');
+  if(view&&view.classList.contains('act')) buildPortal();
+  buildAdmin();
+  toast(`💾 <strong>${h.name}</strong> updated successfully.`);
+}
+function admRemoveHall(id){
+  const h=adminHalls.find(x=>x.id===id);
+  if(!h)return;
+  if(!confirm(`Remove "${h.name}"? This will de-list the hall and revoke owner portal access.`))return;
+  const ai=adminHalls.indexOf(h);
+  if(ai>=0) adminHalls.splice(ai,1);
+  const pi=HALLS.findIndex(x=>x.n===h.name);
+  if(pi>=0) HALLS.splice(pi,1);
+  const ri=approvedHalls.findIndex(x=>x.id===h.id||x.email===h.email);
+  if(ri>=0) approvedHalls.splice(ri,1);
+  saveApprovedHalls();
+  buildAdmin();
+  toast(`🗑 <strong>${h.name}</strong> removed.`);
+}
 
 /* ── duplicate stale match-action stubs removed — canonical versions above ── */
 
@@ -5465,7 +5605,7 @@ function initFromBackend(){
           if(!adminPlayers.find(p=>p.id===r.id||p.email===r.email)){
             adminPlayers.push({
               id:r.id, name, username:r.username||'', email:r.email||'',
-              phone:r.phone||'', region:r.region||'',
+              phone:r.phone||'', region:r.region||'', role:r.role||'player',
               status:r.status||'pending',
               careerStatus:r.careerStatus||'Amateur', ppr:r.ppr||0,
               mw:0, ml:0, rw:0, rl:0, mi:0, sos:0, colors:'#1a3a22',
@@ -5480,14 +5620,22 @@ function initFromBackend(){
               if(r.ppr) existing.ppr=r.ppr;
             }
           }
-          // If approved (active), make sure player is in the public PLAYERS ranking array
-          if(r.status==='active'&&!PLAYERS.find(p=>p.id===r.id||p.name===name)){
-            PLAYERS.push({
+          // If approved (active/inactive), make sure player is in the public PLAYERS ranking array
+          if((r.status==='active'||r.status==='inactive')&&!PLAYERS.find(p=>p.id===r.id||p.name===name)){
+            const entry={
               id:r.id, name, region:r.region||'',
               status:r.careerStatus||'Amateur', fmt:'9-Ball', colors:'#1a3a22',
               mw:0, ml:0, rw:0, rl:0, ppr:r.ppr||1300, pr:0, mi:0, sos:0,
               rank:PLAYERS.length+1
-            });
+            };
+            if(r.status==='inactive') entry._hidden=true;
+            PLAYERS.push(entry);
+          } else {
+            const pl=PLAYERS.find(p=>p.id===r.id||p.name===name);
+            if(pl){
+              if(r.status==='inactive') pl._hidden=true;
+              else if(r.status==='active') delete pl._hidden;
+            }
           }
         } else if(r.role==='owner'){
           // Sync into adminHalls
