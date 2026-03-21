@@ -95,7 +95,7 @@ app.patch('/api/registrations/:id', (req, res) => {
 app.post('/api/admin/reset', (req, res) => {
   const { password } = req.body;
   if (password !== 'Admin1234') return res.status(403).json({ ok: false, error: 'Forbidden' });
-  db.ALLOWED_KEYS.forEach(k => db.set(k, '[]'));
+  db.ALLOWED_KEYS.filter(k => k !== 'pp_testPasswords').forEach(k => db.set(k, '[]'));
   console.log('[RESET] All server data cleared by admin.');
   res.json({ ok: true, message: 'All server data cleared.' });
 });

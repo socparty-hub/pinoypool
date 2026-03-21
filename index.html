@@ -1247,8 +1247,8 @@ const TEST_ACCOUNTS=[
 (function initTestPasswords(){
   const key='pp_testPasswords';
   let pws={};
-  try{pws=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
-  // Set ADMIN default only if not already stored (allows password changes to persist)
+  try{const _raw=JSON.parse(localStorage.getItem(key)||'{}');pws=(typeof _raw==='object'&&!Array.isArray(_raw)&&_raw!==null)?_raw:{};}catch{}
+  // Always ensure ADMIN password is set (reset-proof)
   if(!pws['ADMIN']) pws['ADMIN']='12345678';
   const v=JSON.stringify(pws);
   localStorage.setItem(key,v);
