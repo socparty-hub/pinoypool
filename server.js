@@ -91,6 +91,15 @@ app.patch('/api/registrations/:id', (req, res) => {
   res.json({ ok: true });
 });
 
+/* ── API: admin data reset (clears all server-side data) ── */
+app.post('/api/admin/reset', (req, res) => {
+  const { password } = req.body;
+  if (password !== 'Admin1234') return res.status(403).json({ ok: false, error: 'Forbidden' });
+  db.ALLOWED_KEYS.forEach(k => db.set(k, '[]'));
+  console.log('[RESET] All server data cleared by admin.');
+  res.json({ ok: true, message: 'All server data cleared.' });
+});
+
 /* ── API: save a single pp_* key to SQLite ── */
 app.post('/api/store/:key', (req, res) => {
   const { key }   = req.params;
