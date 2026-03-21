@@ -1510,7 +1510,11 @@ function doRegister(){
     // Save to session-registered users for login; persist in localStorage so it survives page refresh
     if(!registeredUsers.find(u=>u.username===un)){
       registeredUsers.push({id:pid,name,username:un,email:em,phone:ph,password:pw,role,dob,region,moniker:moniker||'',hall:hall||null,addr:addr||null,verificationStatus:vStatus});
-      saveRegisteredUsers();
+      // Save to localStorage for current session only — DO NOT call apiPersist here.
+      // POST /api/register already appended this user server-side correctly.
+      // Calling apiPersist would OVERWRITE the server with only this browser's local
+      // array, causing other browsers' registrations to be lost (race condition).
+      try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{}
     }
     setUser({name,role,initials:getInit(name),username:un,hall,dob,email:em,phone:ph,region,moniker:moniker||'',verificationStatus:vStatus});
     // Store personal details in adminPlayers for both players and hall owners
@@ -1547,11 +1551,14 @@ function doRegister(){
 }
 function setUser(u){
   app.user=u;
+  // Persist session so user stays logged in across page refreshes
+  try{localStorage.setItem('pp_session',JSON.stringify(u));}catch{}
   // If user registered as pending but has since been approved, update their status
   const apEntry=approvedPlayers.find(ap=>ap.email===u.email||ap.username===u.username);
   if(apEntry&&app.user.verificationStatus==='pending'){
     app.user.verificationStatus='active';
     app.user.careerStatus=apEntry.careerStatus;
+    try{localStorage.setItem('pp_session',JSON.stringify(app.user));}catch{}
     const ru=registeredUsers.find(r=>r.email===u.email||r.username===u.username);
     if(ru){ru.verificationStatus='active';saveRegisteredUsers();}
   }
@@ -1697,6 +1704,7 @@ function _setNavBadge(btn,count){
 }
 function logout(){
   app.user=null;
+  try{localStorage.removeItem('pp_session');}catch{}
   document.getElementById('btn-login').style.display='inline-flex';
   document.getElementById('auth-bar').style.display='none';
   ['nb-match','nb-portal','nb-player-portal','nb-admin'].forEach(id=>{
@@ -4759,7 +4767,7 @@ function buildAdmin(){
         if(r.role==='player'||r.role==='fan'){
           const existing=adminPlayers.find(p=>p.id===r.id||p.email===r.email);
           if(!existing){
-            adminPlayers.unshift({id:r.id,name:name.trim(),username:r.username||'',status:r.status||'pending',email:r.email,phone:r.phone,region:r.region,submittedAt:r.submittedAt,careerStatus:r.careerStatus||'Amateur',ppr:r.ppr||0,tier:'C',colors:'#1a3a22'});
+            adminPlayers.unshift({id:r.id,name:name.trim(),username:r.username||'',role:r.role||'player',status:r.status||'pending',email:r.email,phone:r.phone,region:r.region,submittedAt:r.submittedAt,careerStatus:r.careerStatus||'Amateur',ppr:r.ppr||0,tier:'C',colors:'#1a3a22'});
             changed=true;
           } else if(existing.status!==r.status){
             // Sync status changes from backend (e.g. approved on another device)
@@ -5347,13 +5355,12 @@ function admApprovePlayer(id){
   // Also sync verificationStatus in registeredUsers so .catch() fallback doesn't re-show as pending
   const ru=registeredUsers.find(r=>r.email===p.email||r.username===p.username);
   if(ru){ru.verificationStatus='active';saveRegisteredUsers();}
-  // Persist approval to backend
+  // Persist approval to backend — rebuild views AFTER patch completes to avoid
+  // race condition where GET /api/registrations still returns 'pending' status
+  const _rebuildAfterApprove=()=>{buildAdmin();buildDashboard();if(app.lbTab)renderLbTab(app.lbTab);};
   fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({status:'active',careerStatus,ppr:initPPR,approvedAt:new Date().toISOString()})
-  }).catch(()=>{});
-  buildAdmin();
-  buildDashboard();
-  if(app.lbTab) renderLbTab(app.lbTab);
+  }).then(()=>_rebuildAfterApprove()).catch(()=>_rebuildAfterApprove());
   // Store approval notification for the player — shown on their next login
   if(p.email){
     const notif={careerStatus,ppr:initPPR,rank:newRank,approvedAt:new Date().toISOString(),name:p.name};
@@ -5465,7 +5472,7 @@ function initFromBackend(){
           if(!adminPlayers.find(p=>p.id===r.id||p.email===r.email)){
             adminPlayers.push({
               id:r.id, name, username:r.username||'', email:r.email||'',
-              phone:r.phone||'', region:r.region||'',
+              phone:r.phone||'', region:r.region||'', role:r.role||'player',
               status:r.status||'pending',
               careerStatus:r.careerStatus||'Amateur', ppr:r.ppr||0,
               mw:0, ml:0, rw:0, rl:0, mi:0, sos:0, colors:'#1a3a22',
@@ -5572,6 +5579,19 @@ buildBallGrid(1);
 buildBallGrid(2);
 updateDots();
 updateBadge();
+// Restore session from previous page visit so user stays logged in on refresh
+(function restoreSession(){
+  try{
+    const s=JSON.parse(localStorage.getItem('pp_session'));
+    if(s&&s.name&&s.role){
+      setUser(s); // restores header UI + nav buttons silently (no toast)
+      // If admin was on admin panel, navigate back there automatically
+      if(s.role==='admin'){
+        setTimeout(()=>sv('admin',document.getElementById('nb-admin')),100);
+      }
+    }
+  }catch{}
+})();
 initFromBackend();
 restoreApprovals();
 restoreApprovedHalls();
