@@ -4807,6 +4807,9 @@ function buildAdmin(){
     <div style="text-align:center;">
       <div id="adm-stat-pending" style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#e55;">${pendP+pendH+pendM+pendT}</div>
       <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Pending</div>
+    </div>
+    <div style="text-align:center;margin-left:auto;">
+      <button onclick="admResetAllData()" style="background:rgba(184,50,40,.18);border:1px solid rgba(184,50,40,.45);color:#e55;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:6px;cursor:pointer;">⚠ Reset All Data</button>
     </div>`;
   const _activeTab=app.admTab||'players';
   const _activeBtn=Array.from(document.querySelectorAll('.adm-tab')).find(b=>b.getAttribute('onclick')?.includes(`'${_activeTab}'`))||document.querySelector('.adm-tab');
@@ -5118,6 +5121,20 @@ function admTab(btn,tab){
           </div>`).join('')}
     </div>`;
   }
+}
+
+function admResetAllData(){
+  if(!confirm('⚠️ This will permanently delete ALL registrations, players, halls, and match data. Continue?')) return;
+  fetch('/api/admin/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:'Admin1234'})})
+    .then(r=>r.json())
+    .then(d=>{
+      if(!d.ok){toast('⚠️ Reset failed: '+(d.error||'unknown error'));return;}
+      // Clear all localStorage keys so browser-side data is also wiped
+      ['pp_registeredUsers','pp_approvedPlayers','pp_approvedHalls','pp_adminMatches','pp_tournaments','pp_testPasswords','pp_pendingHalls'].forEach(k=>localStorage.removeItem(k));
+      toast('✅ All data cleared. Reloading…');
+      setTimeout(()=>location.reload(),1200);
+    })
+    .catch(()=>toast('⚠️ Could not reach server.'));
 }
 
 function admRefresh(){
