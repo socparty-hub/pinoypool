@@ -14,6 +14,38 @@ app.use(express.json({ limit: '10mb' }));
 // so our app.get('*') route can inject server data into it first
 app.use(express.static(path.join(__dirname), { index: false }));
 
+/* ── API: register a new player / hall owner / scout ── */
+app.post('/api/register', (req, res) => {
+  const { firstName, lastName, username, email, phone, dob, role, hallName, city, region } = req.body;
+  if (!firstName || !lastName || !role) {
+    return res.status(400).json({ ok: false, message: 'Missing required fields.' });
+  }
+  const store = db.getAll();
+  let users = [];
+  try { users = JSON.parse(store['pp_registeredUsers'] || '[]'); } catch(e) {}
+  const entry = {
+    id:                 'r' + Date.now(),
+    name:               (firstName + ' ' + lastName).trim(),
+    username:           username   || '',
+    email:              email      || '',
+    phone:              phone      || '',
+    dob:                dob        || '',
+    role,
+    hall:               hallName   || '',
+    hallName:           hallName   || '',
+    city:               city       || '',
+    region:             region     || '',
+    verificationStatus: 'pending',
+    careerStatus:       'Amateur',
+    ppr:                0,
+    submittedAt:        new Date().toISOString()
+  };
+  users.push(entry);
+  db.set('pp_registeredUsers', JSON.stringify(users));
+  console.log(`[REG] New ${role} registration: ${entry.name} (${email || 'no email'})`);
+  res.json({ ok: true, id: entry.id, message: 'Registration received! Admin will review and activate your account within 24–48 hours.' });
+});
+
 /* ── API: list registered users (buildAdmin fetches this to populate adminPlayers) ── */
 app.get('/api/registrations', (req, res) => {
   const store = db.getAll();
