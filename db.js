@@ -1,7 +1,10 @@
 /* ── PinoyPool MySQL persistence layer ── */
+console.error('[DB] db.js loading...');
 try { require('dotenv').config(); } catch(e) {}
 
+console.error('[DB] requiring mysql2...');
 const mysql = require('mysql2/promise');
+console.error('[DB] mysql2 loaded OK');
 
 const ALLOWED_KEYS = [
   'pp_adminMatches',
