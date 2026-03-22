@@ -1,5 +1,13 @@
-console.error('[STARTUP] server.js loading...');
-try { require('dotenv').config(); } catch(e) { console.error('[STARTUP] dotenv error:', e.message); }
+// Catch any crash before Node dies silently
+process.on('uncaughtException', (err) => {
+  const fs2 = require('fs');
+  const msg = `[CRASH] ${new Date().toISOString()} ${err.message}\n${err.stack}\n`;
+  process.stderr.write(msg);
+  try { fs2.appendFileSync('./startup.log', msg); } catch(e) {}
+});
+
+process.stderr.write('[STARTUP] server.js loading...\n');
+try { require('dotenv').config(); } catch(e) { process.stderr.write('[STARTUP] dotenv error: ' + e.message + '\n'); }
 
 const express = require('express');
 const path    = require('path');
