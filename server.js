@@ -132,7 +132,9 @@ app.get('*', async (req, res) => {
   res.send(html);
 });
 
-/* ── Start: connect to MySQL first, then listen ── */
+/* ── Start: log env, connect to MySQL, then listen ── */
+console.log(`[STARTUP] PORT=${process.env.PORT} DB_HOST=${process.env.DB_HOST} DB_USER=${process.env.DB_USER} DB_NAME=${process.env.DB_NAME}`);
+
 db.init()
   .then(() => {
     app.listen(PORT, () => {
@@ -141,5 +143,9 @@ db.init()
   })
   .catch(err => {
     console.error('[DB] Failed to connect to MySQL:', err.message);
-    process.exit(1);
+    console.error('[DB] Check DB_HOST, DB_USER, DB_PASS, DB_NAME environment variables.');
+    // Start server anyway so the 503 clears and we can read logs
+    app.listen(PORT, () => {
+      console.log(`PinoyPool running on port ${PORT} (DB UNAVAILABLE)`);
+    });
   });
