@@ -1,9 +1,17 @@
-try { require('dotenv').config(); } catch(e) {}
+console.error('[STARTUP] server.js loading...');
+try { require('dotenv').config(); } catch(e) { console.error('[STARTUP] dotenv error:', e.message); }
 
 const express = require('express');
 const path    = require('path');
 const fs      = require('fs');
-const db      = require('./db');
+let db;
+try {
+  db = require('./db');
+  console.error('[STARTUP] db.js loaded OK');
+} catch(e) {
+  console.error('[STARTUP] FATAL: failed to load db.js:', e.message);
+  process.exit(1);
+}
 
 const app           = express();
 const PORT          = process.env.PORT || 3000;
@@ -133,7 +141,7 @@ app.get('*', async (req, res) => {
 });
 
 /* ── Start: log env, connect to MySQL, then listen ── */
-console.log(`[STARTUP] PORT=${process.env.PORT} DB_HOST=${process.env.DB_HOST} DB_USER=${process.env.DB_USER} DB_NAME=${process.env.DB_NAME}`);
+console.error(`[STARTUP] PORT=${process.env.PORT} DB_HOST=${process.env.DB_HOST} DB_USER=${process.env.DB_USER} DB_NAME=${process.env.DB_NAME}`);
 
 db.init()
   .then(() => {
