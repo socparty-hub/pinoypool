@@ -1,10 +1,8 @@
-/* ── PinoyPool JSON file persistence layer (pure Node.js — no native deps) ── */
-const fs   = require('fs');
-const path = require('path');
+/* ── PinoyPool MySQL persistence layer ── */
+try { require('dotenv').config(); } catch(e) {}
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'pinoypool-data.json');
+const mysql = require('mysql2/promise');
 
-// Only these keys are persisted server-side (no ephemeral/session keys)
 const ALLOWED_KEYS = [
   'pp_adminMatches',
   'pp_registeredUsers',
@@ -14,32 +12,49 @@ const ALLOWED_KEYS = [
   'pp_testPasswords',
 ];
 
-function readStore() {
-  try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf8')); }
-  catch (e) { return {}; }
+const pool = mysql.createPool({
+  host:     process.env.DB_HOST     || 'localhost',
+  port:     parseInt(process.env.DB_PORT || '3306'),
+  user:     process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit:    10,
+});
+
+/** Ensure the pp_store table exists (called once on startup) */
+async function init() {
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS pp_store (
+      \`key\`   VARCHAR(100) PRIMARY KEY,
+      \`value\` LONGTEXT     NOT NULL
+    )
+  `);
+  console.log('[DB] MySQL connected and pp_store table ready.');
 }
 
-function writeStore(data) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(data), 'utf8');
+/** Return all whitelisted keys as { key: jsonString } */
+async function getAll() {
+  const placeholders = ALLOWED_KEYS.map(() => '?').join(', ');
+  const [rows] = await pool.execute(
+    `SELECT \`key\`, \`value\` FROM pp_store WHERE \`key\` IN (${placeholders})`,
+    ALLOWED_KEYS
+  );
+  const result = {};
+  rows.forEach(r => { result[r.key] = r.value; });
+  return result;
 }
 
-module.exports = {
-  ALLOWED_KEYS,
+/** Persist one key (value must be a JSON string). Returns false if key not allowed. */
+async function set(key, value) {
+  if (!ALLOWED_KEYS.includes(key)) return false;
+  const v = typeof value === 'string' ? value : JSON.stringify(value);
+  await pool.execute(
+    `INSERT INTO pp_store (\`key\`, \`value\`) VALUES (?, ?)
+     ON DUPLICATE KEY UPDATE \`value\` = VALUES(\`value\`)`,
+    [key, v]
+  );
+  return true;
+}
 
-  /** Return all persisted keys as { key: jsonString } */
-  getAll() {
-    const store = readStore();
-    const result = {};
-    ALLOWED_KEYS.forEach(k => { if (store[k] !== undefined) result[k] = store[k]; });
-    return result;
-  },
-
-  /** Persist one key (value must be a JSON string) */
-  set(key, value) {
-    if (!ALLOWED_KEYS.includes(key)) return false;
-    const store = readStore();
-    store[key] = typeof value === 'string' ? value : JSON.stringify(value);
-    writeStore(store);
-    return true;
-  },
-};
+module.exports = { ALLOWED_KEYS, init, getAll, set };
