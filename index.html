@@ -1163,6 +1163,7 @@ function buildDashboard(){
 function sv(id, btn){
   if(id==='match' && app.user?.role==='fan'){toast('⚠️ Record Match is not available for Scout/Fan accounts.');return;}
   if(id==='player-portal' && !app.user){toast('⚠️ Please log in to access your Player Portal.');openAuth();return;}
+  try{localStorage.setItem('pp_last_section',id);}catch{}
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('act'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('act'));
   const v=document.getElementById('view-'+id);
@@ -5580,7 +5581,7 @@ restoreTournaments();
 _refreshVenueSelect();
 rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
 
-// ── Restore session from previous page load ──
+// ── Restore session and last-visited section from previous page load ──
 (function restoreSession(){
   try{
     const s=localStorage.getItem('pp_session');
@@ -5588,6 +5589,10 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
     const u=JSON.parse(s);
     if(!u||!u.role) return;
     setUser(u);
+    const sec=localStorage.getItem('pp_last_section')||'dashboard';
+    const nbMap={'player-portal':'nb-player-portal','portal':'nb-portal','admin':'nb-admin','match':'nb-match'};
+    const btnEl=nbMap[sec]?document.getElementById(nbMap[sec]):null;
+    sv(sec,btnEl);
   }catch{}
 })();
 
