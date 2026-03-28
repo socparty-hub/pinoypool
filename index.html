@@ -1546,6 +1546,7 @@ function doRegister(){
 }
 function setUser(u){
   app.user=u;
+  try{localStorage.setItem('pp_session',JSON.stringify(u));}catch{}
   // If user registered as pending but has since been approved, update their status
   const apEntry=approvedPlayers.find(ap=>ap.email===u.email||ap.username===u.username);
   if(apEntry&&app.user.verificationStatus==='pending'){
@@ -1695,6 +1696,7 @@ function _setNavBadge(btn,count){
   }
 }
 function logout(){
+  try{localStorage.removeItem('pp_session');}catch{}
   app.user=null;
   document.getElementById('btn-login').style.display='inline-flex';
   document.getElementById('auth-bar').style.display='none';
@@ -5577,6 +5579,17 @@ restoreApprovedHalls();
 restoreTournaments();
 _refreshVenueSelect();
 rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
+
+// ── Restore session from previous page load ──
+(function restoreSession(){
+  try{
+    const s=localStorage.getItem('pp_session');
+    if(!s) return;
+    const u=JSON.parse(s);
+    if(!u||!u.role) return;
+    setUser(u);
+  }catch{}
+})();
 
 // ── Backfill missing fmt/type fields on existing adminMatches ──
 (function backfillMatchFields(){
