@@ -579,12 +579,12 @@ textarea{resize:vertical;min-height:75px;}
 ══════════════════════════════════════════ -->
 <div id="view-match" class="view">
   <div class="ph">⚡ Record a Match</div>
-  <div class="ps">3-Layer Verification · Registered players only · Rankings update on full approval</div>
+  <div class="ps">4-Layer Verification · Winner must reach Race To · Venue locked at setup · Rankings update on Admin approval</div>
 
   <div class="steps" id="msteps">
     <div class="si act" id="s1"><div class="snum">1</div><div class="slbl">Setup</div></div>
-    <div class="si" id="s2"><div class="snum">2</div><div class="slbl">Challenge</div></div>
-    <div class="si" id="s3"><div class="snum">3</div><div class="slbl">Confirm Score</div></div>
+    <div class="si" id="s2"><div class="snum">2</div><div class="slbl">Score</div></div>
+    <div class="si" id="s3"><div class="snum">3</div><div class="slbl">Submitted ✓</div></div>
     <div class="si" id="s4"><div class="snum">4</div><div class="slbl">Verified ✓</div></div>
   </div>
 
@@ -673,7 +673,7 @@ textarea{resize:vertical;min-height:75px;}
             </div>
             <div id="p2-hcp-box" class="hcp-box" style="display:none;"></div>
           </div>
-          <button class="btn btn-p btn-f" id="send-challenge-btn" onclick="sendChallenge()" style="margin-top:.6rem;">📨 Send Match Challenge</button>
+          <button class="btn btn-p btn-f" id="send-challenge-btn" onclick="sendChallenge()" style="margin-top:.6rem;">▶ Enter Score &amp; Submit</button>
         </div>
       </div>
     </div>
@@ -737,8 +737,8 @@ textarea{resize:vertical;min-height:75px;}
           <div style="display:flex;align-items:center;gap:.8rem;">
             <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,168,75,.12);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;" id="chain-1-icon">1</div>
             <div style="flex:1;">
-              <div style="font-size:.8rem;font-weight:600;">Your Confirmation <span style="font-size:.65rem;font-weight:400;color:var(--chalk);">(Player 1)</span></div>
-              <div style="font-size:.68rem;color:var(--chalk2);" id="chain-1-sub">Submitting this form confirms your score</div>
+              <div style="font-size:.8rem;font-weight:600;">Your Score <span style="font-size:.65rem;font-weight:400;color:var(--chalk);">(Initiating Player)</span></div>
+              <div style="font-size:.68rem;color:var(--chalk2);" id="chain-1-sub">Submit the final result of the match</div>
             </div>
             <div style="font-size:.72rem;" id="chain-1-status"><span style="color:var(--chalk2);">You</span></div>
           </div>
@@ -746,8 +746,8 @@ textarea{resize:vertical;min-height:75px;}
           <div style="display:flex;align-items:center;gap:.8rem;">
             <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,168,75,.12);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;" id="chain-2-icon">2</div>
             <div style="flex:1;">
-              <div style="font-size:.8rem;font-weight:600;">Opponent Confirmation <span style="font-size:.65rem;font-weight:400;color:var(--chalk);">(Player 2)</span></div>
-              <div style="font-size:.68rem;color:var(--chalk2);" id="chain-2-sub">They receive a notification to confirm</div>
+              <div style="font-size:.8rem;font-weight:600;">Opponent Confirms <span style="font-size:.65rem;font-weight:400;color:var(--chalk);">(Player 2)</span></div>
+              <div style="font-size:.68rem;color:var(--chalk2);" id="chain-2-sub">They approve, edit, or reject the result</div>
             </div>
             <div style="font-size:.72rem;" id="chain-2-status"><span style="color:var(--chalk2);">Pending</span></div>
           </div>
@@ -755,10 +755,19 @@ textarea{resize:vertical;min-height:75px;}
           <div style="display:flex;align-items:center;gap:.8rem;">
             <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,168,75,.12);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;" id="chain-3-icon">3</div>
             <div style="flex:1;">
-              <div style="font-size:.8rem;font-weight:600;">Hall Validation <span style="font-size:.65rem;font-weight:400;color:var(--chalk);">(Venue)</span></div>
-              <div style="font-size:.68rem;color:var(--chalk2);" id="chain-3-sub">Hall owner verifies the match took place</div>
+              <div style="font-size:.8rem;font-weight:600;">Venue Validates <span style="font-size:.65rem;font-weight:400;color:var(--chalk);">(Hall Owner)</span></div>
+              <div style="font-size:.68rem;color:var(--chalk2);" id="chain-3-sub">Hall owner verifies it took place at their hall</div>
             </div>
             <div style="font-size:.72rem;" id="chain-3-status"><span style="color:var(--chalk2);">Pending</span></div>
+          </div>
+          <div style="width:1px;height:14px;background:var(--border);margin-left:14px;"></div>
+          <div style="display:flex;align-items:center;gap:.8rem;">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,168,75,.12);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;" id="chain-4-icon">4</div>
+            <div style="flex:1;">
+              <div style="font-size:.8rem;font-weight:600;">Admin Final <span style="font-size:.65rem;font-weight:400;color:var(--chalk);">(Approval)</span></div>
+              <div style="font-size:.68rem;color:var(--chalk2);" id="chain-4-sub">Admin approves and rankings are updated</div>
+            </div>
+            <div style="font-size:.72rem;" id="chain-4-status"><span style="color:var(--chalk2);">Pending</span></div>
           </div>
         </div>
       </div>
@@ -1670,19 +1679,26 @@ function setUser(u){
   setTimeout(updateNavBadges, 50);
 }
 function updateNavBadges(){
-  // Player portal: count unconfirmed pending matches for current player
+  const myName=app.user?.name||'';
+  // Player portal: matches needing opponent response + owner-recorded needing acceptance + edit proposals
   const nbPP=document.getElementById('nb-player-portal');
   if(nbPP){
-    // Count pending match challenges for the current player
-    const fresh=(()=>{try{return JSON.parse(localStorage.getItem('pp_pending_challenges')||'[]');}catch{return [];}})();
-    const chalCnt=fresh.filter(c=>c.status==='pending'&&(c.toName===app.user?.name||String(c.toId)===String(app.user?.id))).length;
+    const oppCnt=adminMatches.filter(m=>
+      (m.status==='pending-opponent'||m.status==='player-pending')&&m.p2===myName&&!m.p2ok&&!m.editPending
+    ).length;
+    const editCnt=adminMatches.filter(m=>m.p1===myName&&m.editPending).length;
     const ppCnt=playerPendingMatches.filter(m=>m.me==='p1'?!m.p1accept:!m.p2accept).length;
-    _setNavBadge(nbPP,chalCnt+ppCnt);
+    _setNavBadge(nbPP,oppCnt+editCnt+ppCnt);
   }
-  // Hall portal: manualPending + pendVal (matches needing owner action)
+  // Hall portal: manualPending + player-submitted matches at venue needing owner action
   const nbPortal=document.getElementById('nb-portal');
   if(nbPortal){
-    const cnt=manualPending.length+(typeof pendVal!=='undefined'?pendVal.length:0);
+    const _hallEntry=typeof adminHalls!=='undefined'?adminHalls.find(h=>h.email===app.user?.email||h.username===app.user?.username||h.owner===app.user?.name):null;
+    const _ownerHall=_hallEntry?.name||app.user?.hall||'';
+    const venueCnt=_ownerHall?adminMatches.filter(m=>
+      (m.status==='pending-opponent'||m.status==='player-pending')&&m.venue&&m.venue.includes(_ownerHall)
+    ).length:0;
+    const cnt=manualPending.length+venueCnt;
     _setNavBadge(nbPortal,cnt);
   }
 }
@@ -2029,7 +2045,6 @@ function updateBadge(){
 function sendChallenge(){
   if(!app.p1||!app.p1id){
     if(app.user?.role==='player'){
-      // Check if the player's own account is still pending admin approval
       const entry=typeof adminPlayers!=='undefined'&&adminPlayers.find(p=>p.email===app.user.email||p.name===app.user.name);
       if(entry&&entry.status==='pending'){toast('⏳ Your account is pending admin approval. You can record matches once your account is activated.');return;}
     }
@@ -2039,51 +2054,13 @@ function sendChallenge(){
   if(app.p1id===app.p2id){toast('⚠️ Players must be different.');return;}
   if(app.matchType==='Tournament'&&!app.tournament){toast('⚠️ Select a tournament before recording a Tournament match.');return;}
   const venue=document.getElementById('sel-venue').value;
-  if(!venue){toast('⚠️ Select a venue.');return;}
-  // Owner: skip challenge simulation, go directly to confirm score
-  if(app.user?.role==='owner'){
-    sDone(1);sAct(3);
-    proceedToConfirm();
-    return;
-  }
-  sDone(1);sAct(2);
-  const _chalId='chal-'+Date.now();
-  const _chal={
-    id:_chalId,
-    fromId:app.p1id, fromName:app.p1,
-    toId:app.p2id, toName:app.p2,
-    venue:document.getElementById('sel-venue').value||'',
-    fmt:app.fmt||'9-Ball',
-    raceTo:app.raceTo||9,
-    type:app.matchType||'Tournament',
-    hcpRack:[hcpState.rack[0]||0,hcpState.rack[1]||0],
-    hcpBalls:[[...hcpState.balls[0]].sort((a,b)=>a-b),[...hcpState.balls[1]].sort((a,b)=>a-b)],
-    status:'pending',
-    sentAt:new Date().toISOString()
-  };
-  pendingChallenges.push(_chal);
-  savePendingChallenges();
-  app.pendingChalId=_chalId;
-  // Replace Send button with waiting state + Cancel button
-  const _scBtn=document.getElementById('send-challenge-btn');
-  if(_scBtn){
-    _scBtn.innerHTML=`⏳ Waiting for ${app.p2.split(' ')[0]} to accept…`;
-    _scBtn.disabled=true;_scBtn.style.opacity='.6';
-  }
-  const _scWrap=_scBtn?.parentElement;
-  if(_scWrap&&!_scWrap.querySelector('#cancel-chal-btn')){
-    const _cb=document.createElement('button');
-    _cb.id='cancel-chal-btn';_cb.className='btn btn-d';_cb.style.marginTop='.4rem';_cb.style.width='100%';
-    _cb.innerHTML='✗ Cancel Challenge';
-    _cb.onclick=()=>cancelChallenge(_chalId);
-    _scWrap.appendChild(_cb);
-  }
-  toast(`📨 Challenge sent to <strong>${app.p2.split(' ')[0]}</strong>. Ask them to log in and accept.`);
+  if(!venue){toast('⚠️ A venue is required — it will be locked for this match.');return;}
+  proceedToConfirm();
 }
 
 
 function proceedToConfirm(){
-  sDone(2);sAct(3);
+  sDone(1);sAct(2);
   document.getElementById('match-setup-panel').style.display='none';
   document.getElementById('match-confirm-panel').style.display='block';
   // Init confirm score panel — pre-credit any handicap into starting scores
@@ -2107,7 +2084,7 @@ function proceedToConfirm(){
   document.getElementById('cs-submit-btn').innerHTML=isOwner?'📨 Record &amp; Notify Players':'✓ Confirm My Score &amp; Submit';
   document.getElementById('cs-cancel-btn').textContent=isOwner?'← Back to Setup':'⚠ Dispute / Cancel';
   document.getElementById('cs-cancel-btn').onclick=isOwner?resetMatch:disputeScore;
-  if(!isOwner) [1,2,3].forEach(n=>setChain(n,'wait',n===1?'You':'Pending'));
+  if(!isOwner) [1,2,3,4].forEach(n=>setChain(n,'wait',n===1?'You':'Pending'));
 
   // Build rich handicap breakdown
   const r1=hcpState.rack[0],r2=hcpState.rack[1];
@@ -2178,6 +2155,7 @@ function submitFinalScore(){
   if(s1===hcp1&&s2===hcp2){toast('⚠️ Enter the final score before confirming.');return;}
   if(s1===s2){toast(`⚠️ Tied scores not allowed. Race to ${app.raceTo} — one player must win.`);return;}
   if(Math.max(s1,s2)>app.raceTo){toast(`⚠️ Max score is ${app.raceTo} (Race to ${app.raceTo}).`);return;}
+  if(Math.max(s1,s2)<app.raceTo){toast(`⚠️ Winner must reach ${app.raceTo} racks (Race to ${app.raceTo}). Adjust the score.`);return;}
   app.scores=[s1,s2];
   // Owner flow: push to portal pending and return to setup
   if(app.user?.role==='owner'){
@@ -2220,7 +2198,7 @@ function submitFinalScore(){
       hcpBall:[hcpState.balls[0].size||0,hcpState.balls[1].size||0],
       venue:_mpVenueEntry?.name||app.user?.hall||'—',
       date:new Date().toISOString().slice(0,10),
-      status:'owner-pending',
+      status:'owner-recorded',
       p1ok:false, p2ok:false, venueOk:true,
       submittedAt:new Date().toISOString(),
       ownerName:app.user?.name||'Hall Owner'
@@ -2252,37 +2230,44 @@ function submitFinalScore(){
     resetMatch();
     return;
   }
-  // Player-challenge flow: route to admin/venue verification (no direct approval)
-  const _chalVenue=(document.getElementById('sel-venue')?.value)||app.venue||'—';
-  const _chalHcpParts=[];
-  if(hcpState.rack[0]>0) _chalHcpParts.push(`${app.p1.split(' ')[0]} +${hcpState.rack[0]} racks`);
-  if(hcpState.rack[1]>0) _chalHcpParts.push(`${app.p2.split(' ')[0]} +${hcpState.rack[1]} racks`);
+  // Player flow: submit result — awaiting opponent + venue confirmation
+  const _venue=(document.getElementById('sel-venue')?.value)||'—';
+  const _hcpParts=[];
+  if(hcpState.rack[0]>0) _hcpParts.push(`${app.p1.split(' ')[0]} +${hcpState.rack[0]} racks`);
+  if(hcpState.rack[1]>0) _hcpParts.push(`${app.p2.split(' ')[0]} +${hcpState.rack[1]} racks`);
+  const _hcpB1=[...hcpState.balls[0]].sort((a,b)=>a-b);
+  const _hcpB2=[...hcpState.balls[1]].sort((a,b)=>a-b);
+  if(_hcpB1.length) _hcpParts.push(`${app.p1.split(' ')[0]} last ball ${_hcpB1.join(', ')}`);
+  if(_hcpB2.length) _hcpParts.push(`${app.p2.split(' ')[0]} last ball ${_hcpB2.join(', ')}`);
+  const _hcpLabel=(hcpState.rack[0]||hcpState.rack[1])?`+${hcpState.rack[0]} / +${hcpState.rack[1]} racks`:'None';
   adminMatches.unshift({
-    id:'m-'+Date.now(), p1:app.p1||'Player 1', p2:app.p2||'Player 2',
-    fmt:app.fmt||'9-Ball', type:app.matchType||'Exhibition',
-    score:`${s1}–${s2}`,
-    venue:_chalVenue, date:new Date().toISOString().slice(0,10),
-    hcp:_chalHcpParts.join(' · ')||'None',
-    status:'player-pending',
-    p1ok:true, p2ok:true, venueOk:false,
+    id:'m-'+Date.now(),
+    p1:app.p1||'Player 1', p2:app.p2||'Player 2',
+    score:`${s1}-${s2}`,
+    fmt:app.fmt||'9-Ball',
+    type:app.matchType||'Exhibition',
+    raceTo:app.raceTo||9,
+    hcp:_hcpLabel,
+    hcpRack:[hcpState.rack[0]||0,hcpState.rack[1]||0],
+    hcpBall:[hcpState.balls[0].size||0,hcpState.balls[1].size||0],
+    venue:_venue,
+    date:new Date().toISOString().slice(0,10),
+    status:'pending-opponent',
+    p1ok:true, p2ok:false, venueOk:false,
     submittedAt:new Date().toISOString(),
-    source:'player-challenge'
+    initiatedBy:'player'
   });
   saveAdminMatches();
-  // Update chain UI — steps 1-3 done, step 4 awaiting admin verification
+  sDone(2);sAct(3);
   document.getElementById('cs-actions').style.display='none';
   document.getElementById('cs-waiting').style.display='block';
-  setChain(1,'done','Set Up');
-  setChain(2,'done','Accepted');
-  setChain(3,'done','Score Confirmed');
-  // Step 4 shows awaiting admin
-  const _c4i=document.getElementById('chain-4-icon');
-  const _c4s=document.getElementById('chain-4-status');
-  if(_c4i){_c4i.style.background='rgba(245,166,35,.15)';_c4i.style.borderColor='rgba(245,166,35,.4)';_c4i.style.color='#f5a623';_c4i.textContent='⏳';}
-  if(_c4s) _c4s.innerHTML='<span style="color:#f5a623;">Awaiting Admin</span>';
+  setChain(1,'done','Submitted');
+  setChain(2,'pending','Awaiting');
+  setChain(3,'pending','Awaiting');
+  setChain(4,'pending','Awaiting');
   buildDashboard();
   updateNavBadges();
-  toast('⏳ Score confirmed! Match is awaiting hall owner / Admin verification before rankings update.');
+  toast('📨 Match submitted! Awaiting <strong>opponent</strong> and <strong>venue</strong> confirmation before rankings update.');
 }
 
 function setChain(n,state,label){
@@ -2303,6 +2288,122 @@ function setChain(n,state,label){
 function disputeScore(){
   resetMatch();
   toast('⚠️ Score disputed. Match reset. Admin notified.');
+}
+
+/* ══════════════ OPPONENT ACTIONS (player-submitted matches) ══════════════ */
+function opponentApproveMatch(id){
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m||m.status==='approved'||m.status==='rejected') return;
+  m.p2ok=true;
+  m.opponentApprovedAt=new Date().toISOString();
+  saveAdminMatches();
+  ppTab(document.querySelector('.pp-tab.act'),'validation');
+  updateNavBadges();
+  toast('✅ Score confirmed! Awaiting venue validation before rankings update.');
+}
+
+function opponentRejectMatch(id){
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m) return;
+  m.status='rejected';
+  m.rejectedBy='Opponent';
+  m.rejectedAt=new Date().toISOString();
+  saveAdminMatches();
+  ppTab(document.querySelector('.pp-tab.act'),'validation');
+  updateNavBadges();
+  toast('❌ Match declined. The initiating player has been notified.');
+}
+
+function opponentEditScore(id){
+  // Show inline score editor for this match
+  const wrap=document.getElementById('opp-edit-'+id);
+  if(!wrap) return;
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m) return;
+  const parts=(m.score||'0-0').split('-').map(Number);
+  wrap.innerHTML=`
+    <div style="background:rgba(200,168,75,.07);border:1px solid rgba(200,168,75,.25);border-radius:8px;padding:.85rem;margin-top:.6rem;">
+      <div style="font-size:.72rem;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:.6rem;">✏️ Propose New Score</div>
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;">
+        <div style="flex:1;text-align:center;">
+          <div style="font-size:.65rem;color:var(--chalk);margin-bottom:3px;">${m.p1.split(' ')[0]}</div>
+          <input type="number" id="edit-s1-${id}" min="0" max="${m.raceTo||9}" value="${parts[0]}" style="width:100%;text-align:center;font-family:'DM Mono',monospace;font-size:1.1rem;">
+        </div>
+        <div style="color:var(--chalk2);font-size:.85rem;">—</div>
+        <div style="flex:1;text-align:center;">
+          <div style="font-size:.65rem;color:var(--chalk);margin-bottom:3px;">${m.p2.split(' ')[0]}</div>
+          <input type="number" id="edit-s2-${id}" min="0" max="${m.raceTo||9}" value="${parts[1]}" style="width:100%;text-align:center;font-family:'DM Mono',monospace;font-size:1.1rem;">
+        </div>
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <button class="btn btn-d btn-sm" style="flex:1;" onclick="opponentEditCancel('${id}')">✗ Cancel</button>
+        <button class="btn btn-s btn-sm" style="flex:1;" onclick="opponentProposeScore('${id}')">📨 Propose Score</button>
+      </div>
+    </div>`;
+}
+
+function opponentEditCancel(id){
+  const wrap=document.getElementById('opp-edit-'+id);
+  if(wrap) wrap.innerHTML='';
+}
+
+function opponentProposeScore(id){
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m) return;
+  const s1=parseInt(document.getElementById('edit-s1-'+id)?.value||'0');
+  const s2=parseInt(document.getElementById('edit-s2-'+id)?.value||'0');
+  const rt=m.raceTo||9;
+  if(isNaN(s1)||isNaN(s2)){toast('⚠️ Enter valid scores.');return;}
+  if(s1===s2){toast('⚠️ Scores cannot be tied.');return;}
+  if(Math.max(s1,s2)>rt){toast(`⚠️ Max score is ${rt}.`);return;}
+  if(Math.max(s1,s2)<rt){toast(`⚠️ Winner must reach ${rt} racks (Race to ${rt}).`);return;}
+  m.proposedScore=`${s1}-${s2}`;
+  m.editPending=true;
+  m.editProposedBy=app.user?.name||'Opponent';
+  m.editProposedAt=new Date().toISOString();
+  saveAdminMatches();
+  ppTab(document.querySelector('.pp-tab.act'),'validation');
+  updateNavBadges();
+  toast(`📨 Proposed score ${s1}-${s2} sent to ${m.p1.split(' ')[0]} for review.`);
+}
+
+function initiatorAcceptEdit(id){
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m||!m.editPending) return;
+  m.score=m.proposedScore;
+  m.editPending=false;
+  m.proposedScore=null;
+  m.p1ok=true;
+  saveAdminMatches();
+  ppTab(document.querySelector('.pp-tab.act'),'validation');
+  updateNavBadges();
+  toast('✅ New score accepted. Awaiting venue confirmation.');
+}
+
+function initiatorRejectEdit(id){
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m) return;
+  m.editPending=false;
+  m.proposedScore=null;
+  m.p2ok=false;
+  saveAdminMatches();
+  ppTab(document.querySelector('.pp-tab.act'),'validation');
+  updateNavBadges();
+  toast('↩️ Score edit rejected. Original score stands — opponent must re-confirm.');
+}
+
+/* ══════════════ OWNER: APPROVE PLAYER-SUBMITTED MATCH ══════════════ */
+function ownerApproveVenueMatch(id){
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m||m.status==='approved'||m.status==='rejected') return;
+  m.venueOk=true;
+  m.status='pending-admin';
+  m.venueApprovedAt=new Date().toISOString();
+  m.approvedByVenue=app.user?.name||'Hall Owner';
+  saveAdminMatches();
+  ptab('matches');
+  updateNavBadges();
+  toast('✅ Match approved by venue! Forwarded to Admin for final approval.');
 }
 
 function finalizeMatch(){
@@ -3485,97 +3586,172 @@ function ppTab(btn,tab){
   const p=PLAYERS.find(x=>x.name===app.user?.name)||PLAYERS[0]||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||'Amateur',status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
 
   if(tab==='validation'){
-    // Filter out entries whose match is already approved in adminMatches
     const _myName=app.user?.name||'';
+    // ── Section A: Matches I submitted (I am p1) awaiting opponent/venue ──
+    const _mySubmitted=adminMatches.filter(m=>
+      (m.status==='pending-opponent')&&m.p1===_myName&&!m.editPending
+    );
+    // ── Section B: Matches where I am opponent (p2) needing my response ──
+    const _needMyResponse=adminMatches.filter(m=>
+      (m.status==='pending-opponent'||m.status==='player-pending')&&m.p2===_myName&&!m.p2ok&&!m.editPending
+    );
+    // ── Section C: Score edit proposed by opponent — I (p1) need to respond ──
+    const _editProposed=adminMatches.filter(m=>m.p1===_myName&&m.editPending);
+    // ── Section D: Owner-recorded matches needing my acceptance ──
     for(let _pi=playerPendingMatches.length-1;_pi>=0;_pi--){
       const _pm=playerPendingMatches[_pi];
-      const _approved=adminMatches.find(am=>am.status==='approved'&&
-        ((am.p1===_myName&&am.p2===_pm.opponent)||(am.p2===_myName&&am.p1===_pm.opponent)));
-      if(_approved) playerPendingMatches.splice(_pi,1);
+      if(adminMatches.find(am=>am.status==='approved'&&((am.p1===_myName&&am.p2===_pm.opponent)||(am.p2===_myName&&am.p1===_pm.opponent)))) playerPendingMatches.splice(_pi,1);
     }
-    // Only show entries belonging to the current player
-    const pending=playerPendingMatches.filter(m=>!m.player||m.player===_myName);
+    const _ownerRecorded=playerPendingMatches.filter(m=>!m.player||m.player===_myName);
+    // ── Section E: Awaiting admin final ──
+    const _awaitAdmin=adminMatches.filter(m=>
+      (m.status==='pending-admin'||m.status==='pending')&&(m.p1===_myName||m.p2===_myName)
+    );
+
+    const _matchCard=(m,headerHtml,statusTag,bodyHtml)=>`
+      <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.8rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.75rem;">
+          <div>
+            ${headerHtml}
+            <div style="font-size:.7rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue} <span style="color:var(--border);margin:0 4px;">·</span> 📅 ${m.date}</div>
+          </div>
+          ${statusTag}
+        </div>
+        ${bodyHtml}
+      </div>`;
+
     c.innerHTML=`
-    <div class="card">
-      <div class="ct">⚡ Pending Match Confirmations ${pending.length?`<span style="background:#e55;color:#fff;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${pending.length} pending</span>`:''}</div>
-      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.2rem;line-height:1.6;">These matches were recorded by a Hall Owner and require your confirmation. A match is only official after <strong style="color:var(--gold);">both players confirm</strong>.</p>
-      ${pending.length?pending.map((m,i)=>{
+    ${_editProposed.length?`
+    <div class="card" style="margin-bottom:1rem;border:1px solid rgba(229,85,85,.3);">
+      <div class="ct" style="color:#e55;">⚠️ Score Edit Proposed
+        <span style="background:#e55;color:#fff;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${_editProposed.length}</span>
+      </div>
+      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">Your opponent proposed a different score. Review and accept or reject.</p>
+      ${_editProposed.map(m=>{
+        const opp=m.p2;
+        return _matchCard(m,
+          `<div style="font-weight:600;font-size:.92rem;">vs ${opp}</div>
+           <div style="font-size:.73rem;color:var(--chalk);margin-top:4px;"><span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span> · Original: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong></div>`,
+          `<span style="padding:2px 8px;border-radius:6px;font-size:.65rem;background:rgba(229,85,85,.1);border:1px solid #e55;color:#e55;white-space:nowrap;">Score Disputed</span>`,
+          `<div style="background:rgba(200,168,75,.07);border:1px solid rgba(200,168,75,.2);border-radius:7px;padding:.65rem .8rem;margin-bottom:.7rem;font-size:.8rem;">
+            <span style="color:var(--chalk2);">Proposed by ${opp.split(' ')[0]}:</span> <strong style="color:var(--gold);font-family:'DM Mono',monospace;">${m.proposedScore}</strong>
+          </div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button class="btn btn-d btn-sm" style="flex:1;" onclick="initiatorRejectEdit('${m.id}')">↩️ Keep Original</button>
+            <button class="btn btn-s btn-sm" style="flex:1;" onclick="initiatorAcceptEdit('${m.id}')">✓ Accept ${m.proposedScore}</button>
+          </div>`
+        );
+      }).join('')}
+    </div>`:''}
+
+    ${_needMyResponse.length?`
+    <div class="card" style="margin-bottom:1rem;border:1px solid rgba(31,140,78,.2);">
+      <div class="ct">⚡ Confirm Match Results
+        <span style="background:#e55;color:#fff;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${_needMyResponse.length}</span>
+      </div>
+      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">These matches were submitted with you as the opponent. Approve, propose a different score, or reject.</p>
+      ${_needMyResponse.map(m=>{
+        const isP1=(m.p1===_myName);
+        const opp=isP1?m.p2:m.p1;
+        const scoreForMe=isP1?m.score:(()=>{const pts=m.score.split('-');return `${pts[1]}-${pts[0]}`;})();
+        return _matchCard(m,
+          `<div style="font-weight:600;font-size:.92rem;">vs ${opp}</div>
+           <div style="font-size:.73rem;color:var(--chalk);margin-top:4px;">
+             <span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span>
+             <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
+             · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong>
+             ${m.hcp&&m.hcp!=='None'?`· <span style="color:#e55;font-size:.7rem;">${m.hcp}</span>`:''}
+           </div>`,
+          `<span style="padding:2px 8px;border-radius:6px;font-size:.65rem;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.35);color:var(--gold);white-space:nowrap;">Awaiting You</span>`,
+          `<div style="font-size:.72rem;color:var(--chalk2);margin-bottom:.6rem;">📍 Venue: <strong style="color:var(--chalk);">${m.venue}</strong> <span style="color:var(--border);margin:0 4px;">·</span> <span style="color:#aaa;font-size:.68rem;font-style:italic;">Venue is locked and cannot be changed</span></div>
+           <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+             <button class="btn btn-d btn-sm" style="flex:1;min-width:80px;" onclick="opponentRejectMatch('${m.id}')">✗ Reject</button>
+             <button class="btn btn-sm" style="flex:1;min-width:80px;background:rgba(200,168,75,.1);border-color:rgba(200,168,75,.3);color:var(--gold);" onclick="opponentEditScore('${m.id}')">✏️ Edit Score</button>
+             <button class="btn btn-s btn-sm" style="flex:1;min-width:80px;" onclick="opponentApproveMatch('${m.id}')">✓ Approve</button>
+           </div>
+           <div id="opp-edit-${m.id}"></div>`
+        );
+      }).join('')}
+    </div>`:''}
+
+    ${_mySubmitted.length?`
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="ct">📨 Matches You Submitted
+        <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;color:var(--chalk);">${_mySubmitted.length}</span>
+      </div>
+      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">Awaiting opponent and/or venue confirmation. Rankings update once all parties confirm and Admin approves.</p>
+      ${_mySubmitted.map(m=>{
+        const opp=m.p2;
+        const oppDone=!!m.p2ok;
+        const venueDone=!!m.venueOk;
+        return _matchCard(m,
+          `<div style="font-weight:600;font-size:.92rem;">vs ${opp}</div>
+           <div style="font-size:.73rem;color:var(--chalk);margin-top:4px;">
+             <span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span>
+             <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
+             · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong>
+           </div>`,
+          `<span style="padding:2px 8px;border-radius:6px;font-size:.65rem;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.35);color:#f5a623;white-space:nowrap;">⏳ Pending</span>`,
+          `<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:.72rem;">
+            <span style="padding:2px 8px;border-radius:6px;border:1px solid var(--grn3);color:var(--grn3);">✓ You Submitted</span>
+            <span style="padding:2px 8px;border-radius:6px;border:1px solid ${oppDone?'var(--grn3)':'rgba(245,166,35,.4)'};color:${oppDone?'var(--grn3)':'#f5a623'};">${oppDone?'✓ Opponent Confirmed':'⏳ Awaiting Opponent'}</span>
+            <span style="padding:2px 8px;border-radius:6px;border:1px solid ${venueDone?'var(--grn3)':'rgba(245,166,35,.4)'};color:${venueDone?'var(--grn3)':'#f5a623'};">${venueDone?'✓ Venue Confirmed':'⏳ Awaiting Venue'}</span>
+          </div>`
+        );
+      }).join('')}
+    </div>`:''}
+
+    ${_ownerRecorded.length?`
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="ct">🏢 Owner-Recorded Matches
+        <span style="background:#e55;color:#fff;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${_ownerRecorded.length}</span>
+      </div>
+      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">Recorded by a Hall Owner. Confirm the result to move this match forward.</p>
+      ${_ownerRecorded.map((m,i)=>{
         const myAccepted=m.me==='p1'?m.p1accept:m.p2accept;
         const oppAccepted=m.me==='p1'?m.p2accept:m.p1accept;
-        // Check if venue has already verified this match
         const _realIdx=playerPendingMatches.indexOf(m);
-        const _amEntry=adminMatches.find(am=>(am.p1===_myName||am.p2===_myName)&&(am.p1===m.opponent||am.p2===m.opponent));
-        const venueVerified=_amEntry&&(_amEntry.venueOk||_amEntry.status==='pending'||_amEntry.status==='approved');
-        const statusLabel=venueVerified?'Verified by Venue':myAccepted&&oppAccepted?'Fully Validated':myAccepted?'Accepted by You — Awaiting Opponent':oppAccepted?'Accepted by Opponent — Awaiting You':'Pending Both Players';
-        const statusClass=venueVerified?'status-validated':myAccepted&&oppAccepted?'status-validated':oppAccepted?'status-partial':'status-pending';
-        return`<div style="background:rgba(255,255,255,.03);border:1px solid ${venueVerified?'rgba(31,140,78,.3)':'var(--border)'};border-radius:10px;padding:1.1rem;margin-bottom:.8rem;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.8rem;">
-            <div>
-              <div style="font-weight:600;font-size:.92rem;">vs ${m.opponent} <span style="color:var(--chalk2);font-size:.75rem;">(#${m.opponentRank})</span></div>
-              <div style="font-size:.73rem;color:var(--chalk);margin-top:4px;">
-                <span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span>
-                <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
-                · Score: <strong style="color:var(--gold);font-family:'DM Mono',monospace;">${m.score}</strong>
-                ${m.hcp!=='None'?`· <span style="color:#e55;">${m.hcp}</span>`:''}
-              </div>
-              <div style="font-size:.7rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue} · 📅 ${m.date} ${m.time}</div>
-            </div>
-            <span class="tag ${statusClass}" style="white-space:nowrap;">${statusLabel}</span>
+        return`<div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.8rem;">
+          <div style="font-weight:600;font-size:.92rem;">vs ${m.opponent}</div>
+          <div style="font-size:.73rem;color:var(--chalk);margin-top:4px;">
+            <span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span>
+            <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
+            · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong>
           </div>
-          ${venueVerified?`
-          <div style="display:flex;gap:6px;align-items:center;font-size:.75rem;flex-wrap:wrap;">
-            <span style="padding:3px 10px;border-radius:6px;background:rgba(31,140,78,.15);border:1px solid var(--grn3);color:var(--grn3);">✓ Result Accepted</span>
-            <span style="padding:3px 10px;border-radius:6px;background:rgba(31,140,78,.15);border:1px solid var(--grn3);color:var(--grn3);">✓ Venue Verified</span>
-            <span style="padding:3px 10px;border-radius:6px;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:var(--gold);font-size:.68rem;">⏳ Awaiting Admin</span>
-          </div>`:`
-          <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
-            <div style="display:flex;gap:4px;align-items:center;font-size:.75rem;flex:1;">
-              <div style="width:18px;height:18px;border-radius:50%;background:${myAccepted?'var(--grn2)':'rgba(255,255,255,.05)'};border:2px solid ${myAccepted?'var(--grn3)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:.6rem;">${myAccepted?'✓':'—'}</div>
-              <span style="color:${myAccepted?'var(--grn3)':'var(--chalk2)'};">You — ${myAccepted?'Confirmed':'Not yet confirmed'}</span>
-              <span style="margin:0 6px;color:var(--border);">|</span>
-              <div style="width:18px;height:18px;border-radius:50%;background:${oppAccepted?'var(--grn2)':'rgba(255,255,255,.05)'};border:2px solid ${oppAccepted?'var(--grn3)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:.6rem;">${oppAccepted?'✓':'—'}</div>
-              <span style="color:${oppAccepted?'var(--grn3)':'var(--chalk2)'};">${m.opponent.split(' ')[0]} — ${oppAccepted?'Confirmed':'Waiting'}</span>
-            </div>
-            ${!myAccepted?`<button class="btn btn-s btn-sm" onclick="playerAcceptMatch(${_realIdx})">✓ Accept Result</button>`:''}
-          </div>`}
+          <div style="font-size:.7rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue} · 📅 ${m.date}</div>
+          <div style="display:flex;gap:.5rem;margin-top:.7rem;flex-wrap:wrap;align-items:center;">
+            <span style="padding:2px 8px;border-radius:6px;font-size:.7rem;border:1px solid ${myAccepted?'var(--grn3)':'var(--border)'};color:${myAccepted?'var(--grn3)':'var(--chalk2)'};">${myAccepted?'✓ You Confirmed':'— Not Confirmed'}</span>
+            <span style="padding:2px 8px;border-radius:6px;font-size:.7rem;border:1px solid ${oppAccepted?'var(--grn3)':'var(--border)'};color:${oppAccepted?'var(--grn3)':'var(--chalk2)'};">${oppAccepted?`✓ ${m.opponent.split(' ')[0]} Confirmed`:`⏳ ${m.opponent.split(' ')[0]} Waiting`}</span>
+            ${!myAccepted?`<button class="btn btn-s btn-sm" style="margin-left:auto;" onclick="playerAcceptMatch(${_realIdx})">✓ Accept Result</button>`:''}
+          </div>
         </div>`;
-      }).join(''):'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:2rem 0;">🎉 No pending match confirmations</div>'}
-    </div>
-    ${(()=>{
-      // Show player-pending matches awaiting hall owner / admin verification
-      const myName=app.user?.name;
-      const _awaitingVerif=adminMatches.filter(m=>m.status==='player-pending'&&(m.p1===myName||m.p2===myName));
-      if(!_awaitingVerif.length) return '';
-      return`<div class="card" style="margin-top:1rem;border:1px solid rgba(255,183,29,.2);">
-        <div class="ct">🕐 Awaiting Venue / Admin Verification
-          <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;color:#f5a623;">${_awaitingVerif.length}</span>
-        </div>
-        <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">Both players confirmed these matches. Rankings will update once a hall owner or Admin verifies them.</p>
-        ${_awaitingVerif.map(m=>{
-          const isP1=(m.p1===myName);
-          const opp=isP1?m.p2:m.p1;
-          return`<div style="background:rgba(255,183,29,.04);border:1px solid rgba(255,183,29,.18);border-radius:10px;padding:1rem;margin-bottom:.7rem;">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;">
-              <div>
-                <div style="font-weight:600;font-size:.9rem;">vs ${opp}</div>
-                <div style="font-size:.72rem;color:var(--chalk);margin-top:3px;">
-                  <span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span>
-                  <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
-                  · Score: <strong style="color:var(--gold);font-family:'DM Mono',monospace;">${m.score}</strong>
-                  ${m.hcp&&m.hcp!=='None'?`· <span style="color:#e55;">${m.hcp}</span>`:''}
-                </div>
-                <div style="font-size:.68rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue} · 📅 ${m.date}</div>
-              </div>
-              <span class="tag tgd" style="white-space:nowrap;color:#f5a623;border-color:#f5a623;">⏳ Pending Verification</span>
+      }).join('')}
+    </div>`:''}
+
+    ${_awaitAdmin.length?`
+    <div class="card" style="margin-bottom:1rem;border:1px solid rgba(200,168,75,.15);">
+      <div class="ct">⏳ Awaiting Admin Approval
+        <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;color:#f5a623;">${_awaitAdmin.length}</span>
+      </div>
+      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">All parties confirmed. Rankings will update once Admin gives final approval.</p>
+      ${_awaitAdmin.map(m=>{
+        const opp=m.p1===_myName?m.p2:m.p1;
+        return`<div style="background:rgba(200,168,75,.03);border:1px solid rgba(200,168,75,.15);border-radius:10px;padding:1rem;margin-bottom:.7rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="font-weight:600;font-size:.9rem;">vs ${opp}</div>
+            <div style="font-size:.72rem;color:var(--chalk);margin-top:3px;">
+              <span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span> · <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong>
             </div>
-            <div style="display:flex;gap:8px;margin-top:.6rem;font-size:.7rem;flex-wrap:wrap;">
-              <span style="padding:2px 8px;border-radius:6px;border:1px solid var(--grn3);color:var(--grn3);">✓ Both Players Confirmed</span>
-              <span style="padding:2px 8px;border-radius:6px;border:1px solid #f5a623;color:#f5a623;">⏳ Awaiting Venue</span>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>`;
-    })()}`;
+            <div style="font-size:.68rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue} · 📅 ${m.date}</div>
+          </div>
+          <span style="padding:3px 9px;border-radius:6px;font-size:.65rem;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:var(--gold);white-space:nowrap;">⏳ Awaiting Admin</span>
+        </div>`;
+      }).join('')}
+    </div>`:''}
+
+    ${!_editProposed.length&&!_needMyResponse.length&&!_mySubmitted.length&&!_ownerRecorded.length&&!_awaitAdmin.length?`
+    <div class="card"><div style="text-align:center;padding:2rem;color:var(--chalk2);font-size:.82rem;">🎉 No pending validations</div></div>`:''}
+    `;
 
   } else if(tab==='history'){
     let sort=app.ppSort||'date';
@@ -3986,8 +4162,9 @@ function ptab(tab){
   if(tab==='matches'){
     // ── Compute owner's hall name and player-set matches at this venue ──
     const _ownerHallName=_hallEntry?.name||u?.hall||'';
+    // Player-submitted matches at this venue (new flow: pending-opponent; legacy: player-pending)
     const _playerSetMatches=adminMatches.filter(m=>
-      m.status==='player-pending'&&_ownerHallName&&m.venue&&m.venue.includes(_ownerHallName)
+      (m.status==='pending-opponent'||m.status==='player-pending')&&_ownerHallName&&m.venue&&m.venue.includes(_ownerHallName)
     );
     // ── 4-step progress helper for hall owner match rows ──
     const _hoProgress=(steps)=>`
@@ -4038,7 +4215,9 @@ function ptab(tab){
           <button class="btn btn-sm" onclick="cancelOwnerMatch('${m.id}')" style="min-width:80px;flex:none;background:rgba(229,85,85,.1);border-color:rgba(229,85,85,.3);color:#e55;">✗ Cancel</button>
         </div>
       </div>`;}).join('')}
-      ${_playerSetMatches.map(m=>`
+      ${_playerSetMatches.map(m=>{
+        const oppConfirmed=!!m.p2ok;
+        return`
       <div style="background:rgba(245,166,35,.04);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:1.1rem;margin-bottom:.7rem;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
           <div style="flex:1;min-width:0;">
@@ -4049,29 +4228,20 @@ function ptab(tab){
               · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong>
               ${m.hcp&&m.hcp!=='None'?`· <span style="color:#e55;font-size:.7rem;">Hcp: ${m.hcp}</span>`:''}
             </div>
-            <div style="font-size:.7rem;color:var(--chalk2);margin-top:2px;">📅 ${m.date}${m.submittedAt?' · Submitted '+new Date(m.submittedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''}</div>
-            <div style="font-size:.65rem;color:#f5a623;margin-top:3px;">⏳ Both players confirmed — awaiting your venue verification</div>
-            ${_hoProgress([{label:m.p1.split(' ')[0],done:true},{label:m.p2.split(' ')[0],done:true},{label:'VENUE',done:false},{label:'ADMIN',done:false}])}
+            <div style="font-size:.68rem;color:var(--chalk2);margin-top:2px;">📍 <strong style="color:var(--chalk);">${m.venue}</strong> <span style="color:var(--border);margin:0 3px;">·</span> 📅 ${m.date}</div>
+            <div style="font-size:.63rem;color:#aaa;margin-top:2px;font-style:italic;">Venue is locked and cannot be changed</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:.5rem;font-size:.7rem;">
+              <span style="padding:2px 8px;border-radius:6px;border:1px solid var(--grn3);color:var(--grn3);">✓ ${m.p1.split(' ')[0]} Submitted</span>
+              <span style="padding:2px 8px;border-radius:6px;border:1px solid ${oppConfirmed?'var(--grn3)':'rgba(245,166,35,.4)'};color:${oppConfirmed?'var(--grn3)':'#f5a623'};">${oppConfirmed?`✓ ${m.p2.split(' ')[0]} Confirmed`:`⏳ ${m.p2.split(' ')[0]} Pending`}</span>
+            </div>
+            ${_hoProgress([{label:m.p1.split(' ')[0],done:true},{label:m.p2.split(' ')[0],done:oppConfirmed},{label:'VENUE',done:false},{label:'ADMIN',done:false}])}
           </div>
         </div>
         <div style="display:flex;gap:.5rem;margin-top:.85rem;flex-wrap:wrap;">
           <button class="btn btn-d btn-sm" onclick="ownerRejectPlayerMatch('${m.id}')" style="flex:1;min-width:100px;">✗ Reject</button>
-          <button class="btn btn-s btn-sm" onclick="ownerVerifyPlayerMatch('${m.id}')" style="flex:1;min-width:150px;">✓ Verify & Forward</button>
+          <button class="btn btn-s btn-sm" onclick="ownerApproveVenueMatch('${m.id}')" style="flex:1;min-width:150px;">✓ Approve &amp; Forward to Admin</button>
         </div>
-      </div>`).join('')}
-      ${pendVal.map((m,i)=>`
-      <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.7rem;">
-        <div style="margin-bottom:.7rem;">
-          <div style="font-weight:600;">${m.p1} vs ${m.p2}</div>
-          <div style="font-size:.73rem;color:var(--chalk);margin-top:3px;"><span class="tag ${m.fmt==='9-Ball'?'tn':'tt'}">${m.fmt}</span> · Score: <strong style="color:var(--gold);">${m.sc}</strong> · ${m.time}</div>
-          <div style="font-size:.65rem;color:var(--chalk2);margin-top:3px;">✓ Both players confirmed — awaiting your validation</div>
-        </div>
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-          <button class="btn btn-d btn-sm" onclick="valMatch(${i},false)" style="flex:1;min-width:90px;">✗ Reject</button>
-          <button class="btn btn-s btn-sm" onclick="valMatch(${i},true)" style="flex:1;min-width:110px;">✓ Validate</button>
-          <button class="btn btn-sm" onclick="cancelPendVal(${i})" style="min-width:80px;flex:none;background:rgba(229,85,85,.1);border-color:rgba(229,85,85,.3);color:#e55;">✗ Cancel</button>
-        </div>
-      </div>`).join('')}
+      </div>`}).join('')}
       `}
     </div>
 
@@ -4479,8 +4649,8 @@ function ownerConfirm(i,p){
       if(_pm.opponent===done.p1||_pm.opponent===done.p2) playerPendingMatches.splice(_pi,1);
     }
     if(_amEntry){
-      // ── Upgrade existing entry from 'owner-pending' → 'pending' ──
-      _amEntry.status='pending';
+      // ── Upgrade existing entry from 'owner-recorded' → 'pending-admin' ──
+      _amEntry.status='pending-admin';
       _amEntry.p1ok=true; _amEntry.p2ok=true; _amEntry.venueOk=true;
       _amEntry.bothConfirmedAt=new Date().toISOString();
     } else {
@@ -4564,7 +4734,7 @@ function ownerVerifyPlayerMatch(id){
   const m=adminMatches.find(x=>x.id===id);
   if(!m) return;
   m.venueOk=true;
-  m.status='pending'; // moves from player-pending → pending (admin Final Approvals queue)
+  m.status='pending-admin';
   m.verifiedByOwnerAt=new Date().toISOString();
   saveAdminMatches();
   updateNavBadges();
@@ -4947,11 +5117,11 @@ function admTab(btn,tab){
     const _activePlayers=[...PLAYERS].sort((a,b)=>a.name.localeCompare(b.name));
     const _activeHalls=adminHalls.filter(h=>h.status==='active');
     const _activeTournaments=adminTournaments.filter(t=>t.status==='active');
-    const _ownerPending=adminMatches.filter(m=>m.status==='owner-pending');
-    const _playerPending=adminMatches.filter(m=>m.status==='player-pending');
-    const _pendingBoth=adminMatches.filter(m=>m.status==='pending');
+    const _ownerPending=adminMatches.filter(m=>m.status==='owner-recorded'||m.status==='owner-pending');
+    const _playerPending=adminMatches.filter(m=>m.status==='pending-opponent'||m.status==='player-pending');
+    const _pendingBoth=adminMatches.filter(m=>m.status==='pending-admin'||m.status==='pending');
     const _totalPending=_ownerPending.length+_playerPending.length+_pendingBoth.length;
-    const _processed=[...adminMatches].filter(m=>m.status!=='owner-pending'&&m.status!=='player-pending'&&m.status!=='pending').sort((a,b)=>(b.approvedAt||b.date||'').localeCompare(a.approvedAt||a.date||''));
+    const _processed=[...adminMatches].filter(m=>!['owner-recorded','owner-pending','pending-opponent','player-pending','pending-admin','pending'].includes(m.status)).sort((a,b)=>(b.approvedAt||b.date||'').localeCompare(a.approvedAt||a.date||''));
     // ── Section divider helper ──
     const _secDiv=(label,count,color)=>`
       <div style="display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .9rem;">
@@ -4999,31 +5169,31 @@ function admTab(btn,tab){
 
       <!-- SECTION 1: OWNER-RECORDED — AWAITING PLAYER CONFIRMATIONS -->
       ${_ownerPending.length?`
-        ${_secDiv('⏳ Awaiting Player Confirmation',_ownerPending.length,'#e55')}
+        ${_secDiv('🏢 Owner-Recorded — Awaiting Players',_ownerPending.length,'#e55')}
         ${_ownerPending.map(m=>_matchRow(m,
           [{label:'VENUE',done:true},{label:m.p1.split(' ')[0],done:!!m.p1ok},{label:m.p2.split(' ')[0],done:!!m.p2ok},{label:'ADMIN',done:false}],
-          'awaiting players',
+          'owner recorded',
           `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admApproveMatch('${m.id}')">✓ Approve on Behalf</button>
            <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
 
-      <!-- SECTION 2: PLAYER-SET — AWAITING VENUE/ADMIN -->
+      <!-- SECTION 2: PLAYER-SUBMITTED — AWAITING OPPONENT + VENUE -->
       ${_playerPending.length?`
-        ${_secDiv('🎱 Player-Set — Awaiting Venue',_playerPending.length,'#f5a623')}
+        ${_secDiv('🎱 Player-Submitted — Awaiting Opponent / Venue',_playerPending.length,'#f5a623')}
         ${_playerPending.map(m=>_matchRow(m,
           [{label:m.p1.split(' ')[0],done:!!m.p1ok},{label:m.p2.split(' ')[0],done:!!m.p2ok},{label:'VENUE',done:!!m.venueOk},{label:'ADMIN',done:false}],
-          'awaiting venue',
-          `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admApproveMatch('${m.id}')">✓ Verify & Approve</button>
+          'awaiting validation',
+          `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admApproveMatch('${m.id}')">✓ Approve on Behalf</button>
            <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
 
-      <!-- SECTION 3: ALL CONFIRMED — AWAITING ADMIN FINAL APPROVAL -->
+      <!-- SECTION 3: VENUE CONFIRMED — AWAITING ADMIN FINAL APPROVAL -->
       ${_pendingBoth.length?`
-        ${_secDiv('✅ All Verified — Awaiting Admin Approval',_pendingBoth.length,'var(--grn3)')}
+        ${_secDiv('✅ Venue Confirmed — Awaiting Admin Approval',_pendingBoth.length,'var(--grn3)')}
         ${_pendingBoth.map(m=>_matchRow(m,
-          [{label:m.p1.split(' ')[0],done:true},{label:m.p2.split(' ')[0],done:true},{label:'VENUE',done:true},{label:'ADMIN',done:false}],
+          [{label:m.p1.split(' ')[0],done:!!m.p1ok},{label:m.p2.split(' ')[0],done:!!m.p2ok},{label:'VENUE',done:true},{label:'ADMIN',done:false}],
           'ready to approve',
-          `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admApproveMatch('${m.id}')">✓ Approve & Update Rankings</button>
+          `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admApproveMatch('${m.id}')">✓ Approve &amp; Update Rankings</button>
            <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
       `}
