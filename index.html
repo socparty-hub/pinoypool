@@ -3112,7 +3112,11 @@ function rankMoveHtml(name,currentRank){
 
 function renderLbTab(tab){
   const m=app._rankMult||1;
-  const data=PLAYERS.map(p=>genPlayerStats(p,m));
+  // Exclude suspended players from all ranking tabs — they retain their rating but are hidden
+  const data=PLAYERS.filter(p=>{
+    const adm=adminPlayers.find(a=>a.name===p.name||(a.email&&a.email===p.email));
+    return !adm||adm.status!=='suspended';
+  }).map(p=>genPlayerStats(p,m));
   const c=document.getElementById('lb-content');
 
   /* ── GLOBAL PPR LEADERBOARD (official PinoyPool Ranking System) ── */
@@ -5533,7 +5537,6 @@ function admTab(btn,tab){
             <select style="width:auto;padding:5px 9px;font-size:.78rem;" title="Career Status" onchange="admSetCareer('${p.id}',this.value)">
               ${CAREER_STATUS_LIST.map(t=>`<option value="${t}"${p.careerStatus===t?' selected':''}>${t}</option>`).join('')}
             </select>
-            ${p.status==='active'?`<button class="btn btn-d btn-sm" onclick="admSuspendPlayer('${p.id}')">⊘ Suspend</button>`:''}
           </div>
         </div>`;
       }).join('')}
@@ -5947,8 +5950,25 @@ function admSetPlayerStatus(id,status){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
   if(!p)return;
   p.status=status;
+  // Persist to approvedPlayers so status survives page reload
+  const ap=approvedPlayers.find(r=>String(r.id)===String(p.id)||r.email===p.email);
+  if(ap){ap.status=status;saveApprovedPlayers();}
+  // On reactivation: restore verificationStatus so player portal shows correctly
+  // On suspension: leave verificationStatus alone — player can still log in and play
+  if(status==='active'){
+    const ru=registeredUsers.find(r=>r.email===p.email||r.username===p.username);
+    if(ru){ru.verificationStatus='active';saveRegisteredUsers();}
+  }
+  // Persist to backend
+  fetch('/api/registrations/'+String(id),{method:'PATCH',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({status,updatedAt:new Date().toISOString()})
+  }).catch(()=>{});
   admRefresh();
-  toast(`✅ <strong>${p.name}</strong> status set to <strong>${status}</strong>.`);
+  // Rebuild rankings so suspended players disappear / reappear immediately
+  if(app.lbTab) renderLbTab(app.lbTab);
+  const label=status.charAt(0).toUpperCase()+status.slice(1);
+  const icon=status==='suspended'?'⊘':status==='active'?'✅':'🕐';
+  toast(`${icon} <strong>${p.name}</strong> → <strong>${label}</strong>${status==='suspended'?' · Hidden from rankings':status==='active'?' · Visible in rankings':''}`);
 }
 function admSetCareer(id,tier){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
