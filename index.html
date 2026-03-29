@@ -1439,15 +1439,15 @@ function restoreApprovals(){
   approvedPlayers.forEach(ap=>{
     const adm=adminPlayers.find(p=>p.email===ap.email||p.username===ap.username);
     if(adm){
-      // Update existing entry to reflect approved status
-      adm.status='active'; adm.careerStatus=ap.careerStatus; adm.ppr=ap.ppr;
+      // Update existing entry — respect stored status (active, suspended, etc.)
+      adm.status=ap.status||'active'; adm.careerStatus=ap.careerStatus; adm.ppr=ap.ppr;
       adm.mw=ap.mw||adm.mw||0; adm.ml=ap.ml||adm.ml||0;
     } else {
       // No adminPlayers entry yet (fresh reload) — create one from approvedPlayers data
       adminPlayers.push({
         id:ap.id, name:ap.name, username:ap.username||'', email:ap.email||'',
         phone:ap.phone||'', region:ap.region||'', role:'player',
-        status:'active', careerStatus:ap.careerStatus, ppr:ap.ppr,
+        status:ap.status||'active', careerStatus:ap.careerStatus, ppr:ap.ppr,
         mw:ap.mw||0, ml:ap.ml||0, rw:ap.rw||0, rl:ap.rl||0, mi:ap.mi||0, sos:0,
         colors:ap.colors||'#1a3a22', fmt:ap.fmt||'9-Ball',
         joined:ap.approvedAt?ap.approvedAt.slice(0,10):'',
@@ -6011,7 +6011,18 @@ function admSuspendPlayer(id){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
   if(!p)return;
   p.status='suspended';
+  // Sync approvedPlayers so status survives page reload (restoreApprovals reads this)
+  const ap=approvedPlayers.find(r=>String(r.id)===String(p.id)||r.email===p.email);
+  if(ap){ap.status='suspended';saveApprovedPlayers();}
+  // Sync registeredUsers so the player cannot log in as active after reload
+  const ru=registeredUsers.find(r=>r.email===p.email||r.username===p.username);
+  if(ru){ru.verificationStatus='suspended';saveRegisteredUsers();}
+  // Persist to backend
+  fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({status:'suspended',suspendedAt:new Date().toISOString()})
+  }).catch(()=>{});
   buildAdmin();
+  buildDashboard();
   toast(`⊘ <strong>${p.name}</strong> has been suspended.`);
 }
 function admRejectPlayer(id){
