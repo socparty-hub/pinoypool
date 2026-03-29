@@ -5770,8 +5770,13 @@ function admResetAllData(){
 }
 
 function admRefresh(){
+  // Preserve search input focus — re-rendering replaces the DOM so the input loses focus on every keystroke
+  const _focId=document.activeElement?.id;
+  const _focSel=_focId?[document.activeElement.selectionStart,document.activeElement.selectionEnd]:null;
   // Re-render tab content
   admTab(document.querySelector('.adm-tab.act'),app.admTab||'players');
+  // Restore focus + cursor to whichever input was active before re-render
+  if(_focId){const _ri=document.getElementById(_focId);if(_ri){_ri.focus();try{_ri.setSelectionRange(_focSel[0],_focSel[1]);}catch(e){}}}
   // ── Sync tab badges so they always reflect current data ──
   const _el=id=>document.getElementById(id);
   const _pendP=adminPlayers.filter(p=>p.status==='pending').length;
