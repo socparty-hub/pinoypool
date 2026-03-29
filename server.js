@@ -146,6 +146,9 @@ app.get('*', async (req, res) => {
   html = html.replace('<!-- __SERVER_DATA__ -->', injection);
 
   res.setHeader('Content-Type', 'text/html');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.send(html);
 });
 
