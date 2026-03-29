@@ -140,7 +140,8 @@ app.get('*', async (req, res) => {
     return res.status(500).send('Could not read index.html');
   }
 
-  const serverData  = await db.getAll();
+  let serverData;
+  try { serverData = await db.getAll(); } catch (e) { serverData = {}; }
   const injection   = `<script>window.__SD__=${JSON.stringify(serverData)};</script>`;
   html = html.replace('<!-- __SERVER_DATA__ -->', injection);
 
