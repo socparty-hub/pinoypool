@@ -5475,13 +5475,18 @@ function admTab(btn,tab){
         ? `<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No pending registrations</div>`
         : incoming.map(p=>{
             const sClass={pending:'sp-pending',review:'sp-review'}[p.status]||'sp-pending';
+            // Pull live registration data — registeredUsers is the source of truth for profile updates
+            const _ru=registeredUsers.find(u=>u.id===p.id||u.username===p.username||(u.email&&u.email===p.email));
+            const _email=_ru?.email||p.email||'—';
+            const _region=_ru?.region||p.region||'—';
+            const _phone=_ru?.phone||p.phone||'—';
             return`<div class="adm-row">
               <div style="display:flex;align-items:center;gap:.9rem;min-width:0;flex:1;">
                 <div class="av" style="background:${p.colors||'#1a3a22'};flex-shrink:0;">${getInit(p.name)}</div>
                 <div style="min-width:0;">
                   <div style="font-weight:600;font-size:.9rem;">${p.name}</div>
-                  <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;">${p.email||'—'} · ${p.region||'—'}</div>
-                  <div style="font-size:.68rem;color:var(--chalk2);margin-top:1px;">${p.phone||'—'} · Applied ${p.joined||p.submittedAt?.slice(0,10)||'—'}</div>
+                  <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;">${_email} · ${_region}</div>
+                  <div style="font-size:.68rem;color:var(--chalk2);margin-top:1px;">${_phone} · Applied ${p.joined||p.submittedAt?.slice(0,10)||'—'}</div>
                 </div>
               </div>
               <div class="adm-actions">
@@ -5507,12 +5512,16 @@ function admTab(btn,tab){
       </div>
       ${registered.map(p=>{
         const sClass={active:'sp-active',suspended:'sp-suspended'}[p.status]||'sp-active';
+        // Pull live registration data — registeredUsers is the source of truth for profile updates
+        const _ru=registeredUsers.find(u=>u.id===p.id||u.username===p.username||(u.email&&u.email===p.email));
+        const _email=_ru?.email||p.email||'—';
+        const _region=_ru?.region||p.region||'—';
         return`<div class="adm-row">
           <div style="display:flex;align-items:center;gap:.9rem;min-width:0;flex:1;">
             <div class="av" style="background:${p.colors||'#1a3a22'};flex-shrink:0;">${getInit(p.name)}</div>
             <div style="min-width:0;">
               <div style="font-weight:600;font-size:.9rem;">${p.name}</div>
-              <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;">${p.email||'—'} · ${p.region||'—'} · #${p.rank||'—'} National</div>
+              <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;">${_email} · ${_region} · #${p.rank||'—'} National</div>
               <div style="font-size:.68rem;color:var(--chalk2);margin-top:1px;">Joined ${p.joined||'—'} · W:${p.mw} L:${p.ml}</div>
             </div>
           </div>
