@@ -96,7 +96,7 @@ textarea{resize:vertical;min-height:75px;}
 .ac-rank{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--gold);margin-left:auto;}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:6px;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:1.5px;transition:all .2s;white-space:nowrap;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:6px;border:none;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:1.5px;transition:all .2s;white-space:nowrap;}
 .btn-p{background:linear-gradient(135deg,#D4AF37,#9a7a10);color:#080400;}
 .btn-p:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(200,168,75,.3);}
 .btn-o{background:transparent;border:1px solid var(--gold);color:var(--gold);}
@@ -546,14 +546,16 @@ textarea{resize:vertical;min-height:75px;}
 .ppr-title-row{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,4vw,3.2rem);letter-spacing:3px;text-align:center;color:#fff;margin-bottom:1.8rem;line-height:1;}
 .ppr-title-row span{color:var(--gold);}
 /* Podium */
-.ppr-podium{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:10px;align-items:end;margin-bottom:1.6rem;}
+.ppr-podium{display:grid;grid-template-columns:1.05fr 1.1fr 0.95fr;gap:10px;align-items:end;margin-bottom:1.6rem;}
 .pod-card{background:linear-gradient(160deg,rgba(27,67,50,.7),rgba(10,18,14,.95));border:1px solid var(--gold-border);border-radius:10px;padding:1rem .8rem .9rem;text-align:center;position:relative;overflow:hidden;}
 .pod-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(212,175,55,.06) 0%,transparent 65%);pointer-events:none;}
 .pod-1{border-color:rgba(212,175,55,.55);background:linear-gradient(160deg,rgba(27,67,50,.9),rgba(10,18,14,.98));padding-top:1.4rem;}
+.pod-2{padding-top:1.2rem;}
 .pod-star{position:absolute;top:9px;right:11px;color:var(--gold);font-size:1rem;line-height:1;}
 .pod-rank-lbl{font-family:'Space Grotesk',sans-serif;font-size:.52rem;letter-spacing:3px;color:var(--chalk);text-transform:uppercase;margin-bottom:-.3rem;}
 .pod-rank-num{font-family:'Bebas Neue',sans-serif;font-size:3.2rem;line-height:1;color:var(--gold);}
 .pod-1 .pod-rank-num{font-size:4.2rem;}
+.pod-2 .pod-rank-num{font-size:3.7rem;}
 /* Podium movement arrows — larger than table version */
 .pod-card .pod-move-up span:first-child{font-size:.75rem!important;}
 .pod-card .pod-move-up span:last-child{font-size:.78rem!important;}
@@ -561,8 +563,10 @@ textarea{resize:vertical;min-height:75px;}
 .pod-card .pod-move-dn span:last-child{font-size:.75rem!important;}
 .pod-sil{width:68px;height:95px;margin:.4rem auto .6rem;color:rgba(212,175,55,.18);display:flex;align-items:flex-end;justify-content:center;}
 .pod-1 .pod-sil{width:84px;height:115px;color:rgba(212,175,55,.25);}
+.pod-2 .pod-sil{width:76px;height:105px;}
 .pod-name{font-family:'Bebas Neue',sans-serif;font-size:.88rem;letter-spacing:1.5px;color:#fff;margin-bottom:3px;line-height:1.2;}
 .pod-1 .pod-name{font-size:1.05rem;color:var(--gold);}
+.pod-2 .pod-name{font-size:.96rem;}
 .pod-pts{font-family:'Space Grotesk',sans-serif;font-size:.6rem;letter-spacing:1px;color:var(--chalk);text-transform:uppercase;}
 /* Controls */
 .ppr-controls{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:.9rem;flex-wrap:wrap;}
@@ -585,8 +589,8 @@ textarea{resize:vertical;min-height:75px;}
 .ppr-rank-cell.r1{color:var(--gold2);}
 .ppr-rank-cell.r2{color:#c0c0c0;}
 .ppr-rank-cell.r3{color:#cd7f32;}
-.ppr-player-cell{font-weight:600;color:#fff;letter-spacing:.3px;}
-.ppr-rating-cell{font-family:'DM Mono',monospace;color:var(--gold);font-weight:600;}
+.ppr-tbl td.ppr-player-cell{font-family:'Manrope',sans-serif;font-weight:600;color:#fff;letter-spacing:.3px;}
+.ppr-rating-cell{font-family:'DM Mono',monospace;color:#fff;font-weight:600;}
 .ppr-matches-cell{color:var(--chalk);}
 .ppr-win-cell{color:var(--chalk);}
 /* Load More */
@@ -3175,7 +3179,7 @@ function renderLbTab(tab){
 
     // Active period filter
     const periods=[
-      {k:'alltime',l:'ALL TIME'},
+      {k:'alltime',l:'OVERALL'},
       {k:'year',l:'THIS SEASON'},
       {k:'region',l:'REGION'}
     ];
