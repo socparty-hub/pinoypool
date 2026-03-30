@@ -3116,10 +3116,10 @@ function rankMoveHtml(name,currentRank){
 
 function renderLbTab(tab){
   const m=app._rankMult||1;
-  // Exclude suspended players from all ranking tabs — they retain their rating but are hidden
+  // Only show active players in rankings — suspended/pending/review are hidden but retain rating
   const data=PLAYERS.filter(p=>{
     const adm=adminPlayers.find(a=>a.name===p.name||(a.email&&a.email===p.email));
-    return !adm||adm.status!=='suspended';
+    return !adm||adm.status==='active';
   }).map(p=>genPlayerStats(p,m));
   const c=document.getElementById('lb-content');
 
@@ -5976,7 +5976,8 @@ function admSetPlayerStatus(id,status){
   if(app.lbTab) renderLbTab(app.lbTab);
   const label=status.charAt(0).toUpperCase()+status.slice(1);
   const icon=status==='suspended'?'⊘':status==='active'?'✅':'🕐';
-  toast(`${icon} <strong>${p.name}</strong> → <strong>${label}</strong>${status==='suspended'?' · Hidden from rankings':status==='active'?' · Visible in rankings':''}`);
+  const rankNote=status==='active'?' · Visible in rankings':status!=='active'?' · Hidden from rankings':'';
+  toast(`${icon} <strong>${p.name}</strong> → <strong>${label}</strong>${rankNote}`);
 }
 function admSetCareer(id,tier){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
@@ -6036,22 +6037,7 @@ function admApprovePlayer(id){
   toast(`✅ <strong>${p.name}</strong> approved as <strong>${careerStatus}</strong> · Initial PPR: ${initPPR} · Ranked #${newRank}`);
 }
 function admSuspendPlayer(id){
-  const p=adminPlayers.find(x=>String(x.id)===String(id));
-  if(!p)return;
-  p.status='suspended';
-  // Sync approvedPlayers so status survives page reload (restoreApprovals reads this)
-  const ap=approvedPlayers.find(r=>String(r.id)===String(p.id)||r.email===p.email);
-  if(ap){ap.status='suspended';saveApprovedPlayers();}
-  // Sync registeredUsers so the player cannot log in as active after reload
-  const ru=registeredUsers.find(r=>r.email===p.email||r.username===p.username);
-  if(ru){ru.verificationStatus='suspended';saveRegisteredUsers();}
-  // Persist to backend
-  fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({status:'suspended',suspendedAt:new Date().toISOString()})
-  }).catch(()=>{});
-  buildAdmin();
-  buildDashboard();
-  toast(`⊘ <strong>${p.name}</strong> has been suspended.`);
+  admSetPlayerStatus(id,'suspended');
 }
 function admRejectPlayer(id){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
