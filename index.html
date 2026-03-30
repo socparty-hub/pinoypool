@@ -5384,6 +5384,8 @@ function saveAdminMatches(){const v=JSON.stringify(adminMatches);try{localStorag
 
 const CAREER_STATUS_LIST=['Amateur','Skilled','Semi-Pro','Pro','Elite'];
 const STATUS_OPTS=['active','suspended','pending','review'];
+// Track IDs whose status was changed locally so background fetches don't race and overwrite them
+const _localStatusChanged=new Set();
 
 function buildAdmin(){
   if(app.user?.role!=='admin'){toast('⚠️ Admin access only.');return;}
@@ -5401,8 +5403,9 @@ function buildAdmin(){
           if(!existing){
             adminPlayers.unshift({id:r.id,name:name.trim(),username:r.username||'',status:r.status||'pending',email:r.email,phone:r.phone,region:r.region,submittedAt:r.submittedAt,careerStatus:r.careerStatus||'Amateur',ppr:r.ppr||0,tier:'C',colors:'#1a3a22'});
             changed=true;
-          } else if(existing.status!==r.status){
+          } else if(existing.status!==r.status&&!_localStatusChanged.has(String(r.id))){
             // Sync status changes from backend (e.g. approved on another device)
+            // Skip if this player's status was changed locally to avoid race with PATCH
             existing.status=r.status||existing.status;
             if(r.careerStatus) existing.careerStatus=r.careerStatus;
             if(r.ppr) existing.ppr=r.ppr;
@@ -5413,7 +5416,7 @@ function buildAdmin(){
           if(!existing){
             adminHalls.unshift({id:r.id,name:r.hallName||'Unknown Hall',owner:name.trim(),username:r.username||'',city:r.city||'',contact:r.phone,email:r.email,region:r.region,status:r.status||'pending',submitted:(r.submittedAt||'').slice(0,10)});
             changed=true;
-          } else if(existing.status!==r.status){
+          } else if(existing.status!==r.status&&!_localStatusChanged.has(String(r.id))){
             existing.status=r.status||existing.status;
             changed=true;
           }
@@ -5954,6 +5957,7 @@ function admSetPlayerStatus(id,status){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
   if(!p)return;
   p.status=status;
+  _localStatusChanged.add(String(id));
   // Persist to approvedPlayers so status survives page reload
   const ap=approvedPlayers.find(r=>String(r.id)===String(p.id)||r.email===p.email);
   if(ap){ap.status=status;saveApprovedPlayers();}
