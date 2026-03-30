@@ -6161,7 +6161,10 @@ function initFromBackend(){
             // Update existing entry with latest backend status / PPR
             const existing=adminPlayers.find(p=>p.id===r.id||p.email===r.email);
             if(existing){
-              existing.status=r.status||existing.status;
+              // Prefer approvedPlayers (admin's explicit record) over backend status,
+              // so suspend/activate survives page reload even if PATCH was slow or lost
+              const savedAp=approvedPlayers.find(x=>String(x.id)===String(r.id)||x.email===r.email);
+              existing.status=savedAp?.status||r.status||existing.status;
               if(r.careerStatus) existing.careerStatus=r.careerStatus;
               if(r.ppr) existing.ppr=r.ppr;
             }
