@@ -1461,7 +1461,7 @@ function restoreApprovals(){
       adminPlayers.push({
         id:ap.id, name:ap.name, username:ap.username||'', email:ap.email||'',
         phone:ap.phone||'', region:ap.region||'', role:'player',
-        status:ap.status??(_ru?.verificationStatus)||'active', careerStatus:ap.careerStatus, ppr:ap.ppr,
+        status:(ap.status??_ru?.verificationStatus)||'active', careerStatus:ap.careerStatus, ppr:ap.ppr,
         mw:ap.mw||0, ml:ap.ml||0, rw:ap.rw||0, rl:ap.rl||0, mi:ap.mi||0, sos:0,
         colors:ap.colors||'#1a3a22', fmt:ap.fmt||'9-Ball',
         joined:ap.approvedAt?ap.approvedAt.slice(0,10):'',
