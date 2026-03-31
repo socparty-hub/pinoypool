@@ -6006,6 +6006,7 @@ function admApprovePlayer(id){
   p.status='active';
   p.careerStatus=careerStatus;
   p.ppr=initPPR;
+  _localStatusChanged.add(String(id));
   // Add to PLAYERS ranking system (or update existing entry)
   const existing=PLAYERS.find(x=>x.id===id||x.name===p.name);
   if(!existing){
