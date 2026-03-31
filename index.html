@@ -1450,14 +1450,18 @@ function restoreApprovals(){
     const adm=adminPlayers.find(p=>p.email===ap.email||p.username===ap.username);
     if(adm){
       // Update existing entry — respect stored status (active, suspended, etc.)
-      adm.status=ap.status||'active'; adm.careerStatus=ap.careerStatus; adm.ppr=ap.ppr;
+      // Use ?? so that if ap.status is undefined (old entries without explicit status),
+      // we preserve whatever verificationStatus initFromRegistered() already set.
+      adm.status=ap.status??adm.status; adm.careerStatus=ap.careerStatus; adm.ppr=ap.ppr;
       adm.mw=ap.mw||adm.mw||0; adm.ml=ap.ml||adm.ml||0;
     } else {
-      // No adminPlayers entry yet (fresh reload) — create one from approvedPlayers data
+      // No adminPlayers entry yet (fresh reload) — create one from approvedPlayers data.
+      // Check registeredUsers for the authoritative verificationStatus in case ap.status is unset.
+      const _ru=registeredUsers.find(r=>r.email===ap.email||r.username===ap.username);
       adminPlayers.push({
         id:ap.id, name:ap.name, username:ap.username||'', email:ap.email||'',
         phone:ap.phone||'', region:ap.region||'', role:'player',
-        status:ap.status||'active', careerStatus:ap.careerStatus, ppr:ap.ppr,
+        status:ap.status??(_ru?.verificationStatus)||'active', careerStatus:ap.careerStatus, ppr:ap.ppr,
         mw:ap.mw||0, ml:ap.ml||0, rw:ap.rw||0, rl:ap.rl||0, mi:ap.mi||0, sos:0,
         colors:ap.colors||'#1a3a22', fmt:ap.fmt||'9-Ball',
         joined:ap.approvedAt?ap.approvedAt.slice(0,10):'',
@@ -6021,7 +6025,7 @@ function admApprovePlayer(id){
   // Persist approval to localStorage so it survives page reload
   const apIdx=approvedPlayers.findIndex(x=>x.email===p.email||x.username===p.username);
   const apEntry={id:p.id,name:p.name,username:p.username||'',email:p.email||'',
-    region:p.region||'',careerStatus,ppr:initPPR,fmt:p.fmt||'9-Ball',
+    region:p.region||'',careerStatus,ppr:initPPR,status:'active',fmt:p.fmt||'9-Ball',
     colors:p.colors||'#1a3a22',mw:0,ml:0,rw:0,rl:0,mi:0};
   if(apIdx>=0) approvedPlayers[apIdx]=apEntry; else approvedPlayers.push(apEntry);
   saveApprovedPlayers();
