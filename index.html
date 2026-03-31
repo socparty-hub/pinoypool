@@ -5548,7 +5548,7 @@ function admTab(btn,tab){
           </div>
           <div class="adm-actions">
             <span class="status-pill ${sClass}">● ${p.status}</span>
-            <select style="width:auto;padding:5px 9px;font-size:.78rem;" onchange="admSetPlayerStatus(${p.id},this.value)">
+            <select style="width:auto;padding:5px 9px;font-size:.78rem;" onchange="admSetPlayerStatus('${p.id}',this.value)">
               ${STATUS_OPTS.map(s=>`<option value="${s}"${p.status===s?' selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
             </select>
             <select style="width:auto;padding:5px 9px;font-size:.78rem;" title="Career Status" onchange="admSetCareer('${p.id}',this.value)">
