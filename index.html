@@ -1601,11 +1601,13 @@ function restoreTournaments(){
 function _refreshTournamentSelect(){
   const sel=document.getElementById('sel-tournament');
   if(!sel) return;
+  const cur=sel.value;
   const isOwner=app.user?.role==='owner';
   const ownerHall=isOwner?(app.user?.hall||''):'';
   const visible=TOURNAMENTS.filter(t=>!isOwner||!ownerHall||t.venue.toLowerCase().includes(ownerHall.toLowerCase()));
   sel.innerHTML='<option value="">Select tournament...</option>'+
     visible.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  if(cur) sel.value=cur;
 }
 function _refreshVenueSelect(){
   const sel=document.getElementById('sel-venue');
@@ -2201,11 +2203,7 @@ function applyMatchTypeUI(type){
   const tournFg=document.getElementById('tourn-fg');
   if(tournFg){
     tournFg.style.display=isTournament?'block':'none';
-    if(isTournament){
-      const sel=document.getElementById('sel-tournament');
-      sel.innerHTML='<option value="">Select tournament...</option>'+
-        availTournaments.map(t=>`<option value="${t.name}">${t.name}</option>`).join('');
-    }
+    if(isTournament) _refreshTournamentSelect();
   }
   // Handicap sections
   const p1hcp=document.getElementById('p1-hcp-area');
@@ -6032,8 +6030,23 @@ function admSetCareer(id,tier){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
   if(!p)return;
   p.careerStatus=tier;
+  // Propagate to approvedPlayers (persistent store)
+  const ap=approvedPlayers.find(x=>x.id===p.id||x.email===p.email||x.username===p.username);
+  if(ap){ ap.careerStatus=tier; }
+  // Propagate to PLAYERS[] (used for K-factor in PPR calculations)
+  const pl=PLAYERS.find(x=>x.name===p.name||x.id===p.id);
+  if(pl){ pl.status=tier; }
+  // Persist to localStorage so change survives page reload
+  saveApprovedPlayers();
+  // Rebuild PPR so K-factor and initial PPR reflect the new career status
+  rebuildStatsFromMatches();
+  buildDashboard();
+  // Persist to backend
+  fetch('/api/registrations/'+String(id),{method:'PATCH',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({careerStatus:tier,updatedAt:new Date().toISOString()})
+  }).catch(()=>{});
   admRefresh();
-  toast(`✅ <strong>${p.name}</strong> career status → <strong>${tier}</strong>.`);
+  toast(`✅ <strong>${p.name}</strong> career status → <strong>${tier}</strong>. Rankings updated.`);
 }
 function admApprovePlayer(id){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
