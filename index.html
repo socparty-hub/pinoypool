@@ -30,9 +30,10 @@ header{position:sticky;top:0;z-index:90;background:linear-gradient(180deg,rgba(1
 .logo-text h1{font-family:'Epilogue',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:3px;color:var(--gold);line-height:1;}
 .logo-text span{display:block;font-size:0.56rem;letter-spacing:3.5px;color:var(--chalk);text-transform:uppercase;margin-top:-2px;}
 nav{display:flex;gap:2px;}
-.nb{position:relative;background:none;border:none;color:var(--chalk);font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:0.78rem;letter-spacing:1.5px;text-transform:uppercase;padding:8px 13px;cursor:pointer;border-radius:5px;transition:all .2s;white-space:nowrap;}
+.nb{position:relative;background:none;border:none;color:var(--chalk);font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:0.95rem;letter-spacing:3px;text-transform:uppercase;padding:8px 13px;cursor:pointer;border-radius:5px;transition:all .2s;white-space:nowrap;}
 .nb:hover,.nb.act{background:var(--gold-dim);color:var(--gold);}
 .nb.act{border-bottom:2px solid var(--gold);border-radius:5px 5px 0 0;}
+#nb-admin{display:none!important;}
 .nav-badge{position:absolute;top:2px;right:3px;background:#e55;color:#fff;font-size:.52rem;font-weight:700;min-width:14px;height:14px;border-radius:7px;padding:0 3px;display:flex;align-items:center;justify-content:center;line-height:1;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.4);}
 .hdr-right{display:flex;gap:8px;align-items:center;}
 .auth-bar{display:none;align-items:center;gap:8px;font-size:0.82rem;color:var(--chalk);}
@@ -155,6 +156,7 @@ textarea{resize:vertical;min-height:75px;}
 .rn{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;color:rgba(200,168,75,.35);width:36px;}
 .rn.top{color:var(--gold);}
 .pp{display:flex;align-items:center;gap:8px;}
+#dash-top5 .pp{white-space:nowrap;flex-wrap:nowrap;}
 .av{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.78rem;flex-shrink:0;}
 .wrb{display:flex;align-items:center;gap:6px;}
 .bt{width:60px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;}
@@ -647,12 +649,12 @@ textarea{resize:vertical;min-height:75px;}
   <nav id="main-nav">
     <button class="nb act" onclick="sv('dashboard',this)">Dashboard</button>
     <button class="nb" id="nb-match" onclick="sv('match',this)" style="display:none">Record Match</button>
-    <button class="nb" onclick="sv('live',this)">📺 Watch Now</button>
+    <button class="nb" onclick="sv('live',this)">Watch Now</button>
     <button class="nb" onclick="sv('rankings',this)">Rankings</button>
     <button class="nb" onclick="sv('halls',this)">Find Halls</button>
     <button class="nb" id="nb-player-portal" onclick="sv('player-portal',this)" style="display:none">🎱 My Portal</button>
     <button class="nb" id="nb-portal" onclick="sv('portal',this)" style="display:none">🏢 Hall Portal</button>
-    <button class="nb" id="nb-admin" onclick="sv('admin',this)" style="display:none;color:#e55;border-color:rgba(184,50,40,.3);">⚙️ Admin</button>
+    <button class="nb" id="nb-admin" onclick="sv('admin',this)" style="display:none!important;color:#e55;border-color:rgba(184,50,40,.3);">⚙️ Admin</button>
   </nav>
   <div class="hdr-right">
     <div class="auth-bar" id="auth-bar">
@@ -686,9 +688,9 @@ textarea{resize:vertical;min-height:75px;}
     <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,8vw,5.5rem);line-height:.9;text-shadow:0 4px 38px rgba(0,0,0,.5);margin-bottom:.9rem;">WHERE LEGENDS<br><span style="color:var(--gold);">ARE DISCOVERED</span></h2>
     <p style="color:var(--chalk);max-width:460px;margin:0 auto 1.4rem;line-height:1.65;font-size:.93rem;">Verified matches. National rankings. Real talent, real recognition.</p>
     <div class="hero-btns">
-      <button class="btn btn-p" id="hero-cta" onclick="openAuth()">🎱 Join PinoyPool</button>
+      <button class="btn btn-p" id="hero-cta" onclick="openAuth()">Join PinoyPool</button>
       <button class="btn btn-o" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">View Rankings</button>
-      <button class="btn btn-g" onclick="sv('live',document.querySelectorAll('.nb')[2])">📺 Watch Now</button>
+      <button class="btn btn-g" onclick="sv('live',document.querySelectorAll('.nb')[2])">Watch Now</button>
     </div>
   </div>
 
@@ -709,8 +711,8 @@ textarea{resize:vertical;min-height:75px;}
       </div>
     </div>
     <div class="card">
-      <div class="ct">🏆 National Top 5</div>
-      <table class="rt" id="dash-top5"><thead><tr><th>#</th><th>Player</th><th>W/L Matches</th><th>Win%</th></tr></thead>
+      <div class="ct">🏆 Overall Top 5</div>
+      <table class="rt" id="dash-top5"><thead><tr><th>#</th><th>Player</th><th style="text-align:center;">Total Matches</th><th style="text-align:center;">Win%</th></tr></thead>
       <tbody><tr><td colspan="4" style="text-align:center;color:var(--chalk2);padding:1.2rem;font-size:.82rem;">No registered players yet.</td></tr></tbody></table>
     </div>
   </div>
@@ -935,7 +937,7 @@ textarea{resize:vertical;min-height:75px;}
      WATCH NOW
 ══════════════════════════════════════════ -->
 <div id="view-live" class="view">
-  <div class="ph">📺 Watch Now</div>
+  <div class="ph">Watch Now</div>
   <div class="ps">All active matches · Stream indicators · Watch live from players and hall owners</div>
   <div style="display:flex;gap:1rem;align-items:center;margin-bottom:1.4rem;flex-wrap:wrap;">
     <div style="flex:1;min-width:200px;max-width:320px;position:relative;">
@@ -996,9 +998,17 @@ textarea{resize:vertical;min-height:75px;}
   <div class="ps">Registered & verified venues across the Philippines</div>
   <div class="card" style="margin-bottom:1.4rem;">
     <div style="display:flex;gap:.9rem;flex-wrap:wrap;align-items:center;">
-      <input type="text" placeholder="🔍 Search by city or name..." style="flex:1;min-width:200px;max-width:300px;">
-      <div class="tg" style="width:auto;"><button class="tb act">All</button><button class="tb">NCR</button><button class="tb">Cebu</button><button class="tb">Davao</button></div>
-      <button class="btn btn-p btn-sm" onclick="openRegHall()">+ Register Your Hall</button>
+      <input type="text" id="hall-search" placeholder="🔍 Search hall name..." style="flex:1;min-width:160px;max-width:260px;" oninput="buildHalls()">
+      <select id="hall-region-filter" style="flex:1;min-width:180px;max-width:280px;background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:1.5px;cursor:pointer;" onchange="buildHalls()">
+        <option value="">All Regions</option>
+        <option>NCR – Metro Manila</option>
+        <option>Region III – Central Luzon</option>
+        <option>Region IV-A – CALABARZON</option>
+        <option>Region VI – Western Visayas</option>
+        <option>Region VII – Central Visayas</option>
+        <option>Region XI – Davao Region</option>
+      </select>
+      <button id="hall-reg-btn" class="btn btn-p btn-sm" onclick="openRegHall()" style="display:none;">+ Register Your Hall</button>
     </div>
   </div>
   <div class="hgrid" id="hall-grid"></div>
@@ -1329,15 +1339,15 @@ function buildDashboard(){
   // — National Top 5 —
   const tbody=document.querySelector('#dash-top5 tbody');
   if(tbody){
-    const top5=[...PLAYERS].sort((a,b)=>b.ppr-a.ppr).slice(0,5);
+    const top5=[...PLAYERS].filter(p=>{const adm=adminPlayers.find(a=>a.name===p.name||(a.email&&a.email===p.email));return !adm||adm.status==='active';}).sort((a,b)=>b.ppr-a.ppr).slice(0,5);
     if(top5.length===0){
       tbody.innerHTML=`<tr><td colspan="4" style="text-align:center;color:var(--chalk2);padding:1.2rem;font-size:.82rem;">No registered players yet.</td></tr>`;
     } else {
       tbody.innerHTML=top5.map((p,i)=>{
         const total=p.mw+p.ml;
         const wp=total?Math.round(p.mw/total*100):0;
-        const ini=p.name.split(' ').filter(w=>w.length>1).map(w=>w[0]).join('').slice(0,2).toUpperCase();
-        return `<tr><td class="rn${i<3?' top':''}">${i+1}</td><td><div class="pp"><div class="av" style="background:${p.colors||'#1a3a22'}">${ini}</div>${fmtPlayerName(p.name)}</div></td><td><span style="color:var(--grn3);">${p.mw}</span>/<span style="color:#e55;">${p.ml}</span></td><td><div class="wrb"><div class="bt"><div class="bf" style="width:${wp}%;"></div></div>${wp}%</div></td></tr>`;
+        const tier=careerTier(p.mw,p.ml,p.status||p.careerStatus);
+        return `<tr style="cursor:pointer" onclick="sv('rankings',document.querySelectorAll('.nb')[3])"><td class="rn${i<3?' top':''}">${i+1}</td><td><div class="pp">${fmtPlayerName(p.name)} ${tierBadge(tier)}</div></td><td style="text-align:center;">${total}</td><td style="text-align:center;"><div class="wrb" style="justify-content:center;"><div class="bt"><div class="bf" style="width:${wp}%;"></div></div>${wp}%</div></td></tr>`;
       }).join('');
     }
   }
@@ -1424,7 +1434,7 @@ const TEST_ACCOUNTS=[
     email:'dennis.po@pool.ph',
     name:'Dennis Po', role:'player', initials:'DP', username:'dennispo',
     dob:'1990-01-01', phone:'09171234567',
-    email_addr:'dennis.po@pool.ph', region:'NCR'
+    email_addr:'dennis.po@pool.ph', region:'NCR – Metro Manila'
   }
 ];
 (function initTestPasswords(){
@@ -1563,7 +1573,7 @@ function restoreApprovedHalls(){
     if(!existing){adminHalls.push({...ah,status:'active'});}
     else{existing.status='active';}
     if(!HALLS.find(h=>h.n===ah.name)){
-      HALLS.push({n:ah.name,c:ah.city,t:ah.tables||0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:ah.fb||'—'});
+      HALLS.push({n:ah.name,c:ah.region||ah.city,t:ah.tables||0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:ah.fb||'—'});
     }
   });
   // Also restore pending hall applications so admin can review them after page reload
@@ -1710,7 +1720,7 @@ function doRegister(){
     if(role==='owner'&&!adminHalls.find(h=>h.email===em)){
       const newHall={
         id:backendId||'h'+Date.now(), name:hall||'Unknown Hall', owner:name, username:un,
-        city:addr||region||'—', tables:0, contact:ph, email:em, fb:'—',
+        city:addr||region||'—', region:region||'', tables:0, contact:ph, email:em, fb:'—',
         status:'pending', submitted:new Date().toISOString().slice(0,10)
       };
       adminHalls.unshift(newHall);
@@ -1853,7 +1863,7 @@ function setUser(u){
       heroCta.textContent='⚡ Record Match';
       heroCta.onclick=()=>sv('match',null);
     } else {
-      heroCta.textContent='🎱 Join PinoyPool';
+      heroCta.textContent='Join PinoyPool';
       heroCta.onclick=openAuth;
     }
   }
@@ -1921,7 +1931,7 @@ function logout(){
   const rb=document.getElementById('hdr-role');if(rb)rb.remove();
   // Restore hero CTA
   const heroCta=document.getElementById('hero-cta');
-  if(heroCta){heroCta.textContent='🎱 Join PinoyPool';heroCta.onclick=openAuth;}
+  if(heroCta){heroCta.textContent='Join PinoyPool';heroCta.onclick=openAuth;}
   // Restore challenge button label
   const cBtn=document.getElementById('send-challenge-btn');
   if(cBtn) cBtn.innerHTML='📨 Send Match Challenge';
@@ -1951,7 +1961,7 @@ function acSearch(inpId, listId){
   const pool=[
     ...activeAP.map(p=>{
       const pl=PLAYERS.find(x=>x.id===p.id||x.name===p.name);
-      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',colors:p.colors||'#1a3a22',rank:pl?.rank||99};
+      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:p.careerStatus||pl?.status||pl?.careerStatus||'Amateur',colors:p.colors||'#1a3a22',rank:pl?.rank||99};
     }),
     ...PLAYERS.filter(p=>!apNames.has(p.name))
   ];
@@ -1962,7 +1972,7 @@ function acSearch(inpId, listId){
       <div class="ac-av" style="background:${p.colors}">${getInit(p.name)}</div>
       <div>
         <div style="font-weight:600;">${fmtPlayerName(p.name)}</div>
-        <div style="font-size:.68rem;color:var(--chalk);">${p.region} · ${fmtBallTag(p.fmt)}</div>
+        <div style="font-size:.68rem;color:var(--chalk);">${p.region} · ${tierBadge(careerTier(0,0,p.careerStatus))}</div>
       </div>
       <div class="ac-rank">#${p.rank==='99'||p.rank===99?'—':p.rank}</div>
     </div>`).join('');
@@ -3677,19 +3687,46 @@ function renderLbTab(tab){
 }
 
 /* ══════════════════ HALLS ══════════════════ */
+const REGION_FULL={
+  'NCR':'NCR – Metro Manila','CAR':'CAR – Cordillera',
+  'Region I':'Region I – Ilocos','Region II':'Region II – Cagayan Valley',
+  'Region III':'Region III – Central Luzon','Region IV-A':'Region IV-A – CALABARZON',
+  'Region IV-B':'Region IV-B – MIMAROPA','Region V':'Region V – Bicol',
+  'Region VI':'Region VI – Western Visayas','Region VII':'Region VII – Central Visayas',
+  'Region VIII':'Region VIII – Eastern Visayas','Region IX':'Region IX – Zamboanga Peninsula',
+  'Region X':'Region X – Northern Mindanao','Region XI':'Region XI – Davao Region',
+  'Region XII':'Region XII – SOCCSKSARGEN','Region XIII':'Region XIII – Caraga','BARMM':'BARMM'
+};
+function fullRegion(r){return REGION_FULL[r]||r||'—';}
 function buildHalls(){
-  document.getElementById('hall-grid').innerHTML=HALLS.map(h=>{
+  // Show register button only for owner/admin
+  const _regBtn=document.getElementById('hall-reg-btn');
+  if(_regBtn) _regBtn.style.display=(app.user&&(app.user.role==='owner'||app.user.role==='admin'))?'':'none';
+  const _q=(document.getElementById('hall-search')?.value||'').toLowerCase().trim();
+  const _region=document.getElementById('hall-region-filter')?.value||'';
+  const _suspendedNames=new Set(adminPlayers.filter(p=>p.status==='suspended').map(p=>p.name));
+  const _filtered=HALLS.filter(h=>{
+    if(_q&&!h.n.toLowerCase().includes(_q)) return false;
+    if(_region&&fullRegion(h.c)!==_region) return false;
+    return true;
+  });
+  if(!_filtered.length){
+    document.getElementById('hall-grid').innerHTML='<div style="color:var(--chalk2);font-size:.88rem;text-align:center;padding:3rem 0;">No halls found.</div>';
+    return;
+  }
+  document.getElementById('hall-grid').innerHTML=_filtered.map(h=>{
     const _activeCnt=new Set(
       adminMatches.filter(m=>m.status==='approved'&&m.venue&&(m.venue===h.n||m.venue.startsWith(h.n)))
         .flatMap(m=>[m.p1,m.p2].filter(Boolean))
+        .filter(name=>!_suspendedNames.has(name))
     ).size;
     return `
-    <div class="hc" onclick="toast('📍 <strong>${h.n}</strong> — ${h.c}')">
+    <div class="hc" onclick="toast('📍 <strong>${h.n}</strong> — ${fullRegion(h.c)}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:1.5px;">${h.n}</div>
         ${h.open?'<span style="font-size:.7rem;color:var(--grn3);"><span class="dot dg"></span>Open</span>':'<span style="font-size:.7rem;color:var(--chalk);">Closed</span>'}
       </div>
-      <div style="font-size:.76rem;color:var(--chalk);margin-bottom:7px;">📍 ${h.c}</div>
+      <div style="font-size:.76rem;color:var(--chalk);margin-bottom:7px;">📍 ${fullRegion(h.c)}</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:6px;">
         <span style="font-size:.7rem;color:var(--chalk);">👥 ${_activeCnt} active</span>
       </div>
@@ -4912,7 +4949,7 @@ function acSearchM(inpId,listId,pNum){
   const pool=[
     ...activeAP.map(p=>{
       const pl=PLAYERS.find(x=>x.id===p.id||x.name===p.name);
-      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',colors:p.colors||'#1a3a22',rank:pl?.rank||99};
+      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:p.careerStatus||pl?.status||pl?.careerStatus||'Amateur',colors:p.colors||'#1a3a22',rank:pl?.rank||99};
     }),
     ...PLAYERS.filter(p=>!apNames.has(p.name))
   ];
@@ -4922,7 +4959,7 @@ function acSearchM(inpId,listId,pNum){
     <div class="ac-item" onclick="selectMPlayer('${p.id}','${inpId}','${listId}',${pNum})">
       <div class="ac-av" style="background:${p.colors}">${getInit(p.name)}</div>
       <div><div style="font-weight:600;">${fmtPlayerName(p.name)}</div>
-        <div style="font-size:.68rem;color:var(--chalk);">${p.region} · ${fmtBallTag(p.fmt)}</div>
+        <div style="font-size:.68rem;color:var(--chalk);">${p.region} · ${tierBadge(careerTier(0,0,p.careerStatus))}</div>
       </div>
       <div class="ac-rank">#${p.rank===99?'—':p.rank}</div>
     </div>`).join('');
@@ -5786,7 +5823,9 @@ function admTab(btn,tab){
 
 function admResetAllData(){
   if(!confirm('⚠️ This will permanently delete ALL registrations, players, halls, and match data. Continue?')) return;
-  fetch('/api/admin/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:'Admin1234'})})
+  const _rp=prompt('Enter admin reset password:');
+  if(!_rp) return;
+  fetch('/api/admin/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:_rp})})
     .then(r=>r.json())
     .then(d=>{
       if(!d.ok){toast('⚠️ Reset failed: '+(d.error||'unknown error'));return;}
@@ -6053,9 +6092,23 @@ function admSuspendPlayer(id){
 function admRejectPlayer(id){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
   if(!p)return;
+  // Remove from adminPlayers
   adminPlayers.splice(adminPlayers.indexOf(p),1);
+  // Remove from registeredUsers so username is freed
+  const ruIdx=registeredUsers.findIndex(u=>u.email===p.email||u.username===p.username);
+  if(ruIdx!==-1){registeredUsers.splice(ruIdx,1);saveRegisteredUsers();}
+  // Remove from approvedPlayers if somehow present
+  const apIdx=approvedPlayers.findIndex(u=>u.email===p.email||u.name===p.name);
+  if(apIdx!==-1){approvedPlayers.splice(apIdx,1);saveApprovedPlayers();}
+  // Remove from in-memory PLAYERS list
+  const plIdx=PLAYERS.findIndex(u=>u.name===p.name);
+  if(plIdx!==-1) PLAYERS.splice(plIdx,1);
+  // Notify backend
+  fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({status:'rejected',rejectedAt:new Date().toISOString()})
+  }).catch(()=>{});
   admRefresh();
-  toast(`✗ <strong>${p.name}</strong> registration rejected and removed.`);
+  toast(`✗ <strong>${p.name}</strong> registration rejected. Username <strong>${p.username||p.email}</strong> is now available again.`);
 }
 /* ── Hall actions ── */
 function admApproveHall(id){
@@ -6073,7 +6126,7 @@ function admApproveHall(id){
   try{localStorage.setItem('pp_pendingHalls',JSON.stringify(_pendHalls));}catch{}
   // Add to public HALLS list
   if(!HALLS.find(x=>x.n===h.name))
-    HALLS.push({n:h.name,c:h.city,t:h.tables||0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:h.fb&&h.fb!=='—'?h.fb.replace('fb.com/',''):'—'});
+    HALLS.push({n:h.name,c:h.region||h.city,t:h.tables||0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:h.fb&&h.fb!=='—'?h.fb.replace('fb.com/',''):'—'});
   _refreshVenueSelect();
   // Persist approval to backend
   fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
@@ -6199,7 +6252,7 @@ function initFromBackend(){
           }
           // If approved, make sure hall is in the public HALLS list
           if(r.status==='active'&&!HALLS.find(h=>h.n===r.hallName)){
-            HALLS.push({n:r.hallName||'Unknown Hall',c:r.city||'',t:0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:'—'});
+            HALLS.push({n:r.hallName||'Unknown Hall',c:r.region||r.city||'',t:0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:'—'});
           }
         }
       });

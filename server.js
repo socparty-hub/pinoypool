@@ -58,7 +58,7 @@ app.post('/api/register', async (req, res) => {
   };
   users.push(entry);
   await db.set('pp_registeredUsers', JSON.stringify(users));
-  console.log(`[REG] New ${role} registration: ${entry.name} (${email || 'no email'})`);
+  console.log(`[REG] New ${role} registration received (id: ${entry.id})`);
   res.json({ ok: true, id: entry.id, message: 'Registration received! Admin will review and activate your account within 24–48 hours.' });
 });
 
@@ -110,7 +110,8 @@ app.patch('/api/registrations/:id', async (req, res) => {
 /* ── API: admin data reset (clears all server-side data) ── */
 app.post('/api/admin/reset', async (req, res) => {
   const { password } = req.body;
-  if (password !== 'Admin1234') return res.status(403).json({ ok: false, error: 'Forbidden' });
+  const RESET_PW = process.env.ADMIN_RESET_PASSWORD;
+  if (!RESET_PW || password !== RESET_PW) return res.status(403).json({ ok: false, error: 'Forbidden' });
   for (const k of db.ALLOWED_KEYS.filter(k => k !== 'pp_testPasswords')) {
     await db.set(k, '[]');
   }
@@ -153,7 +154,7 @@ app.get('*', async (req, res) => {
 });
 
 /* ── Start: log env, connect to MySQL, then listen ── */
-console.error(`[STARTUP] PORT=${process.env.PORT} DB_HOST=${process.env.DB_HOST} DB_USER=${process.env.DB_USER} DB_NAME=${process.env.DB_NAME}`);
+console.error(`[STARTUP] PORT=${process.env.PORT} DB_NAME=${process.env.DB_NAME}`);
 
 db.init()
   .then(() => {
