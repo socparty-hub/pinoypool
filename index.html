@@ -5823,7 +5823,9 @@ function admTab(btn,tab){
 
 function admResetAllData(){
   if(!confirm('⚠️ This will permanently delete ALL registrations, players, halls, and match data. Continue?')) return;
-  fetch('/api/admin/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:'Admin1234'})})
+  const _rp=prompt('Enter admin reset password:');
+  if(!_rp) return;
+  fetch('/api/admin/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:_rp})})
     .then(r=>r.json())
     .then(d=>{
       if(!d.ok){toast('⚠️ Reset failed: '+(d.error||'unknown error'));return;}
