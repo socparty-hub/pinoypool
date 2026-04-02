@@ -368,6 +368,9 @@ textarea{resize:vertical;min-height:75px;}
   .srow{gap:.6rem;margin-bottom:1.2rem;}
   .g2,.g3{gap:clamp(.5rem,2.5vw,1.4rem);}
   .le{padding:7px clamp(7px,2.5vw,11px);}
+  /* Player portal header — stack vertically, stats in 3-col grid */
+  .pp-hdr{flex-direction:column;align-items:flex-start;gap:.85rem;}
+  #pp-hdr-stats{display:grid!important;grid-template-columns:repeat(3,1fr);gap:.6rem .5rem;width:100%;text-align:center;}
   /* Hero tighter */
   #view-dashboard>div:first-child{padding:1.4rem 0 .8rem!important;}
   /* Win-bar too cramped on mobile — hide it, keep % */
@@ -4114,10 +4117,10 @@ function buildPlayerPortal(){
   document.getElementById('pp-hdr-stats').innerHTML=`
     <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);">#${p.rank}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Overall Rank</div></div>
     <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold2);">${p.ppr||_base}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Overall PPR</div></div>
+    <div><div style="font-size:1rem;font-weight:700;color:${_tier.color};background:${_tier.bg};border:1px solid ${_tier.border};border-radius:6px;padding:3px 10px;margin-top:2px;">${_tier.label}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);margin-top:3px;">Status</div></div>
     <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#f5c842;">${_ppr9}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank9}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">9-Ball</div></div>
     <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#4a9eff;">${_ppr10}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank10}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">10-Ball</div></div>
-    <div><div style="font-family:'DM Mono',monospace;font-size:1.7rem;font-weight:700;color:${_miCol};">${_miSign}${p.mi||0}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Momentum</div></div>
-    <div><div style="font-size:1rem;font-weight:700;color:${_tier.color};background:${_tier.bg};border:1px solid ${_tier.border};border-radius:6px;padding:3px 10px;margin-top:2px;">${_tier.label}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);margin-top:3px;">Status</div></div>`;
+    <div><div style="font-family:'DM Mono',monospace;font-size:1.7rem;font-weight:700;color:${_miCol};">${_miSign}${p.mi||0}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Momentum</div></div>`;
 
   // Show first tab
   ppTab(document.querySelector('.pp-tab'),'validation');
