@@ -1448,11 +1448,14 @@ function restoreApprovals(){
   approvedPlayers.forEach(ap=>{
     const adm=adminPlayers.find(p=>p.email===ap.email||p.username===ap.username);
     if(adm){
-      // Update existing entry — respect stored status (active, suspended, etc.)
-      // Use ?? so that if ap.status is undefined (old entries without explicit status),
-      // we preserve whatever verificationStatus initFromRegistered() already set.
-      adm.status=ap.status??adm.status; adm.careerStatus=ap.careerStatus; adm.ppr=ap.ppr;
+      // Update existing entry — respect stored status (active, suspended, review, etc.)
+      // Old approvedPlayers entries may not have an explicit status field — default to 'active'
+      // since presence in approvedPlayers means the admin approved them.
+      // || instead of ?? so undefined/null/'' all default to 'active'; 'suspended'/'pending'/'review' are truthy and preserved.
+      adm.status=ap.status||'active'; adm.careerStatus=ap.careerStatus; adm.ppr=ap.ppr;
       adm.mw=ap.mw||adm.mw||0; adm.ml=ap.ml||adm.ml||0;
+      // Backfill missing status on old entries so future reloads work correctly
+      if(!ap.status){ ap.status='active'; }
     } else {
       // No adminPlayers entry yet (fresh reload) — create one from approvedPlayers data.
       // Check registeredUsers for the authoritative verificationStatus in case ap.status is unset.
@@ -1482,6 +1485,8 @@ function restoreApprovals(){
     }
   });
   if(approvedPlayers.length) PLAYERS.sort((a,b)=>b.ppr-a.ppr).forEach((pl,i)=>pl.rank=i+1);
+  // Persist any backfilled status fields so old data is fixed permanently on next reload
+  try{saveApprovedPlayers();}catch{}
 }
 
 /* Rebuild player W/L records and PPR from the authoritative match history.
