@@ -1309,7 +1309,7 @@ function buildDashboard(){
   if(lc){
     const adminVer=typeof adminMatches!=='undefined'
       ?adminMatches.filter(x=>x.status==='approved').map(x=>({
-          p1:x.p1,p2:x.p2,fmt:x.fmt,type:x.type,sc:x.score,date:x.date,ts:x.date,label:'Admin Approved'
+          ...x,sc:x.score,ts:x.date,label:'Admin Approved'
         }))
       :[];
     const allM=[...adminVer];
