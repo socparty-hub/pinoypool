@@ -6445,13 +6445,17 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
   }catch{}
 })();
 
-// ── Backfill missing fmt/type fields on existing adminMatches ──
+// ── Backfill missing fmt/type/venueOk fields on existing adminMatches ──
 (function backfillMatchFields(){
   let changed=false;
   adminMatches.forEach(m=>{
     if(!m.fmt){m.fmt='9-Ball';changed=true;}
     if(!m.type){m.type='Exhibition';changed=true;}
     if(!m.venue){m.venue='—';changed=true;}
+    // If a match was fully approved by both players and admin (status==='approved')
+    // but venueOk is missing (recorded before venue confirmation was tracked),
+    // treat it as venue-confirmed so it counts toward PPR/ratings rebuild.
+    if(m.status==='approved'&&m.p1ok&&m.p2ok&&!m.venueOk){m.venueOk=true;changed=true;}
   });
   if(changed) saveAdminMatches();
 })();
