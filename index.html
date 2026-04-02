@@ -4323,7 +4323,7 @@ function ppTab(btn,tab){
                 <span style="font-family:'DM Mono',monospace;color:${m.result==='W'?'var(--grn3)':m.result==='L'?'#e55':'var(--gold)'};">${m.score}</span>
                 <span class="tag ${m.result==='W'?'tok':m.result==='L'?'thc':'tgd'}" style="margin-left:4px;">${m.result==='W'?'WIN':m.result==='L'?'LOSS':'DRAW'}</span>
               </td>
-              <td style="font-size:.73rem;color:${m.hcp!=='None'?'#e55':'var(--chalk2)'};">${m.hcp}</td>
+              <td style="font-size:.73rem;color:${m.hasHcp?'#e55':'var(--chalk2)'};">${m.hcp}</td>
               <td style="font-size:.73rem;color:var(--chalk);">${m.venue}</td>
               <td style="font-size:.72rem;color:var(--chalk2);">${fmtDate(m.date)}</td>
               <td><span class="tag tok">✓ ${m.status}</span></td>
@@ -4526,8 +4526,11 @@ function getPlayerMatchHistory(playerName){
       const result=myScore>oppScore?'W':myScore<oppScore?'L':'D';
       const scoreStr=`${myScore}–${oppScore}`;
       const oppRank=PLAYERS.find(p=>p.name===opp)?.rank||'?';
+      const myBalls=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[isP1?0:1])?m.hcpBalls[isP1?0:1]:[];
+      const ballsStr=myBalls.length?`(${[...myBalls].sort((a,b)=>a-b).join(',')})`:''
+      const hcpDisplay=(m.hcp&&m.hcp!=='None')?m.hcp+(ballsStr?` · ${ballsStr}`:''):(ballsStr||'None');
       return {opponent:opp,opponentRank:oppRank,fmt:m.fmt||'9-Ball',type:m.type||'Exhibition',
-        score:scoreStr,hcp:m.hcp||'None',venue:m.venue||'—',date:m.date||'—',result,status:'Verified'};
+        score:scoreStr,hcp:hcpDisplay,hasHcp:!!(m.hcp&&m.hcp!=='None')||myBalls.length>0,venue:m.venue||'—',date:m.date||'—',result,status:'Verified'};
     });
 }
 function ppSortHistory(sort){
