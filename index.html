@@ -361,11 +361,13 @@ textarea{resize:vertical;min-height:75px;}
   #auth-bar .btn{display:none!important;}
   /* Compact login button */
   #btn-login{font-size:.62rem;padding:5px 10px;letter-spacing:.5px;}
-  .view{padding:1rem .9rem 1.5rem;}
+  .view{padding:1rem clamp(.4rem,3.5vw,.9rem) 1.5rem;}
   /* Smaller card + stat padding */
-  .card{padding:1rem;}
+  .card{padding:clamp(.7rem,3vw,1rem) clamp(.65rem,2.8vw,1rem);}
   .sc{padding:.9rem .7rem;}
   .srow{gap:.6rem;margin-bottom:1.2rem;}
+  .g2,.g3{gap:clamp(.5rem,2.5vw,1.4rem);}
+  .le{padding:7px clamp(7px,2.5vw,11px);}
   /* Hero tighter */
   #view-dashboard>div:first-child{padding:1.4rem 0 .8rem!important;}
   /* Win-bar too cramped on mobile — hide it, keep % */
