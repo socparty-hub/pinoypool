@@ -325,17 +325,43 @@ textarea{resize:vertical;min-height:75px;}
   .g2,.g3,.g31,.g31{grid-template-columns:1fr;}
   .pa-grid{grid-template-columns:repeat(2,1fr);}
   nav{display:none;}
-  /* Compact header — logo centered, avatar right only */
+  /* Compact header — logo centered, hamburger left, avatar right */
   header{height:52px;padding:0 .9rem;justify-content:center;position:relative;}
   .logo-text span{display:none;}
   .hdr-right{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);}
+  /* Hamburger button */
+  #hdr-ham{display:flex!important;}
+  #hdr-ham{
+    display:flex;align-items:center;justify-content:center;
+    position:absolute;left:.9rem;top:50%;transform:translateY(-50%);
+    background:none;border:1px solid var(--gold-border);border-radius:6px;
+    color:var(--gold);width:32px;height:32px;cursor:pointer;font-size:1rem;
+    z-index:92;transition:background .2s;
+  }
+  #hdr-ham:hover,#hdr-ham.open{background:var(--gold-dim);}
+  /* Mobile nav slide-down overlay */
+  nav#main-nav.open{
+    display:flex!important;flex-direction:column;
+    position:fixed;top:52px;left:0;right:0;
+    background:rgba(8,14,10,0.98);border-bottom:2px solid var(--gold);
+    z-index:91;padding:.4rem 0 .6rem;
+    backdrop-filter:blur(16px);
+    animation:hamSlide .18s ease;
+  }
+  nav#main-nav.open .nb{
+    font-size:.9rem;letter-spacing:2px;padding:13px 1.4rem;
+    border-radius:0;text-align:left;width:100%;
+    border-bottom:1px solid rgba(212,175,55,.07);
+  }
+  nav#main-nav.open .nb:last-child{border-bottom:none;}
+  nav#main-nav.open .nb.act{border-bottom:1px solid rgba(212,175,55,.07);border-radius:0;}
+  @keyframes hamSlide{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
   /* Hide name, role badge and logout on mobile — avatar only */
   #hdr-name,#hdr-role{display:none!important;}
   #auth-bar .btn{display:none!important;}
   /* Compact login button */
   #btn-login{font-size:.62rem;padding:5px 10px;letter-spacing:.5px;}
-  /* Tighter view — extra bottom for mobile nav */
-  .view{padding:1rem .9rem 5.5rem;}
+  .view{padding:1rem .9rem 1.5rem;}
   /* Smaller card + stat padding */
   .card{padding:1rem;}
   .sc{padding:.9rem .7rem;}
@@ -356,41 +382,6 @@ textarea{resize:vertical;min-height:75px;}
   .pp-tab{font-size:.75rem;padding:8px 10px;}
   .adm-tabs{flex-wrap:wrap;}
   .adm-tab{font-size:.75rem;padding:8px 10px;flex:1 1 auto;}
-}
-/* ══════════════════ MOBILE NAV ══════════════════ */
-#mob-nav{display:none;}
-@media(max-width:768px){
-  body{padding-bottom:calc(56px + env(safe-area-inset-bottom,0px));}
-  #mob-nav{
-    display:flex;
-    position:fixed;bottom:0;left:0;right:0;
-    height:56px;
-    background:rgba(7,13,5,.97);
-    border-top:1px solid var(--border);
-    backdrop-filter:blur(14px);
-    z-index:100;
-    padding-bottom:env(safe-area-inset-bottom,0px);
-  }
-  .mnb{
-    flex:1;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:2px;
-    background:none;border:none;
-    color:var(--chalk);
-    font-family:'Barlow Condensed',sans-serif;
-    font-size:.55rem;letter-spacing:1px;text-transform:uppercase;
-    cursor:pointer;padding:5px 2px 3px;
-    transition:color .15s;
-    -webkit-tap-highlight-color:transparent;
-  }
-  .mnb-icon{font-size:1.2rem;line-height:1;}
-  .mnb.act{color:var(--gold);}
-  .mnb:active{opacity:.7;}
-  .mnb-av{
-    width:22px;height:22px;border-radius:50%;
-    background:var(--baize);border:1.5px solid var(--gold);
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Bebas Neue',sans-serif;font-size:.62rem;color:var(--gold);
-  }
 }
 
 /* PLAYER PORTAL */
@@ -643,6 +634,7 @@ textarea{resize:vertical;min-height:75px;}
 <body>
 
 <header>
+  <button id="hdr-ham" onclick="toggleHamMenu()" aria-label="Menu" style="display:none;">☰</button>
   <a class="logo" onclick="sv('dashboard',this)">
     <img src="pinoypool-logo.png" alt="PinoyPool" style="height:62px;width:auto;object-fit:cover;object-position:center;display:block;margin:-1px 0;">
   </a>
@@ -652,9 +644,9 @@ textarea{resize:vertical;min-height:75px;}
     <button class="nb" onclick="sv('live',this)">Watch Now</button>
     <button class="nb" onclick="sv('rankings',this)">Rankings</button>
     <button class="nb" onclick="sv('halls',this)">Find Halls</button>
-    <button class="nb" id="nb-player-portal" onclick="sv('player-portal',this)" style="display:none">🎱 My Portal</button>
-    <button class="nb" id="nb-portal" onclick="sv('portal',this)" style="display:none">🏢 Hall Portal</button>
-    <button class="nb" id="nb-admin" onclick="sv('admin',this)" style="display:none!important;color:#e55;border-color:rgba(184,50,40,.3);">⚙️ Admin</button>
+    <button class="nb" id="nb-player-portal" onclick="sv('player-portal',this)" style="display:none">My Portal</button>
+    <button class="nb" id="nb-portal" onclick="sv('portal',this)" style="display:none">Hall Portal</button>
+    <button class="nb" id="nb-admin" onclick="sv('admin',this)" style="display:none!important;color:#e55;border-color:rgba(184,50,40,.3);">Admin</button>
   </nav>
   <div class="hdr-right">
     <div class="auth-bar" id="auth-bar">
@@ -1353,19 +1345,29 @@ function buildDashboard(){
   }
 }
 
+function toggleHamMenu(){
+  const nav=document.getElementById('main-nav');
+  const ham=document.getElementById('hdr-ham');
+  const open=nav.classList.toggle('open');
+  if(ham) ham.classList.toggle('open',open);
+  ham.textContent=open?'✕':'☰';
+}
+function closeHamMenu(){
+  const nav=document.getElementById('main-nav');
+  const ham=document.getElementById('hdr-ham');
+  if(nav) nav.classList.remove('open');
+  if(ham){ham.classList.remove('open');ham.textContent='☰';}
+}
 function sv(id, btn){
   if(id==='match' && app.user?.role==='fan'){toast('⚠️ Record Match is not available for Scout/Fan accounts.');return;}
   if(id==='player-portal' && !app.user){toast('⚠️ Please log in to access your Player Portal.');openAuth();return;}
+  closeHamMenu();
   try{localStorage.setItem('pp_last_section',id);}catch{}
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('act'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('act'));
   const v=document.getElementById('view-'+id);
   if(v) v.classList.add('act');
   if(btn && btn.classList) btn.classList.add('act');
-  // Sync mobile bottom nav
-  const mMap={dashboard:'mnb-home',live:'mnb-watch',rankings:'mnb-rank',halls:'mnb-halls','player-portal':'mnb-me',portal:'mnb-me',admin:'mnb-me',match:'mnb-home'};
-  document.querySelectorAll('.mnb').forEach(b=>b.classList.remove('act'));
-  const mId=mMap[id]; if(mId){const mb=document.getElementById(mId);if(mb)mb.classList.add('act');}
   if(id==='dashboard') buildDashboard();
   if(id==='rankings') buildRankings();
   if(id==='halls') buildHalls();
@@ -1375,19 +1377,6 @@ function sv(id, btn){
   if(id==='admin') buildAdmin();
   if(id==='match'){applyMatchTypeUI(app.matchType||'Money Game');applyMatchStepUI();}
 }
-function mobSync(key){
-  const map={home:'mnb-home',watch:'mnb-watch',rank:'mnb-rank',halls:'mnb-halls'};
-  document.querySelectorAll('.mnb').forEach(b=>b.classList.remove('act'));
-  const mb=document.getElementById(map[key]);if(mb)mb.classList.add('act');
-}
-function mobMeBtn(){
-  if(!app.user){openAuth();return;}
-  const r=app.user.role;
-  if(r==='player') sv('player-portal',null);
-  else if(r==='owner') sv('portal',null);
-  else if(r==='admin') sv('admin',null);
-}
-
 /* ══════════════════ AUTH ══════════════════ */
 function openAuth(){document.getElementById('m-auth').classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
@@ -1483,8 +1472,14 @@ function restoreApprovals(){
       PLAYERS.push({id:ap.id,name:ap.name,region:ap.region||'',status:ap.careerStatus,
         fmt:ap.fmt||'9-Ball',colors:ap.colors||'#1a3a22',
         mw:ap.mw||0,ml:ap.ml||0,rw:ap.rw||0,rl:ap.rl||0,
-        ppr:ap.ppr,pr:0,mi:ap.mi||0,sos:0,rank:0});
-    } else {existing.status=ap.careerStatus;existing.ppr=ap.ppr;}
+        ppr:ap.ppr,ppr9:ap.ppr9||ap.ppr,ppr10:ap.ppr10||ap.ppr,
+        mw9:ap.mw9||0,ml9:ap.ml9||0,mw10:ap.mw10||0,ml10:ap.ml10||0,
+        pr:0,mi:ap.mi||0,sos:0,rank:0});
+    } else {existing.status=ap.careerStatus;existing.ppr=ap.ppr;
+      existing.ppr9=ap.ppr9||ap.ppr; existing.ppr10=ap.ppr10||ap.ppr;
+      existing.mw9=ap.mw9||0; existing.ml9=ap.ml9||0;
+      existing.mw10=ap.mw10||0; existing.ml10=ap.ml10||0;
+    }
   });
   if(approvedPlayers.length) PLAYERS.sort((a,b)=>b.ppr-a.ppr).forEach((pl,i)=>pl.rank=i+1);
 }
@@ -1501,13 +1496,19 @@ function rebuildStatsFromMatches(){
   if(totalActual===totalExpected) return;
   // Reset all approved players to initial PPR / zeroed records
   approvedPlayers.forEach(ap=>{
-    ap.ppr=INITIAL_PPR[ap.careerStatus]||1300;
+    const base=INITIAL_PPR[ap.careerStatus]||1300;
+    ap.ppr=base; ap.ppr9=base; ap.ppr10=base;
     ap.mw=0; ap.ml=0; ap.rw=0; ap.rl=0; ap.mi=0; ap.sos=0;
+    ap.mw9=0; ap.ml9=0; ap.mw10=0; ap.ml10=0;
   });
   // Mirror reset into PLAYERS[]
   PLAYERS.forEach(pl=>{
     const ap=approvedPlayers.find(a=>a.name===pl.name);
-    if(ap){pl.ppr=ap.ppr; pl.mw=0; pl.ml=0; pl.rw=0; pl.rl=0; pl.mi=0;}
+    if(ap){
+      pl.ppr=ap.ppr; pl.ppr9=ap.ppr9; pl.ppr10=ap.ppr10;
+      pl.mw=0; pl.ml=0; pl.rw=0; pl.rl=0; pl.mi=0;
+      pl.mw9=0; pl.ml9=0; pl.mw10=0; pl.ml10=0;
+    }
   });
   // Sort matches chronologically (id = 'm-{timestamp}')
   const sorted=[...approvedMs].sort((a,b)=>{
@@ -1515,7 +1516,7 @@ function rebuildStatsFromMatches(){
     const tb=parseInt((b.id||'').replace('m-',''))||0;
     return ta-tb;
   });
-  // Replay each match through the same PPR formula
+  // Replay each match through the same PPR formula — format-specific
   sorted.forEach(m=>{
     const parts=(m.score||'').split(/[-–]/).map(s=>parseInt(s.trim())).filter(n=>!isNaN(n));
     if(parts.length!==2) return;
@@ -1523,11 +1524,26 @@ function rebuildStatsFromMatches(){
     const pl1=PLAYERS.find(p=>p.name===m.p1);
     const pl2=PLAYERS.find(p=>p.name===m.p2);
     if(!pl1||!pl2) return;
-    const delta1=calcMatchPPR(pl1.ppr,pl2.ppr,pl1.status||'Amateur',m.type||'Exhibition',s1,s2,1.0);
-    const delta2=calcMatchPPR(pl2.ppr,pl1.ppr,pl2.status||'Amateur',m.type||'Exhibition',s2,s1,1.0);
     const p1won=s1>s2;
-    pl1.ppr=Math.max(100,Math.round(pl1.ppr+delta1));
-    pl2.ppr=Math.max(100,Math.round(pl2.ppr+delta2));
+    const is9=(m.fmt||'9-Ball')==='9-Ball';
+    const fmtPpr1=is9?(pl1.ppr9||pl1.ppr):(pl1.ppr10||pl1.ppr);
+    const fmtPpr2=is9?(pl2.ppr9||pl2.ppr):(pl2.ppr10||pl2.ppr);
+    const delta1=calcMatchPPR(fmtPpr1,fmtPpr2,pl1.status||'Amateur',m.type||'Exhibition',s1,s2,1.0);
+    const delta2=calcMatchPPR(fmtPpr2,fmtPpr1,pl2.status||'Amateur',m.type||'Exhibition',s2,s1,1.0);
+    if(is9){
+      pl1.ppr9=Math.max(100,Math.round((pl1.ppr9||pl1.ppr)+delta1));
+      pl2.ppr9=Math.max(100,Math.round((pl2.ppr9||pl2.ppr)+delta2));
+      pl1.mw9=(pl1.mw9||0)+(p1won?1:0); pl1.ml9=(pl1.ml9||0)+(p1won?0:1);
+      pl2.mw9=(pl2.mw9||0)+(p1won?0:1); pl2.ml9=(pl2.ml9||0)+(p1won?1:0);
+    } else {
+      pl1.ppr10=Math.max(100,Math.round((pl1.ppr10||pl1.ppr)+delta1));
+      pl2.ppr10=Math.max(100,Math.round((pl2.ppr10||pl2.ppr)+delta2));
+      pl1.mw10=(pl1.mw10||0)+(p1won?1:0); pl1.ml10=(pl1.ml10||0)+(p1won?0:1);
+      pl2.mw10=(pl2.mw10||0)+(p1won?0:1); pl2.ml10=(pl2.ml10||0)+(p1won?1:0);
+    }
+    // Recompute overall as weighted average
+    pl1.ppr=calcOverallPPR(pl1);
+    pl2.ppr=calcOverallPPR(pl2);
     pl1.mw=(pl1.mw||0)+(p1won?1:0); pl1.ml=(pl1.ml||0)+(p1won?0:1);
     pl2.mw=(pl2.mw||0)+(p1won?0:1); pl2.ml=(pl2.ml||0)+(p1won?1:0);
     pl1.rw=(pl1.rw||0)+s1; pl1.rl=(pl1.rl||0)+s2;
@@ -1537,7 +1553,11 @@ function rebuildStatsFromMatches(){
     // Sync back to approvedPlayers
     [pl1,pl2].forEach(pl=>{
       const ap=approvedPlayers.find(a=>a.name===pl.name);
-      if(ap){ap.ppr=pl.ppr;ap.mw=pl.mw;ap.ml=pl.ml;ap.rw=pl.rw||0;ap.rl=pl.rl||0;ap.mi=pl.mi||0;}
+      if(ap){
+        ap.ppr=pl.ppr; ap.ppr9=pl.ppr9; ap.ppr10=pl.ppr10;
+        ap.mw=pl.mw; ap.ml=pl.ml; ap.rw=pl.rw||0; ap.rl=pl.rl||0; ap.mi=pl.mi||0;
+        ap.mw9=pl.mw9||0; ap.ml9=pl.ml9||0; ap.mw10=pl.mw10||0; ap.ml10=pl.ml10||0;
+      }
     });
   });
   // Re-sort PLAYERS by PPR and assign ranks
@@ -1870,15 +1890,6 @@ function setUser(u){
     }
   }
 
-  // Mobile nav Me button
-  const mnbMeLbl=document.getElementById('mnb-me-lbl');
-  const mnbMeIcon=document.getElementById('mnb-me-icon');
-  if(mnbMeLbl) mnbMeLbl.textContent=u.role==='player'?'Portal':u.role==='owner'?'Hall':u.role==='admin'?'Admin':'Portal';
-  if(mnbMeIcon){
-    const av=document.createElement('span');av.className='mnb-av';av.textContent=u.initials||'?';
-    mnbMeIcon.replaceWith(av);av.id='mnb-me-icon';
-  }
-
   // Pending challenge notice for players only
   if(u.role==='player') showPendNotice();
   // Update nav notification badges
@@ -1938,10 +1949,6 @@ function logout(){
   const cBtn=document.getElementById('send-challenge-btn');
   if(cBtn) cBtn.innerHTML='📨 Send Match Challenge';
 
-  // Reset mobile nav Me button
-  const mnbMeEl=document.getElementById('mnb-me-icon');
-  if(mnbMeEl){const ic=document.createElement('span');ic.className='mnb-icon';ic.id='mnb-me-icon';ic.textContent='👤';mnbMeEl.replaceWith(ic);}
-  const mnbMeLblEl=document.getElementById('mnb-me-lbl');if(mnbMeLblEl)mnbMeLblEl.textContent='Profile';
   const inp=document.getElementById('p1-inp');
   inp.value='';inp.readOnly=false;inp.style.color='';inp.style.cursor='';
   app.p1='';app.p1id=null;
@@ -1996,6 +2003,10 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('#auth-bar')){
     const dd=document.getElementById('av-dropdown');
     if(dd) dd.classList.remove('open');
+  }
+  // Close hamburger menu on outside click
+  if(!e.target.closest('#main-nav')&&!e.target.closest('#hdr-ham')){
+    closeHamMenu();
   }
   // Close lb hamburger dropdown on outside click
   if(!e.target.closest('#lb-tab-bar')){
@@ -2648,7 +2659,7 @@ function finalizeMatch(){
   // Apply official PPR update for both players
   const _hcpR=[hcpState.rack[0]||0, hcpState.rack[1]||0];
   const _hcpB=[hcpState.balls[0].size||0, hcpState.balls[1].size||0];
-  updatePlayerPPR(app.p1, app.p2, s1, s2, app.matchType||'Tournament', _hcpR, _hcpB);
+  updatePlayerPPR(app.p1, app.p2, s1, s2, app.matchType||'Tournament', _hcpR, _hcpB, app.fmt||'9-Ball');
   document.getElementById('w-name').textContent=wn+' Wins!';
   document.getElementById('w-detail').textContent=`${wn} defeated ${ln} ${app.scores[wi-1]}–${app.scores[2-wi]} in ${app.fmt}`;
   document.getElementById('m-winner').classList.add('open');
@@ -2732,7 +2743,7 @@ function resetMatch(){
 /* ══════════════ UPDATE PPR AFTER VALIDATED MATCH (PDF §6-§16) ══════════════
    hcpRack: [racks_given_to_p1, racks_given_to_p2]  (int ≥ 0)
    hcpBall: [balls_count_given_to_p1, balls_count_given_to_p2] (int ≥ 0)   */
-function updatePlayerPPR(p1name, p2name, s1, s2, matchType, hcpRack, hcpBall){
+function updatePlayerPPR(p1name, p2name, s1, s2, matchType, hcpRack, hcpBall, fmt){
   // Look in PLAYERS first; fall back to adminPlayers(active) for recently-approved players
   const _findPl=name=>PLAYERS.find(p=>p.name===name)
     ||(typeof adminPlayers!=='undefined'?adminPlayers.find(p=>p.name===name&&p.status==='active'):null);
@@ -2743,15 +2754,34 @@ function updatePlayerPPR(p1name, p2name, s1, s2, matchType, hcpRack, hcpBall){
   const b=[hcpBall[0]||0, hcpBall[1]||0];
   // H factor per PDF: rack giver → 0.95/0.90/0.85; ball giver → 0.90; ball receiver → 1.10
   let h1=1.0, h2=1.0;
-  if(r[1]>0)      { h1=r[1]>=3?0.85:r[1]===2?0.90:0.95; }   // p1 gives racks to p2
-  else if(r[0]>0) { h2=r[0]>=3?0.85:r[0]===2?0.90:0.95; }   // p2 gives racks to p1
-  else if(b[1]>0) { h1=0.90; h2=1.10; }                      // p1 gives last ball to p2
-  else if(b[0]>0) { h2=0.90; h1=1.10; }                      // p2 gives last ball to p1
-  const delta1=calcMatchPPR(pl1.ppr, pl2.ppr, pl1.status, matchType, s1, s2, h1);
-  const delta2=calcMatchPPR(pl2.ppr, pl1.ppr, pl2.status, matchType, s2, s1, h2);
-  pl1.ppr=Math.max(100, Math.round(pl1.ppr+delta1));
-  pl2.ppr=Math.max(100, Math.round(pl2.ppr+delta2));
+  if(r[1]>0)      { h1=r[1]>=3?0.85:r[1]===2?0.90:0.95; }
+  else if(r[0]>0) { h2=r[0]>=3?0.85:r[0]===2?0.90:0.95; }
+  else if(b[1]>0) { h1=0.90; h2=1.10; }
+  else if(b[0]>0) { h2=0.90; h1=1.10; }
   const p1won=s1>s2;
+  const is9=(fmt||'9-Ball')==='9-Ball';
+  // Ensure format-specific ratings exist (fallback to overall ppr for legacy data)
+  if(pl1.ppr9==null) pl1.ppr9=pl1.ppr; if(pl1.ppr10==null) pl1.ppr10=pl1.ppr;
+  if(pl2.ppr9==null) pl2.ppr9=pl2.ppr; if(pl2.ppr10==null) pl2.ppr10=pl2.ppr;
+  let delta1, delta2;
+  if(is9){
+    delta1=calcMatchPPR(pl1.ppr9,pl2.ppr9,pl1.status,matchType,s1,s2,h1);
+    delta2=calcMatchPPR(pl2.ppr9,pl1.ppr9,pl2.status,matchType,s2,s1,h2);
+    pl1.ppr9=Math.max(100,Math.round(pl1.ppr9+delta1));
+    pl2.ppr9=Math.max(100,Math.round(pl2.ppr9+delta2));
+    pl1.mw9=(pl1.mw9||0)+(p1won?1:0); pl1.ml9=(pl1.ml9||0)+(p1won?0:1);
+    pl2.mw9=(pl2.mw9||0)+(p1won?0:1); pl2.ml9=(pl2.ml9||0)+(p1won?1:0);
+  } else {
+    delta1=calcMatchPPR(pl1.ppr10,pl2.ppr10,pl1.status,matchType,s1,s2,h1);
+    delta2=calcMatchPPR(pl2.ppr10,pl1.ppr10,pl2.status,matchType,s2,s1,h2);
+    pl1.ppr10=Math.max(100,Math.round(pl1.ppr10+delta1));
+    pl2.ppr10=Math.max(100,Math.round(pl2.ppr10+delta2));
+    pl1.mw10=(pl1.mw10||0)+(p1won?1:0); pl1.ml10=(pl1.ml10||0)+(p1won?0:1);
+    pl2.mw10=(pl2.mw10||0)+(p1won?0:1); pl2.ml10=(pl2.ml10||0)+(p1won?1:0);
+  }
+  // Overall = weighted average of both format ratings
+  pl1.ppr=calcOverallPPR(pl1);
+  pl2.ppr=calcOverallPPR(pl2);
   if(p1won){ pl1.mw++; pl2.ml++; } else { pl2.mw++; pl1.ml++; }
   pl1.mi=Math.max(-10,Math.min(10,(pl1.mi||0)+(p1won?1:-1)));
   pl2.mi=Math.max(-10,Math.min(10,(pl2.mi||0)+(p1won?-1:1)));
@@ -2759,10 +2789,14 @@ function updatePlayerPPR(p1name, p2name, s1, s2, matchType, hcpRack, hcpBall){
   pl2.sos=calcSoS(pl1.ppr);
   const sorted=[...PLAYERS].sort((a,b2)=>b2.ppr-a.ppr);
   sorted.forEach((pl,idx)=>{ pl.rank=idx+1; });
-  // Persist updated PPR + record to localStorage so they survive page reload
+  // Persist updated PPR + all format ratings to localStorage
   [pl1, pl2].forEach(pl=>{
     const ap=approvedPlayers.find(r=>r.name===pl.name||r.email===pl.email);
-    if(ap){ ap.ppr=pl.ppr; ap.mw=pl.mw; ap.ml=pl.ml; ap.mi=pl.mi||0; ap.sos=pl.sos||0; }
+    if(ap){
+      ap.ppr=pl.ppr; ap.ppr9=pl.ppr9; ap.ppr10=pl.ppr10;
+      ap.mw=pl.mw; ap.ml=pl.ml; ap.mi=pl.mi||0; ap.sos=pl.sos||0;
+      ap.mw9=pl.mw9||0; ap.ml9=pl.ml9||0; ap.mw10=pl.mw10||0; ap.ml10=pl.ml10||0;
+    }
   });
   saveApprovedPlayers();
   return {delta1, delta2};
@@ -2864,6 +2898,15 @@ const CAREER_TIERS={
 const K_FACTORS={Elite:12,Pro:16,'Semi-Pro':24,Skilled:32,Amateur:40};
 /* Initial PPR per career status (PDF §3) */
 const INITIAL_PPR={Elite:2100,Pro:1900,'Semi-Pro':1700,Skilled:1500,Amateur:1300};
+// Compute overall PPR as weighted average of format-specific ratings
+function calcOverallPPR(pl){
+  const m9=(pl.mw9||0)+(pl.ml9||0);
+  const m10=(pl.mw10||0)+(pl.ml10||0);
+  const total=m9+m10;
+  const base=INITIAL_PPR[pl.status||pl.careerStatus||'Amateur']||1300;
+  if(total===0) return pl.ppr9||base;
+  return Math.round(((pl.ppr9||base)*m9+(pl.ppr10||base)*m10)/total);
+}
 function careerTier(mw,ml,status){
   if(status&&CAREER_TIERS[status]) return CAREER_TIERS[status];
   const total=mw+ml; const wpct=Math.round(mw/(total||1)*100);
@@ -3004,10 +3047,11 @@ function genPlayerStats(p, mult){
   const noMatches=mw+ml===0;
   // Official PPR (PinoyPool Rating) — stored on player, scaled by period multiplier
   const ppr=Math.round((p.ppr||INITIAL_PPR[p.status]||1500)*m);
-  // Discipline sub-ratings (9B/10B)
-  const baseRating=1000+Math.round((mw/(mw+ml||1))*500)+(rw/(rw+rl||1))*80;
-  const r9=p.fmt==='9-Ball'?Math.round(baseRating+12):Math.round(baseRating*0.88);
-  const r10=p.fmt==='10-Ball'?Math.round(baseRating+12):Math.round(baseRating*0.88);
+  // Discipline sub-ratings — real per-format ratings from match history
+  const base=INITIAL_PPR[p.status||p.careerStatus||'Amateur']||1300;
+  const ppr9=Math.round((p.ppr9||base)*m);
+  const ppr10=Math.round((p.ppr10||base)*m);
+  const r9=ppr9; const r10=ppr10;
   const overall=ppr;
   // Match type breakdown — real from adminMatches (NOT synthetic % estimates)
   const _playerMs=(typeof adminMatches!=='undefined'?adminMatches:[])
@@ -3087,7 +3131,7 @@ function genPlayerStats(p, mult){
   const avgOpp=Math.round((p.sos/100)*2200);
   // Strength of Schedule (SoS, 0-100) — official metric: (avgOppPPR/2200)×100
   const sos=p.sos||calcSoS(avgOpp);
-  return{...p,mw,ml,rw,rl,ppr,r9,r10,overall,pr,mi,sos,
+  return{...p,mw,ml,rw,rl,ppr,ppr9,ppr10,r9,r10,overall,pr,mi,sos,
          tW,tL,mngW,mngL,exW,exL,last20W,last20L,ratingChange,
          strN,strW,hcpGiven,hcpTaken,hcpNet,avgMargin:parseFloat(avgMargin),
          peak,avgOpp,activity,hcpNum,
@@ -3152,12 +3196,13 @@ function renderLbTab(tab){
 
   /* ── GLOBAL PPR LEADERBOARD (official PinoyPool Ranking System) ── */
   if(tab==='global'){
-    const sorted=[...data].sort((a,b)=>b.ppr-a.ppr);
+    // Sort by format-specific rating: 9-Ball by ppr9, 10-Ball by ppr10, overall by ppr
+    const _sortKey=app.rankFmt==='9-Ball'?'ppr9':app.rankFmt==='10-Ball'?'ppr10':'ppr';
+    const sorted=[...data].sort((a,b)=>b[_sortKey]-a[_sortKey]);
     // Derive unique regions for the picker
     const allRegions=[...new Set(data.map(p=>p.region).filter(Boolean))].sort();
-    // Apply region + format filter
+    // Apply region filter only (all players appear in all format leaderboards)
     let display=app.pprRegion?sorted.filter(p=>p.region===app.pprRegion):sorted;
-    if(app.rankFmt&&app.rankFmt!=='all') display=display.filter(p=>p.fmt===app.rankFmt);
 
     // Silhouette SVG
     const sil=`<svg viewBox="0 0 60 110" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -3181,7 +3226,7 @@ function renderLbTab(tab){
         <div class="pod-sil">${sil}</div>
         <div class="pod-name">${fmtPlayerName(p.name)}</div>
         <div style="margin:.35rem 0 .25rem;">${tierBadge(tier)}</div>
-        <div class="pod-pts">RATING: ${p.ppr.toLocaleString()}</div>
+        <div class="pod-pts">RATING: ${(p[_sortKey]||p.ppr).toLocaleString()}</div>
       </div>`;
     };
 
@@ -3190,17 +3235,23 @@ function renderLbTab(tab){
     const PAGE=10;
     app._pprShown=PAGE;
 
+    // Format-aware labels
+    const _fmtLabel=app.rankFmt==='9-Ball'?'9-BALL':app.rankFmt==='10-Ball'?'10-BALL':'PLAYER';
+    const _ratingHdr=app.rankFmt==='9-Ball'?'9-Ball Rating':app.rankFmt==='10-Ball'?'10-Ball Rating':'Overall Rating';
+
     const tableRows=(rows,startRank)=>rows.map((p,i)=>{
       const rank=startRank+i;
-      const wpct=Math.round(p.mw/(p.mw+p.ml||1)*100);
-      const total=p.mw+p.ml;
+      // Show format-specific match counts when in format mode
+      const fmtTotal=app.rankFmt==='9-Ball'?(p.mw9||0)+(p.ml9||0):app.rankFmt==='10-Ball'?(p.mw10||0)+(p.ml10||0):p.mw+p.ml;
+      const fmtWins=app.rankFmt==='9-Ball'?(p.mw9||0):app.rankFmt==='10-Ball'?(p.mw10||0):p.mw;
+      const wpct=Math.round(fmtWins/(fmtTotal||1)*100);
       const rc=rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
       const tier=careerTier(p.mw,p.ml,p.status);
       return`<tr class="ppr-row" data-name="${p.name.toLowerCase()}" data-region="${p.region||''}" data-fmt="${p.fmt||'9-Ball'}">
         <td class="ppr-rank-cell ${rc}"><div style="display:flex;align-items:center;gap:7px;">${rank}${rankMoveHtml(p.name,rank)}</div></td>
         <td class="ppr-player-cell"><span style="margin-right:8px;">${fmtPlayerName(p.name)}</span>${tierBadge(tier)}</td>
-        <td class="ppr-rating-cell">${p.ppr.toLocaleString()}</td>
-        <td class="ppr-matches-cell">${total}</td>
+        <td class="ppr-rating-cell">${(p[_sortKey]||p.ppr).toLocaleString()}</td>
+        <td class="ppr-matches-cell">${fmtTotal}</td>
         <td class="ppr-win-cell">${wpct}%</td>
       </tr>`;
     }).join('');
@@ -3215,7 +3266,7 @@ function renderLbTab(tab){
 
     c.innerHTML=`
     <div class="ppr-wrap">
-      <div class="ppr-title-row">PINOYPOOL <span>PLAYER RANKINGS</span></div>
+      <div class="ppr-title-row">PINOYPOOL <span>${_fmtLabel} RANKINGS</span></div>
 
       <!-- Podium top 3 -->
       <div class="ppr-podium">
@@ -3251,7 +3302,7 @@ function renderLbTab(tab){
       <div class="ppr-tbl-wrap">
         <table class="ppr-tbl" id="ppr-tbl">
           <thead><tr>
-            <th>Rank</th><th>Player</th><th style="text-align:center;">Rating</th><th style="text-align:center;">Matches Played</th><th style="text-align:center;">Win %</th>
+            <th>Rank</th><th>Player</th><th style="text-align:center;">${_ratingHdr}</th><th style="text-align:center;">Matches Played</th><th style="text-align:center;">Win %</th>
           </tr></thead>
           <tbody id="ppr-tbody">
             ${display.length>3?tableRows(display.slice(3),4):'<tr><td colspan="5" style="text-align:center;color:var(--chalk);padding:1.5rem;">No players found for this region.</td></tr>'}
@@ -4024,12 +4075,20 @@ function buildPlayerPortal(){
   const _tier=careerTier(p.mw,p.ml,p.status);
   const _miSign=(p.mi||0)>0?'+':'';
   const _miCol=(p.mi||0)>3?'var(--grn3)':(p.mi||0)<-3?'#e55':(p.mi||0)>0?'var(--gold)':'var(--chalk2)';
+  // Compute format-specific ranks for display
+  const _sorted9=[...PLAYERS].sort((a,b)=>(b.ppr9||b.ppr)-(a.ppr9||a.ppr));
+  const _sorted10=[...PLAYERS].sort((a,b)=>(b.ppr10||b.ppr)-(a.ppr10||a.ppr));
+  const _rank9=(_sorted9.findIndex(x=>x.name===p.name)+1)||'—';
+  const _rank10=(_sorted10.findIndex(x=>x.name===p.name)+1)||'—';
+  const _base=INITIAL_PPR[p.status]||1300;
+  const _ppr9=p.ppr9||_base;
+  const _ppr10=p.ppr10||_base;
   document.getElementById('pp-hdr-stats').innerHTML=`
-    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);">#${p.rank}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">PP Rank</div></div>
-    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold2);">${p.ppr||INITIAL_PPR[p.status]||1500}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">PPR</div></div>
-    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#5dade2;">${p.pr||0}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">PR Score</div></div>
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);">#${p.rank}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Overall Rank</div></div>
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold2);">${p.ppr||_base}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Overall PPR</div></div>
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#f5c842;">${_ppr9}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank9}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">9-Ball</div></div>
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#4a9eff;">${_ppr10}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank10}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">10-Ball</div></div>
     <div><div style="font-family:'DM Mono',monospace;font-size:1.7rem;font-weight:700;color:${_miCol};">${_miSign}${p.mi||0}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Momentum</div></div>
-    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--grn3);">${p.sos||0}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">SoS</div></div>
     <div><div style="font-size:1rem;font-weight:700;color:${_tier.color};background:${_tier.bg};border:1px solid ${_tier.border};border-radius:6px;padding:3px 10px;margin-top:2px;">${_tier.label}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);margin-top:3px;">Status</div></div>`;
 
   // Show first tab
@@ -6080,7 +6139,7 @@ function admApprovePlayer(id){
   const initPPR=INITIAL_PPR[careerStatus]||1300;
   p.status='active';
   p.careerStatus=careerStatus;
-  p.ppr=initPPR;
+  p.ppr=initPPR; p.ppr9=initPPR; p.ppr10=initPPR;
   _localStatusChanged.add(String(id));
   // Add to PLAYERS ranking system (or update existing entry)
   const existing=PLAYERS.find(x=>x.id===id||x.name===p.name);
@@ -6088,12 +6147,14 @@ function admApprovePlayer(id){
     PLAYERS.push({
       id:p.id, name:p.name, region:p.region||'', status:careerStatus,
       fmt:p.fmt||'9-Ball', colors:p.colors||'#1a3a22',
-      mw:0, ml:0, rw:0, rl:0, ppr:initPPR, pr:0, mi:0, sos:0,
-      rank:PLAYERS.length+1
+      mw:0, ml:0, rw:0, rl:0,
+      ppr:initPPR, ppr9:initPPR, ppr10:initPPR,
+      mw9:0, ml9:0, mw10:0, ml10:0,
+      pr:0, mi:0, sos:0, rank:PLAYERS.length+1
     });
   } else {
     existing.status=careerStatus;
-    existing.ppr=initPPR;
+    existing.ppr=initPPR; existing.ppr9=initPPR; existing.ppr10=initPPR;
   }
   // Re-rank all players by PPR
   PLAYERS.sort((a,b)=>b.ppr-a.ppr).forEach((pl,i)=>pl.rank=i+1);
@@ -6101,8 +6162,10 @@ function admApprovePlayer(id){
   // Persist approval to localStorage so it survives page reload
   const apIdx=approvedPlayers.findIndex(x=>x.email===p.email||x.username===p.username);
   const apEntry={id:p.id,name:p.name,username:p.username||'',email:p.email||'',
-    region:p.region||'',careerStatus,ppr:initPPR,status:'active',fmt:p.fmt||'9-Ball',
-    colors:p.colors||'#1a3a22',mw:0,ml:0,rw:0,rl:0,mi:0};
+    region:p.region||'',careerStatus,ppr:initPPR,ppr9:initPPR,ppr10:initPPR,
+    status:'active',fmt:p.fmt||'9-Ball',
+    colors:p.colors||'#1a3a22',mw:0,ml:0,rw:0,rl:0,mi:0,
+    mw9:0,ml9:0,mw10:0,ml10:0};
   if(apIdx>=0) approvedPlayers[apIdx]=apEntry; else approvedPlayers.push(apEntry);
   saveApprovedPlayers();
   // Also sync verificationStatus in registeredUsers so .catch() fallback doesn't re-show as pending
@@ -6391,12 +6454,5 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
 
 
 </script>
-<nav id="mob-nav">
-  <button class="mnb act" id="mnb-home" onclick="sv('dashboard',null);mobSync('home')"><span class="mnb-icon">🏠</span>Home</button>
-  <button class="mnb" id="mnb-watch" onclick="sv('live',null);mobSync('watch')"><span class="mnb-icon">📺</span>Watch</button>
-  <button class="mnb" id="mnb-rank" onclick="sv('rankings',null);mobSync('rank')"><span class="mnb-icon">🏆</span>Rankings</button>
-  <button class="mnb" id="mnb-halls" onclick="sv('halls',null);mobSync('halls')"><span class="mnb-icon">📍</span>Halls</button>
-  <button class="mnb" id="mnb-me" onclick="mobMeBtn()"><span class="mnb-icon" id="mnb-me-icon">👤</span><span id="mnb-me-lbl">Profile</span></button>
-</nav>
 </body>
 </html>
