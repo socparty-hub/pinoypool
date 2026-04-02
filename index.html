@@ -2808,11 +2808,20 @@ function setPprPeriod(btn,period){
   if(period==='region'){
     app._pprRegionMode=!app._pprRegionMode;
     if(!app._pprRegionMode) app.pprRegion=null;
+    app.rankFmt='all';
+    renderLbTab('global');
+    return;
+  }
+  if(period==='9ball'||period==='10ball'){
+    app._pprRegionMode=false;
+    app.pprRegion=null;
+    app.rankFmt=period==='9ball'?'9-Ball':'10-Ball';
     renderLbTab('global');
     return;
   }
   app._pprRegionMode=false;
   app.pprRegion=null;
+  app.rankFmt='all';
   app.rankPeriod=period;
   buildRankings();
 }
@@ -3146,8 +3155,9 @@ function renderLbTab(tab){
     const sorted=[...data].sort((a,b)=>b.ppr-a.ppr);
     // Derive unique regions for the picker
     const allRegions=[...new Set(data.map(p=>p.region).filter(Boolean))].sort();
-    // Apply region filter
-    const display=app.pprRegion?sorted.filter(p=>p.region===app.pprRegion):sorted;
+    // Apply region + format filter
+    let display=app.pprRegion?sorted.filter(p=>p.region===app.pprRegion):sorted;
+    if(app.rankFmt&&app.rankFmt!=='all') display=display.filter(p=>p.fmt===app.rankFmt);
 
     // Silhouette SVG
     const sil=`<svg viewBox="0 0 60 110" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -3186,7 +3196,7 @@ function renderLbTab(tab){
       const total=p.mw+p.ml;
       const rc=rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
       const tier=careerTier(p.mw,p.ml,p.status);
-      return`<tr class="ppr-row" data-name="${p.name.toLowerCase()}" data-region="${p.region||''}">
+      return`<tr class="ppr-row" data-name="${p.name.toLowerCase()}" data-region="${p.region||''}" data-fmt="${p.fmt||'9-Ball'}">
         <td class="ppr-rank-cell ${rc}"><div style="display:flex;align-items:center;gap:7px;">${rank}${rankMoveHtml(p.name,rank)}</div></td>
         <td class="ppr-player-cell"><span style="margin-right:8px;">${fmtPlayerName(p.name)}</span>${tierBadge(tier)}</td>
         <td class="ppr-rating-cell">${p.ppr.toLocaleString()}</td>
@@ -3198,7 +3208,8 @@ function renderLbTab(tab){
     // Active period filter
     const periods=[
       {k:'alltime',l:'OVERALL'},
-      {k:'year',l:'THIS SEASON'},
+      {k:'9ball',l:'9-BALL'},
+      {k:'10ball',l:'10-BALL'},
       {k:'region',l:'REGION'}
     ];
 
@@ -3220,7 +3231,12 @@ function renderLbTab(tab){
           <input class="ppr-search" id="ppr-search" placeholder="Search Players..." oninput="filterPprTable(this.value)">
         </div>
         <div class="ppr-filters">
-          ${periods.map(f=>`<button class="ppr-flt${app._pprRegionMode&&f.k==='region'?' act':(app.rankPeriod||'alltime')===f.k&&!app._pprRegionMode?' act':''}" onclick="setPprPeriod(this,'${f.k}')">${f.l}</button>`).join('')}
+          ${periods.map(f=>`<button class="ppr-flt${
+            (app._pprRegionMode&&f.k==='region')||
+            (app.rankFmt==='9-Ball'&&f.k==='9ball')||
+            (app.rankFmt==='10-Ball'&&f.k==='10ball')||
+            ((app.rankFmt==='all'||!app.rankFmt)&&!app._pprRegionMode&&(app.rankPeriod||'alltime')===f.k)
+            ?' act':''}" onclick="setPprPeriod(this,'${f.k}')">${f.l}</button>`).join('')}
         </div>
       </div>
 
