@@ -396,6 +396,8 @@ textarea{resize:vertical;min-height:75px;}
 .tier-semipro{background:linear-gradient(135deg,rgba(140,80,190,.22),rgba(140,80,190,.07));border:1px solid rgba(140,80,190,.45);color:#bb8fce;}
 .tier-skilled{background:linear-gradient(135deg,rgba(31,140,78,.22),rgba(31,140,78,.07));border:1px solid rgba(31,140,78,.45);color:var(--grn3);}
 .tier-amateur{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:var(--chalk);}
+.tier-inline{font-size:.68rem;color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:.85;margin:0 2px;}
+.hcp-tag{font-size:.75rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;letter-spacing:0;}
 /* Admin Portal */
 .adm-hdr{background:linear-gradient(135deg,rgba(90,20,10,.5),rgba(8,14,6,.95));border:1px solid rgba(184,50,40,.4);border-radius:12px;padding:1.4rem;margin-bottom:1.4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
 .adm-tabs{display:flex;gap:0;border:1px solid rgba(184,50,40,.3);border-radius:10px;overflow:hidden;margin-bottom:1.4rem;}
@@ -1323,7 +1325,7 @@ function buildDashboard(){
         const sc=m.sc||'';
         const parts=sc.split(/[-–]/).map(x=>parseInt(x.trim()));
         const isWin=parts.length===2&&parts[0]>parts[1];
-        return `<div class="le ${isWin?'lw':'ll'}"><div><div style="font-weight:600;">${fmtPlayerName(m.p1)} vs ${fmtPlayerName(m.p2)}</div><div style="font-size:.72rem;color:var(--chalk);margin-top:2px;">${fmtBadge}${m.type?` <span class="tag tgd">${m.type}</span>`:''}</div></div><div style="text-align:right;"><div style="font-family:'DM Mono',monospace;color:var(--gold);">${sc}</div><div style="font-size:.67rem;color:var(--chalk2);">${fmtDate(m.ts||m.date)}</div></div></div>`;
+        return `<div class="le ${isWin?'lw':'ll'}"><div><div style="font-weight:600;line-height:1.5;">${fmtMatchLabel(m)}</div><div style="font-size:.72rem;color:var(--chalk);margin-top:2px;">${fmtBadge}${m.type?` <span class="tag tgd">${m.type}</span>`:''}</div></div><div style="text-align:right;"><div style="font-family:'DM Mono',monospace;color:var(--gold);">${sc}</div><div style="font-size:.67rem;color:var(--chalk2);">${fmtDate(m.ts||m.date)}</div></div></div>`;
       }).join('');
     }
   }
@@ -2432,6 +2434,7 @@ function submitFinalScore(){
       sc:`${s1}-${s2}`,winner,hcp:hcpParts.join(' · ')||'None',
       hcpRack:[hcpState.rack[0]||0,hcpState.rack[1]||0],
       hcpBall:[hcpState.balls[0].size||0,hcpState.balls[1].size||0],
+      hcpBalls:[b1,b2],
       status:'pending',ts:new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}),
       p1accept:false,p2accept:false,
       venue:_mpVenueEntry?.name||app.user?.hall||'—'
@@ -2446,6 +2449,9 @@ function submitFinalScore(){
       hcp:_mpHcpLabel,
       hcpRack:[hcpState.rack[0]||0,hcpState.rack[1]||0],
       hcpBall:[hcpState.balls[0].size||0,hcpState.balls[1].size||0],
+      hcpBalls:[b1,b2],
+      p1CareerStatus:PLAYERS.find(p=>p.name===app.p1)?.status||'Amateur',
+      p2CareerStatus:PLAYERS.find(p=>p.name===app.p2)?.status||'Amateur',
       venue:_mpVenueEntry?.name||app.user?.hall||'—',
       date:new Date().toISOString().slice(0,10),
       status:'owner-recorded',
@@ -2500,6 +2506,9 @@ function submitFinalScore(){
     hcp:_hcpLabel,
     hcpRack:[hcpState.rack[0]||0,hcpState.rack[1]||0],
     hcpBall:[hcpState.balls[0].size||0,hcpState.balls[1].size||0],
+    hcpBalls:[_hcpB1,_hcpB2],
+    p1CareerStatus:PLAYERS.find(p=>p.name===app.p1)?.status||'Amateur',
+    p2CareerStatus:PLAYERS.find(p=>p.name===app.p2)?.status||'Amateur',
     venue:_venue,
     date:new Date().toISOString().slice(0,10),
     status:'pending-opponent',
@@ -4728,7 +4737,7 @@ function ptab(tab){
       <div style="background:rgba(200,168,75,.04);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.7rem;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.7rem;">
           <div>
-            <div style="font-weight:600;">${fmtPlayerName(m.p1)} vs ${fmtPlayerName(m.p2)}</div>
+            <div style="font-weight:600;line-height:1.5;">${fmtMatchLabel(m)}</div>
             <div style="font-size:.73rem;color:var(--chalk);margin-top:3px;">
               ${fmtBallTag(m.fmt)}
               <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
@@ -4757,7 +4766,7 @@ function ptab(tab){
       <div style="background:rgba(245,166,35,.04);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:1.1rem;margin-bottom:.7rem;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
           <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;font-size:.92rem;">${fmtPlayerName(m.p1)} <span style="color:var(--chalk2);">vs</span> ${fmtPlayerName(m.p2)}</div>
+            <div style="font-weight:600;font-size:.92rem;line-height:1.6;">${fmtMatchLabel(m)}</div>
             <div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:3px;">
               ${fmtBallTag(m.fmt)}
               <span class="tag tgd">${m.type}</span>
@@ -4940,7 +4949,7 @@ function filterHistory(btn, period){
     const timeLabel=m.approvedAt?new Date(m.approvedAt).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric'}):fmtDate(m.date);
     return`<tr>
       <td>
-        <div style="font-weight:600;font-size:.85rem;">${fmtPlayerName(m.p1)} <span style="color:var(--chalk2);">vs</span> ${fmtPlayerName(m.p2)}</div>
+        <div style="font-weight:600;font-size:.85rem;line-height:1.6;">${fmtMatchLabel(m)}</div>
         <div style="font-size:.65rem;color:var(--grn3);margin-top:2px;">🏆 ${winner}</div>
       </td>
       <td>${fmtBallTag(m.fmt)}</td>
@@ -5138,7 +5147,7 @@ function renderManualPending(){
     <div style="background:rgba(200,168,75,.04);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.7rem;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.7rem;">
         <div>
-          <div style="font-weight:600;">${fmtPlayerName(m.p1)} vs ${fmtPlayerName(m.p2)}</div>
+          <div style="font-weight:600;line-height:1.5;">${fmtMatchLabel(m)}</div>
           <div style="font-size:.73rem;color:var(--chalk);margin-top:3px;">
             ${fmtBallTag(m.fmt)}
             <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
@@ -5756,7 +5765,7 @@ function admTab(btn,tab){
       <div style="background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;margin-bottom:.65rem;">
         <div style="display:flex;align-items:flex-start;gap:.8rem;flex-wrap:wrap;">
           <div style="flex:1;min-width:160px;">
-            <div style="font-weight:600;font-size:.9rem;line-height:1.5;">${m.p1} <span style="color:var(--chalk2);font-weight:400;">vs</span> ${m.p2} <span class="status-pill sp-pending" style="font-size:.55rem;font-weight:400;vertical-align:middle;white-space:nowrap;">● ${statusLabel}</span></div>
+            <div style="font-weight:600;font-size:.9rem;line-height:1.5;">${fmtMatchLabel(m)} <span class="status-pill sp-pending" style="font-size:.55rem;font-weight:400;vertical-align:middle;white-space:nowrap;">● ${statusLabel}</span></div>
             <div style="font-size:.72rem;color:var(--chalk);margin-top:3px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
               ${fmtBallTag(m.fmt)}
               <span class="tag tgd">${m.type}</span>
@@ -5822,7 +5831,7 @@ function admTab(btn,tab){
           const _isRejected=m.status==='rejected';
           return`<div style="display:flex;align-items:center;gap:.7rem;padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.05);">
             <div style="flex:1;min-width:0;">
-              <div style="font-size:.88rem;font-weight:600;">${m.p1} <span style="color:var(--chalk2);font-weight:400;">vs</span> ${m.p2}</div>
+              <div style="font-size:.88rem;font-weight:600;line-height:1.5;">${fmtMatchLabel(m)}</div>
               <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
                 ${fmtBallTag(m.fmt)}
                 <span class="tag tgd">${m.type}</span>
@@ -6010,6 +6019,9 @@ function admRecordMatch(){
     hcp: 'None',
     hcpRack: [0,0],
     hcpBall: [0,0],
+    hcpBalls: [[],[]],
+    p1CareerStatus:PLAYERS.find(p=>p.name===p1)?.status||'Amateur',
+    p2CareerStatus:PLAYERS.find(p=>p.name===p2)?.status||'Amateur',
     venue,
     date,
     status: 'approved',
@@ -6298,6 +6310,27 @@ function fmtPlayerName(name){
   const surname=parts[parts.length-1].toUpperCase();
   const first=parts.slice(0,-1).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
   return `${first} ${surname}`;
+}
+function fmtHcpTag(rack, ballNums){
+  let s='';
+  if(rack>0) s+=`(+${rack})`;
+  if(ballNums&&ballNums.length>0) s+=`(${[...ballNums].sort((a,b)=>a-b).join(',')})`;
+  return s;
+}
+function fmtMatchLabel(m){
+  const _pl1=PLAYERS.find(p=>p.name===m.p1);
+  const _pl2=PLAYERS.find(p=>p.name===m.p2);
+  const t1=m.p1CareerStatus||_pl1?.status||'';
+  const t2=m.p2CareerStatus||_pl2?.status||'';
+  const r1=Array.isArray(m.hcpRack)?(m.hcpRack[0]||0):0;
+  const r2=Array.isArray(m.hcpRack)?(m.hcpRack[1]||0):0;
+  const b1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
+  const b2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
+  const h1=fmtHcpTag(r1,b1);
+  const h2=fmtHcpTag(r2,b2);
+  const n1=`${fmtPlayerName(m.p1)}${t1?` <span class="tier-inline">${t1}</span>`:''}${h1?` <span class="hcp-tag">${h1}</span>`:''}`;
+  const n2=`${fmtPlayerName(m.p2)}${t2?` <span class="tier-inline">${t2}</span>`:''}${h2?` <span class="hcp-tag">${h2}</span>`:''}`;
+  return `${n1} <span style="color:var(--chalk2);font-weight:400;">vs</span> ${n2}`;
 }
 
 /* ══════════════════ BACKEND INIT ══════════════════ */
