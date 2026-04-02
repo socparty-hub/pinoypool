@@ -4309,13 +4309,14 @@ function ppTab(btn,tab){
       <div style="overflow-x:auto;">
         <table class="rt" style="min-width:640px;">
           <thead><tr>
-            <th>Opponent</th><th>Format</th><th>Type</th><th>Score</th><th>Handicap</th><th>Venue</th><th>Date</th><th>Status</th>
+            <th>Date</th><th>Opponent</th><th>Format</th><th>Type</th><th>Score</th><th>Handicap</th><th>Venue</th><th>Status</th>
           </tr></thead>
           <tbody>
             ${(()=>{
               const rows=ppSortHistory(sort);
               if(!rows.length) return `<tr><td colspan="8" style="text-align:center;padding:2.5rem;color:var(--chalk2);font-size:.82rem;">🎱 No verified matches yet. Record a match to see your history here.</td></tr>`;
               return rows.map(m=>`<tr>
+              <td style="font-size:.72rem;color:var(--chalk2);white-space:nowrap;">${fmtDate(m.date)}</td>
               <td><div style="font-weight:600;">${m.opponent}</div><div style="font-size:.65rem;color:var(--chalk);">#${m.opponentRank}</div></td>
               <td>${fmtBallTag(m.fmt)}</td>
               <td style="font-size:.76rem;color:var(--chalk);">${m.type}</td>
@@ -4325,7 +4326,6 @@ function ppTab(btn,tab){
               </td>
               <td style="font-size:.73rem;color:${m.hasHcp?'#e55':'var(--chalk2)'};">${m.hcp}</td>
               <td style="font-size:.73rem;color:var(--chalk);">${m.venue}</td>
-              <td style="font-size:.72rem;color:var(--chalk2);">${fmtDate(m.date)}</td>
               <td><span class="tag tok">✓ ${m.status}</span></td>
             </tr>`).join('');
             })()}
@@ -4527,8 +4527,9 @@ function getPlayerMatchHistory(playerName){
       const scoreStr=`${myScore}–${oppScore}`;
       const oppRank=PLAYERS.find(p=>p.name===opp)?.rank||'?';
       const myBalls=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[isP1?0:1])?m.hcpBalls[isP1?0:1]:[];
-      const ballsStr=myBalls.length?`(${[...myBalls].sort((a,b)=>a-b).join(',')})`:''
-      const hcpDisplay=(m.hcp&&m.hcp!=='None')?m.hcp+(ballsStr?` · ${ballsStr}`:''):(ballsStr||'None');
+      const ballsStr=myBalls.length?`last balls: (${[...myBalls].sort((a,b)=>a-b).join(',')})`:''
+      const rackPart=m.hcp&&m.hcp!=='None'?m.hcp:'';
+      const hcpDisplay=rackPart&&ballsStr?`${rackPart}<br><span style="font-size:.68rem;color:var(--gold2);">${ballsStr}</span>`:rackPart||ballsStr||'None';
       return {opponent:opp,opponentRank:oppRank,fmt:m.fmt||'9-Ball',type:m.type||'Exhibition',
         score:scoreStr,hcp:hcpDisplay,hasHcp:!!(m.hcp&&m.hcp!=='None')||myBalls.length>0,venue:m.venue||'—',date:m.date||'—',result,status:'Verified'};
     });
