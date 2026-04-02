@@ -49,12 +49,12 @@ nav{display:flex;gap:2px;}
 .av-dd-head{
   padding:12px 16px 10px;border-bottom:1px solid rgba(212,175,55,.1);
 }
-.av-dd-name{font-family:'Epilogue',sans-serif;font-weight:700;font-size:.88rem;color:#fff;}
-.av-dd-role{font-family:'Space Grotesk',sans-serif;font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--chalk);margin-top:2px;}
+.av-dd-name{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;color:#fff;}
+.av-dd-role{font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);margin-top:2px;}
 .av-dd-item{
   display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;
   background:none;border:none;cursor:pointer;
-  font-family:'Space Grotesk',sans-serif;font-size:.8rem;font-weight:600;
+  font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:1.5px;
   color:var(--chalk);text-align:left;border-bottom:1px solid rgba(212,175,55,.05);
 }
 .av-dd-item:last-child{border-bottom:none;}
@@ -665,10 +665,10 @@ textarea{resize:vertical;min-height:75px;}
             <div class="av-dd-name" id="av-dd-name">—</div>
             <div class="av-dd-role" id="av-dd-role"></div>
           </div>
-          <button class="av-dd-item" onclick="toggleAvDropdown();sv('player-portal',null)" id="av-dd-portal" style="display:none;">🎱 My Portal</button>
-          <button class="av-dd-item" onclick="toggleAvDropdown();sv('portal',null)" id="av-dd-hall" style="display:none;">🏢 Hall Portal</button>
-          <button class="av-dd-item" onclick="toggleAvDropdown();sv('admin',null)" id="av-dd-admin" style="display:none;">⚙️ Admin</button>
-          <button class="av-dd-item logout" onclick="toggleAvDropdown();logout()">↩ Logout</button>
+          <button class="av-dd-item" onclick="toggleAvDropdown();sv('player-portal',null)" id="av-dd-portal" style="display:none;">My Portal</button>
+          <button class="av-dd-item" onclick="toggleAvDropdown();sv('portal',null)" id="av-dd-hall" style="display:none;">Hall Portal</button>
+          <button class="av-dd-item" onclick="toggleAvDropdown();sv('admin',null)" id="av-dd-admin" style="display:none;">Admin</button>
+          <button class="av-dd-item logout" onclick="toggleAvDropdown();logout()">Logout</button>
         </div>
       </div>
       <span id="hdr-name">—</span>
@@ -1020,7 +1020,7 @@ textarea{resize:vertical;min-height:75px;}
 <div id="view-player-portal" class="view">
   <div class="pp-hdr">
     <div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:var(--gold);">🎱 Player Portal</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:var(--gold);" id="pp-title">Player Portal</div>
       <div style="font-size:.76rem;color:var(--chalk);margin-top:2px;" id="pp-subtitle">Your match history · Rankings · Pending validations</div>
     </div>
     <div id="pp-hdr-stats" style="display:flex;gap:1.2rem;text-align:center;flex-wrap:wrap;"></div>
@@ -1783,7 +1783,7 @@ function setUser(u){
   document.getElementById('hdr-name').textContent=fmtPlayerName(u.name);
 
   // Populate avatar dropdown
-  const roleLabels={player:'🎱 Player',owner:'🏢 Hall Owner',fan:'👁 Scout/Fan',admin:'⚙️ Admin'};
+  const roleLabels={player:'Player',owner:'Hall Owner',fan:'Scout/Fan',admin:'Admin'};
   const avDdName=document.getElementById('av-dd-name');
   const avDdRole=document.getElementById('av-dd-role');
   if(avDdName) avDdName.textContent=fmtPlayerName(u.name);
@@ -3927,6 +3927,8 @@ function buildPlayerPortal(){
 
   /* ── PENDING VERIFICATION STATE ── */
   if(isPending){
+    const _ppTitle=document.getElementById('pp-title');
+    if(_ppTitle) _ppTitle.textContent=u.moniker||'Player Portal';
     document.getElementById('pp-subtitle').textContent=`${fmtPlayerName(u.name)} · ${u.region||'—'} · Pending Verification`;
     document.getElementById('pp-hdr-stats').innerHTML=`
       <div style="display:flex;align-items:center;gap:.75rem;background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.3);border-radius:10px;padding:.55rem 1.1rem;">
@@ -3998,7 +4000,9 @@ function buildPlayerPortal(){
   const losses=_realHistory.filter(m=>m.result==='L').length;
   const pct=Math.round(wins/(wins+losses||1)*100);
 
-  document.getElementById('pp-subtitle').textContent=`${fmtPlayerName(p.name)} · ${p.region} · ${p.fmt}`;
+  const _ppTitleEl=document.getElementById('pp-title');
+  if(_ppTitleEl) _ppTitleEl.textContent=u.moniker||'Player Portal';
+  document.getElementById('pp-subtitle').textContent=`${fmtPlayerName(p.name)} · ${u.region||p.region}`;
 
   // Header stats — official PinoyPool metrics (PPR, PR, MI, SoS)
   const _tier=careerTier(p.mw,p.ml,p.status);
@@ -4499,6 +4503,9 @@ function savePlayerProfile(){
   // Update PLAYERS array
   const pl=PLAYERS.find(p=>p.name===app.user.name);
   if(pl){ pl.moniker=moniker; pl.fb=fb; }
+  // Refresh portal title live
+  const _ptEl=document.getElementById('pp-title');
+  if(_ptEl) _ptEl.textContent=moniker||'Player Portal';
   toast('✅ Profile saved! Moniker and Facebook page updated.');
 }
 
