@@ -4165,17 +4165,44 @@ function ppTab(btn,tab){
       (m.status==='pending-admin'||m.status==='pending')&&(m.p1===_myName||m.p2===_myName)
     );
 
-    const _matchCard=(m,headerHtml,statusTag,bodyHtml)=>`
-      <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.8rem;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.75rem;">
-          <div>
-            ${headerHtml}
-            <div style="font-size:.7rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue} <span style="color:var(--border);margin:0 4px;">·</span> 📅 ${fmtDate(m.date)}</div>
+    const _scSt=`font-family:'DM Mono',monospace;font-weight:700;font-size:1rem;`;
+    const _fmtB=f=>f==='9-Ball'
+      ?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`
+      :`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
+    const _pendCard=(m,isMyP1,statusBadge,actionHtml,extraTop='')=>{
+      const _sc=(m.score||m.sc||'0-0').split(/[-–]/).map(x=>x.trim());
+      const _myS=isMyP1?(_sc[0]||''):(_sc[1]||''); const _opS=isMyP1?(_sc[1]||''):(_sc[0]||'');
+      const _myN=isMyP1?m.p1:m.p2; const _opN=isMyP1?m.p2:m.p1;
+      const _myT=m[isMyP1?'p1CareerStatus':'p2CareerStatus']||(PLAYERS.find(p=>p.name===_myN)||{}).status||'';
+      const _opT=m[isMyP1?'p2CareerStatus':'p1CareerStatus']||(PLAYERS.find(p=>p.name===_opN)||{}).status||'';
+      const _mr=Array.isArray(m.hcpRack)?(m.hcpRack[isMyP1?0:1]||0):0;
+      const _or=Array.isArray(m.hcpRack)?(m.hcpRack[isMyP1?1:0]||0):0;
+      const _mb=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[isMyP1?0:1])?m.hcpBalls[isMyP1?0:1]:[];
+      const _ob=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[isMyP1?1:0])?m.hcpBalls[isMyP1?1:0]:[];
+      const _mh=fmtHcpTag(_mr,_mb); const _oh=fmtHcpTag(_or,_ob);
+      const _myL=`${fmtPlayerName(_myN)}${_myT?` <span class="tier-inline">${_myT}</span>`:''}${_mh?` <span class="hcp-tag">${_mh}</span>`:''}`;
+      const _opL=`${fmtPlayerName(_opN)}${_opT?` <span class="tier-inline">${_opT}</span>`:''}${_oh?` <span class="hcp-tag">${_oh}</span>`:''}`;
+      return `<div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;margin-bottom:.8rem;overflow:hidden;">
+        <div style="padding:clamp(7px,2.5vw,11px);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_fmtB(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}${statusBadge?` ${statusBadge}`:''}</div>
+            <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
           </div>
-          ${statusTag}
+          ${extraTop}
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_myL}</div>
+            <span style="${_scSt}color:var(--chalk);">${_myS}</span>
+          </div>
+          <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_opL}</div>
+            <span style="${_scSt}color:var(--chalk);">${_opS}</span>
+          </div>
+          <div style="font-size:.65rem;color:var(--chalk2);margin-top:.35rem;">📍 ${m.venue||'—'}</div>
         </div>
-        ${bodyHtml}
+        ${actionHtml?`<div style="padding:.4rem clamp(7px,2.5vw,11px) .75rem;border-top:1px solid rgba(255,255,255,.05);">${actionHtml}</div>`:''}
       </div>`;
+    };
 
     c.innerHTML=`
     ${_editProposed.length?`
@@ -4185,19 +4212,15 @@ function ppTab(btn,tab){
       </div>
       <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">Your opponent proposed a different score. Review and accept or reject.</p>
       ${_editProposed.map(m=>{
-        const opp=m.p2;
-        return _matchCard(m,
-          `<div style="font-weight:600;font-size:.92rem;">vs ${opp}</div>
-           <div style="font-size:.73rem;color:var(--chalk);margin-top:4px;">${fmtBallTag(m.fmt)} · Original: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong></div>`,
-          `<span style="padding:2px 8px;border-radius:6px;font-size:.65rem;background:rgba(229,85,85,.1);border:1px solid #e55;color:#e55;white-space:nowrap;">Score Disputed</span>`,
-          `<div style="background:rgba(200,168,75,.07);border:1px solid rgba(200,168,75,.2);border-radius:7px;padding:.65rem .8rem;margin-bottom:.7rem;font-size:.8rem;">
-            <span style="color:var(--chalk2);">Proposed by ${opp.split(' ')[0]}:</span> <strong style="color:var(--gold);font-family:'DM Mono',monospace;">${m.proposedScore}</strong>
-          </div>
-          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-            <button class="btn btn-d btn-sm" style="flex:1;" onclick="initiatorRejectEdit('${m.id}')">↩️ Keep Original</button>
-            <button class="btn btn-s btn-sm" style="flex:1;" onclick="initiatorAcceptEdit('${m.id}')">✓ Accept ${m.proposedScore}</button>
-          </div>`
-        );
+        const statusBadge=`<span style="padding:2px 8px;border-radius:6px;font-size:.63rem;background:rgba(229,85,85,.1);border:1px solid #e55;color:#e55;white-space:nowrap;">Score Disputed</span>`;
+        const extraTop=`<div style="background:rgba(200,168,75,.07);border:1px solid rgba(200,168,75,.2);border-radius:7px;padding:.55rem .75rem;margin-bottom:.45rem;font-size:.78rem;">
+          <span style="color:var(--chalk2);">Proposed by ${m.p2.split(' ')[0]}:</span> <strong style="color:var(--gold);font-family:'DM Mono',monospace;">${m.proposedScore}</strong>
+        </div>`;
+        const actionHtml=`<div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button class="btn btn-d btn-sm" style="flex:1;" onclick="initiatorRejectEdit('${m.id}')">↩️ Keep Original</button>
+          <button class="btn btn-s btn-sm" style="flex:1;" onclick="initiatorAcceptEdit('${m.id}')">✓ Accept ${m.proposedScore}</button>
+        </div>`;
+        return _pendCard(m,true,statusBadge,actionHtml,extraTop);
       }).join('')}
     </div>`:''}
 
@@ -4209,25 +4232,14 @@ function ppTab(btn,tab){
       <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">These matches were submitted with you as the opponent. Approve, propose a different score, or reject.</p>
       ${_needMyResponse.map(m=>{
         const isP1=(m.p1===_myName);
-        const opp=isP1?m.p2:m.p1;
-        const scoreForMe=isP1?m.score:(()=>{const pts=m.score.split('-');return `${pts[1]}-${pts[0]}`;})();
-        return _matchCard(m,
-          `<div style="font-weight:600;font-size:.92rem;">vs ${opp}</div>
-           <div style="font-size:.73rem;color:var(--chalk);margin-top:4px;">
-             ${fmtBallTag(m.fmt)}
-             <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
-             · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong>
-             ${m.hcp&&m.hcp!=='None'?`· <span style="color:#e55;font-size:.7rem;">${m.hcp}</span>`:''}
-           </div>`,
-          `<span style="padding:2px 8px;border-radius:6px;font-size:.65rem;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.35);color:var(--gold);white-space:nowrap;">Awaiting You</span>`,
-          `<div style="font-size:.72rem;color:var(--chalk2);margin-bottom:.6rem;">📍 Venue: <strong style="color:var(--chalk);">${m.venue}</strong> <span style="color:var(--border);margin:0 4px;">·</span> <span style="color:#aaa;font-size:.68rem;font-style:italic;">Venue is locked and cannot be changed</span></div>
-           <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-             <button class="btn btn-d btn-sm" style="flex:1;min-width:80px;" onclick="opponentRejectMatch('${m.id}')">✗ Reject</button>
-             <button class="btn btn-sm" style="flex:1;min-width:80px;background:rgba(200,168,75,.1);border-color:rgba(200,168,75,.3);color:var(--gold);" onclick="opponentEditScore('${m.id}')">✏️ Edit Score</button>
-             <button class="btn btn-s btn-sm" style="flex:1;min-width:80px;" onclick="opponentApproveMatch('${m.id}')">✓ Approve</button>
-           </div>
-           <div id="opp-edit-${m.id}"></div>`
-        );
+        const statusBadge=`<span style="padding:2px 8px;border-radius:6px;font-size:.63rem;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.35);color:var(--gold);white-space:nowrap;">Awaiting You</span>`;
+        const actionHtml=`<div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button class="btn btn-d btn-sm" style="flex:1;min-width:80px;" onclick="opponentRejectMatch('${m.id}')">✗ Reject</button>
+          <button class="btn btn-sm" style="flex:1;min-width:80px;background:rgba(200,168,75,.1);border-color:rgba(200,168,75,.3);color:var(--gold);" onclick="opponentEditScore('${m.id}')">✏️ Edit Score</button>
+          <button class="btn btn-s btn-sm" style="flex:1;min-width:80px;" onclick="opponentApproveMatch('${m.id}')">✓ Approve</button>
+        </div>
+        <div id="opp-edit-${m.id}"></div>`;
+        return _pendCard(m,isP1,statusBadge,actionHtml);
       }).join('')}
     </div>`:''}
 
@@ -4238,23 +4250,14 @@ function ppTab(btn,tab){
       </div>
       <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">Awaiting opponent and/or venue confirmation. Rankings update once all parties confirm and Admin approves.</p>
       ${_mySubmitted.map(m=>{
-        const opp=m.p2;
-        const oppDone=!!m.p2ok;
-        const venueDone=!!m.venueOk;
-        return _matchCard(m,
-          `<div style="font-weight:600;font-size:.92rem;">vs ${opp}</div>
-           <div style="font-size:.73rem;color:var(--chalk);margin-top:4px;">
-             ${fmtBallTag(m.fmt)}
-             <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
-             · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong>
-           </div>`,
-          `<span style="padding:2px 8px;border-radius:6px;font-size:.65rem;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.35);color:#f5a623;white-space:nowrap;">⏳ Pending</span>`,
-          `<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:.72rem;">
-            <span style="padding:2px 8px;border-radius:6px;border:1px solid var(--grn3);color:var(--grn3);">✓ You Submitted</span>
-            <span style="padding:2px 8px;border-radius:6px;border:1px solid ${oppDone?'var(--grn3)':'rgba(245,166,35,.4)'};color:${oppDone?'var(--grn3)':'#f5a623'};">${oppDone?'✓ Opponent Confirmed':'⏳ Awaiting Opponent'}</span>
-            <span style="padding:2px 8px;border-radius:6px;border:1px solid ${venueDone?'var(--grn3)':'rgba(245,166,35,.4)'};color:${venueDone?'var(--grn3)':'#f5a623'};">${venueDone?'✓ Venue Confirmed':'⏳ Awaiting Venue'}</span>
-          </div>`
-        );
+        const oppDone=!!m.p2ok; const venueDone=!!m.venueOk;
+        const statusBadge=`<span style="padding:2px 8px;border-radius:6px;font-size:.63rem;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.35);color:#f5a623;white-space:nowrap;">⏳ Pending</span>`;
+        const actionHtml=`<div style="display:flex;gap:6px;flex-wrap:wrap;font-size:.7rem;">
+          <span style="padding:2px 8px;border-radius:6px;border:1px solid var(--grn3);color:var(--grn3);">✓ You Submitted</span>
+          <span style="padding:2px 8px;border-radius:6px;border:1px solid ${oppDone?'var(--grn3)':'rgba(245,166,35,.4)'};color:${oppDone?'var(--grn3)':'#f5a623'};">${oppDone?'✓ Opponent Confirmed':'⏳ Awaiting Opponent'}</span>
+          <span style="padding:2px 8px;border-radius:6px;border:1px solid ${venueDone?'var(--grn3)':'rgba(245,166,35,.4)'};color:${venueDone?'var(--grn3)':'#f5a623'};">${venueDone?'✓ Venue Confirmed':'⏳ Awaiting Venue'}</span>
+        </div>`;
+        return _pendCard(m,true,statusBadge,actionHtml);
       }).join('')}
     </div>`:''}
 
@@ -4269,22 +4272,13 @@ function ppTab(btn,tab){
         const opp=isP1?m.p2:m.p1;
         const myOk=isP1?!!m.p1ok:!!m.p2ok;
         const oppOk=isP1?!!m.p2ok:!!m.p1ok;
-        const score=m.score||m.sc||'—';
-        return`<div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.8rem;">
-          <div style="font-weight:600;font-size:.92rem;">vs ${opp}</div>
-          <div style="font-size:.73rem;color:var(--chalk);margin-top:4px;">
-            ${fmtBallTag(m.fmt)}
-            <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
-            · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${score}</strong>
-            ${m.hcp&&m.hcp!=='None'?`· <span style="color:#e55;font-size:.7rem;">${m.hcp}</span>`:''}
-          </div>
-          <div style="font-size:.7rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue||m.venue||'—'} · 📅 ${fmtDate(m.date)}</div>
-          <div style="display:flex;gap:.5rem;margin-top:.7rem;flex-wrap:wrap;align-items:center;">
-            <span style="padding:2px 8px;border-radius:6px;font-size:.7rem;border:1px solid ${myOk?'var(--grn3)':'var(--border)'};color:${myOk?'var(--grn3)':'var(--chalk2)'};">${myOk?'✓ You Confirmed':'— Not Confirmed'}</span>
-            <span style="padding:2px 8px;border-radius:6px;font-size:.7rem;border:1px solid ${oppOk?'var(--grn3)':'var(--border)'};color:${oppOk?'var(--grn3)':'var(--chalk2)'};">${oppOk?`✓ ${opp.split(' ')[0]} Confirmed`:`⏳ ${opp.split(' ')[0]} Waiting`}</span>
-            ${!myOk?`<button class="btn btn-s btn-sm" style="margin-left:auto;" onclick="playerConfirmOwnerMatch('${m.id}')">✓ Confirm Result</button>`:''}
-          </div>
+        const statusBadge=`<span style="padding:2px 8px;border-radius:6px;font-size:.63rem;background:rgba(52,130,219,.1);border:1px solid rgba(52,130,219,.35);color:#4a9eff;white-space:nowrap;">🏢 Owner Recorded</span>`;
+        const actionHtml=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.7rem;">
+          <span style="padding:2px 8px;border-radius:6px;border:1px solid ${myOk?'var(--grn3)':'var(--border)'};color:${myOk?'var(--grn3)':'var(--chalk2)'};">${myOk?'✓ You Confirmed':'— Not Confirmed'}</span>
+          <span style="padding:2px 8px;border-radius:6px;border:1px solid ${oppOk?'var(--grn3)':'var(--border)'};color:${oppOk?'var(--grn3)':'var(--chalk2)'};">${oppOk?`✓ ${opp.split(' ')[0]} Confirmed`:`⏳ ${opp.split(' ')[0]} Waiting`}</span>
+          ${!myOk?`<button class="btn btn-s btn-sm" style="margin-left:auto;" onclick="playerConfirmOwnerMatch('${m.id}')">✓ Confirm</button>`:''}
         </div>`;
+        return _pendCard(m,isP1,statusBadge,actionHtml);
       }).join('')}
     </div>`:''}
 
@@ -4295,17 +4289,9 @@ function ppTab(btn,tab){
       </div>
       <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">All parties confirmed. Rankings will update once Admin gives final approval.</p>
       ${_awaitAdmin.map(m=>{
-        const opp=m.p1===_myName?m.p2:m.p1;
-        return`<div style="background:rgba(200,168,75,.03);border:1px solid rgba(200,168,75,.15);border-radius:10px;padding:1rem;margin-bottom:.7rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
-          <div>
-            <div style="font-weight:600;font-size:.9rem;">vs ${opp}</div>
-            <div style="font-size:.72rem;color:var(--chalk);margin-top:3px;">
-              ${fmtBallTag(m.fmt)} · <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong>
-            </div>
-            <div style="font-size:.68rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue} · 📅 ${fmtDate(m.date)}</div>
-          </div>
-          <span style="padding:3px 9px;border-radius:6px;font-size:.65rem;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:var(--gold);white-space:nowrap;">⏳ Awaiting Admin</span>
-        </div>`;
+        const isP1=m.p1===_myName;
+        const statusBadge=`<span style="padding:2px 8px;border-radius:6px;font-size:.63rem;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:var(--gold);white-space:nowrap;">⏳ Awaiting Admin</span>`;
+        return _pendCard(m,isP1,statusBadge,'');
       }).join('')}
     </div>`:''}
 
@@ -4786,61 +4772,84 @@ function ptab(tab){
       <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.1rem;">Matches recorded at your hall awaiting confirmation or validation. You can confirm on behalf of any player who was physically present.</p>
       ${_ownedPending.map(m=>{
         const realIdx=manualPending.indexOf(m);
-        return `
-      <div style="background:rgba(200,168,75,.04);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.7rem;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.7rem;">
-          <div>
-            <div style="font-weight:600;line-height:1.5;">${fmtMatchLabel(m)}</div>
-            <div style="font-size:.73rem;color:var(--chalk);margin-top:3px;">
-              ${fmtBallTag(m.fmt)}
-              <span class="tag tgd" style="margin-left:3px;">${m.type}</span>
-              · Score: <strong style="color:var(--gold);">${m.sc}</strong>
-              · 🏆 <strong style="color:var(--grn3);">${m.winner?.split(' ')[0]||'—'} wins</strong>
+        const _scO=`font-family:'DM Mono',monospace;font-weight:700;font-size:1rem;`;
+        const _fBO=f=>f==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
+        const _pts=(m.sc||m.score||'0-0').split(/[-–]/).map(x=>x.trim());
+        const _s1O=_pts[0]||''; const _s2O=_pts[1]||'';
+        const _win1=parseInt(_s1O)>parseInt(_s2O);
+        const _p1T=(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
+        const _p2T=(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+        const _p1L=`${fmtPlayerName(m.p1)}${_p1T?` <span class="tier-inline">${_p1T}</span>`:''}`;
+        const _p2L=`${fmtPlayerName(m.p2)}${_p2T?` <span class="tier-inline">${_p2T}</span>`:''}`;
+        return `<div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;margin-bottom:.8rem;overflow:hidden;">
+          <div style="padding:clamp(7px,2.5vw,11px);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+              <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_fBO(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}</div>
+              <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.ts||m.date)}</div>
             </div>
-            ${m.hcp!=='None'?`<div style="font-size:.7rem;color:#e55;margin-top:2px;">Hcp: ${m.hcp}</div>`:''}
-            <div style="font-size:.65rem;color:var(--chalk2);margin-top:3px;">⏳ Players notified — awaiting confirmation or your validation</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p1L}</div>
+              <span style="${_scO}color:${_win1?'var(--gold)':'var(--chalk2)'};">${_s1O}</span>
+            </div>
+            <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p2L}</div>
+              <span style="${_scO}color:${!_win1?'var(--gold)':'var(--chalk2)'};">${_s2O}</span>
+            </div>
+            <div style="font-size:.65rem;color:var(--chalk2);margin-top:.35rem;">📍 ${m.venue||'—'}</div>
           </div>
-          <div style="font-size:.7rem;color:var(--chalk2);">${fmtDate(m.ts||m.date)}</div>
-        </div>
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem;">
-          <button class="btn btn-sm" onclick="ownerConfirm(${realIdx},1)" ${m.p1accept?'disabled':''} style="flex:1;min-width:100px;background:${m.p1accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.1)'};border-color:${m.p1accept?'rgba(31,140,78,.5)':'var(--border)'};color:${m.p1accept?'var(--grn3)':'var(--chalk)'};cursor:${m.p1accept?'default':'pointer'};">
-            ${m.p1accept?`✓ ${m.p1.split(' ')[0]}`:`✋ ${m.p1.split(' ')[0]}`}
-          </button>
-          <button class="btn btn-sm" onclick="ownerConfirm(${realIdx},2)" ${m.p2accept?'disabled':''} style="flex:1;min-width:100px;background:${m.p2accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.1)'};border-color:${m.p2accept?'rgba(31,140,78,.5)':'var(--border)'};color:${m.p2accept?'var(--grn3)':'var(--chalk)'};cursor:${m.p2accept?'default':'pointer'};">
-            ${m.p2accept?`✓ ${m.p2.split(' ')[0]}`:`✋ ${m.p2.split(' ')[0]}`}
-          </button>
-          <button class="btn btn-sm" onclick="cancelOwnerMatch('${m.id}')" style="min-width:70px;flex:none;background:rgba(229,85,85,.1);border-color:rgba(229,85,85,.3);color:#e55;">✗ Cancel</button>
-        </div>
-        <button class="btn btn-s btn-sm" style="width:100%;" onclick="ownerValidateMatch('${m.id}')">✓ Validate &amp; Notify Players</button>
-      </div>`;}).join('')}
+          <div style="padding:.4rem clamp(7px,2.5vw,11px) .4rem;border-top:1px solid rgba(255,255,255,.05);">
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem;">
+              <button class="btn btn-sm" onclick="ownerConfirm(${realIdx},1)" ${m.p1accept?'disabled':''} style="flex:1;min-width:90px;background:${m.p1accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.1)'};border-color:${m.p1accept?'rgba(31,140,78,.5)':'var(--border)'};color:${m.p1accept?'var(--grn3)':'var(--chalk)'};cursor:${m.p1accept?'default':'pointer'};">${m.p1accept?`✓ ${m.p1.split(' ')[0]}`:`✋ ${m.p1.split(' ')[0]}`}</button>
+              <button class="btn btn-sm" onclick="ownerConfirm(${realIdx},2)" ${m.p2accept?'disabled':''} style="flex:1;min-width:90px;background:${m.p2accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.1)'};border-color:${m.p2accept?'rgba(31,140,78,.5)':'var(--border)'};color:${m.p2accept?'var(--grn3)':'var(--chalk)'};cursor:${m.p2accept?'default':'pointer'};">${m.p2accept?`✓ ${m.p2.split(' ')[0]}`:`✋ ${m.p2.split(' ')[0]}`}</button>
+              <button class="btn btn-sm" onclick="cancelOwnerMatch('${m.id}')" style="min-width:60px;flex:none;background:rgba(229,85,85,.1);border-color:rgba(229,85,85,.3);color:#e55;">✗</button>
+            </div>
+            <button class="btn btn-s btn-sm" style="width:100%;" onclick="ownerValidateMatch('${m.id}')">✓ Validate &amp; Notify Players</button>
+          </div>
+        </div>`;}).join('')}
       ${_playerSetMatches.map(m=>{
         const oppConfirmed=!!m.p2ok;
-        return`
-      <div style="background:rgba(245,166,35,.04);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:1.1rem;margin-bottom:.7rem;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;font-size:.92rem;line-height:1.6;">${fmtMatchLabel(m)}</div>
-            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:3px;">
-              ${fmtBallTag(m.fmt)}
-              <span class="tag tgd">${m.type}</span>
-              <span style="font-size:.73rem;color:var(--chalk);white-space:nowrap;">· Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</strong></span>
-              ${m.hcp&&m.hcp!=='None'?`<span style="white-space:nowrap;color:#e55;font-size:.7rem;">· Hcp: ${m.hcp}</span>`:''}
+        const _scO=`font-family:'DM Mono',monospace;font-weight:700;font-size:1rem;`;
+        const _fBO=f=>f==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
+        const _pts=(m.score||'0-0').split(/[-–]/).map(x=>x.trim());
+        const _s1O=_pts[0]||''; const _s2O=_pts[1]||'';
+        const _win1=parseInt(_s1O)>parseInt(_s2O);
+        const _p1T=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
+        const _p2T=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+        const _mr1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0; const _mr2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
+        const _mb1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
+        const _mb2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
+        const _h1=fmtHcpTag(_mr1,_mb1); const _h2=fmtHcpTag(_mr2,_mb2);
+        const _p1L=`${fmtPlayerName(m.p1)}${_p1T?` <span class="tier-inline">${_p1T}</span>`:''}${_h1?` <span class="hcp-tag">${_h1}</span>`:''}`;
+        const _p2L=`${fmtPlayerName(m.p2)}${_p2T?` <span class="tier-inline">${_p2T}</span>`:''}${_h2?` <span class="hcp-tag">${_h2}</span>`:''}`;
+        return `<div style="background:rgba(255,255,255,.03);border:1px solid rgba(245,166,35,.2);border-radius:10px;margin-bottom:.8rem;overflow:hidden;">
+          <div style="padding:clamp(7px,2.5vw,11px);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+              <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_fBO(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}</div>
+              <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
             </div>
-            <div style="font-size:.68rem;color:var(--chalk2);margin-top:2px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
-              <span>📍 <strong style="color:var(--chalk);">${m.venue}</strong></span>
-              <span style="white-space:nowrap;">📅 ${fmtDate(m.date)}</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p1L}</div>
+              <span style="${_scO}color:var(--chalk);">${_s1O}</span>
             </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:.5rem;font-size:.7rem;">
+            <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p2L}</div>
+              <span style="${_scO}color:var(--chalk);">${_s2O}</span>
+            </div>
+            <div style="font-size:.65rem;color:var(--chalk2);margin-top:.35rem;">📍 ${m.venue||'—'}</div>
+          </div>
+          <div style="padding:.4rem clamp(7px,2.5vw,11px) .75rem;border-top:1px solid rgba(255,255,255,.05);">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.5rem;font-size:.7rem;">
               <span style="padding:2px 8px;border-radius:6px;border:1px solid var(--grn3);color:var(--grn3);">✓ ${m.p1.split(' ')[0]} Submitted</span>
               <span style="padding:2px 8px;border-radius:6px;border:1px solid ${oppConfirmed?'var(--grn3)':'rgba(245,166,35,.4)'};color:${oppConfirmed?'var(--grn3)':'#f5a623'};">${oppConfirmed?`✓ ${m.p2.split(' ')[0]} Confirmed`:`⏳ ${m.p2.split(' ')[0]} Pending`}</span>
             </div>
+            <div style="display:flex;gap:.5rem;">
+              <button class="btn btn-s btn-sm" style="flex:1;" onclick="ownerApproveVenueMatch('${m.id}')">✓ Approve</button>
+              <button class="btn btn-d btn-sm" style="flex:1;" onclick="ownerRejectPlayerMatch('${m.id}')">✗ Reject</button>
+            </div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:.4rem;flex-shrink:0;">
-            <button class="btn btn-s btn-sm" onclick="ownerApproveVenueMatch('${m.id}')" style="min-width:90px;">✓ Approve</button>
-            <button class="btn btn-d btn-sm" onclick="ownerRejectPlayerMatch('${m.id}')" style="min-width:90px;">✗ Reject</button>
-          </div>
-        </div>
-      </div>`}).join('')}
+        </div>`}).join('')}
       `}
     </div>
 
@@ -4848,7 +4857,6 @@ function ptab(tab){
 
   /* ── MATCH HISTORY ── */
   } else if(tab==='history'){
-    const today='2026-02-22', thisMonth='2026-02', thisYear='2026';
     c.innerHTML=`
     <div class="card">
       <div class="ct">📋 Match History — Your Venue</div>
@@ -4859,14 +4867,7 @@ function ptab(tab){
         <button class="tb" style="flex:none;min-width:80px;" onclick="filterHistory(this,'year')">This Year</button>
       </div>
       <div id="history-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1.2rem;"></div>
-      <div style="overflow-x:auto;">
-        <table class="rt" style="min-width:720px;" id="history-table">
-          <thead><tr>
-            <th>Players</th><th>Format</th><th>Type</th><th>Score</th><th>Handicap</th><th>Date & Time</th>
-          </tr></thead>
-          <tbody id="history-tbody"></tbody>
-        </table>
-      </div>
+      <div id="history-cards"></div>
     </div>`;
     filterHistory(document.querySelector('#portal-content .tb.act'),'all');
 
@@ -4991,26 +4992,40 @@ function filterHistory(btn, period){
       <div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;"><span>Exhibition</span><span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--gold);">${types.Exhibition}</span></div>
     </div>`;
 
-  const tbody=document.getElementById('history-tbody');
-  if(!data.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--chalk2);padding:2rem;">No matches found for this period</td></tr>`;return;}
-  tbody.innerHTML=data.map(m=>{
-    // Normalize score field (adminMatches uses 'score', hallHistory uses 'sc')
-    const sc=m.score||m.sc||'—';
-    const parts=sc.split('-');
-    const s1=parseInt(parts[0])||0, s2=parseInt(parts[1])||0;
-    const winner=m.winner||(s1>s2?m.p1:s1<s2?m.p2:'—');
-    const timeLabel=m.approvedAt?new Date(m.approvedAt).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric'}):fmtDate(m.date);
-    return`<tr>
-      <td>
-        <div style="font-weight:600;font-size:.85rem;line-height:1.6;">${fmtMatchLabel(m)}</div>
-        <div style="font-size:.65rem;color:var(--grn3);margin-top:2px;">🏆 ${winner}</div>
-      </td>
-      <td>${fmtBallTag(m.fmt)}</td>
-      <td style="font-size:.76rem;color:var(--chalk);">${m.type||'—'}</td>
-      <td><span style="font-family:'DM Mono',monospace;font-size:.9rem;color:var(--gold);">${sc}</span></td>
-      <td style="font-size:.76rem;color:${(!m.hcp||m.hcp==='None')?'var(--chalk2)':'#e55'}">${m.hcp||'None'}</td>
-      <td style="font-size:.72rem;color:var(--chalk2);">${timeLabel}</td>
-    </tr>`;
+  const cardsEl=document.getElementById('history-cards');
+  if(!cardsEl) return;
+  if(!data.length){cardsEl.innerHTML=`<div style="text-align:center;color:var(--chalk2);padding:2rem;font-size:.82rem;">No matches found for this period</div>`;return;}
+  const _scH=`font-family:'DM Mono',monospace;font-weight:700;font-size:1.05rem;`;
+  const _fBH=f=>f==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
+  cardsEl.innerHTML=data.map(m=>{
+    const sc=m.score||m.sc||'0-0';
+    const pts=sc.split(/[-–]/).map(x=>parseInt(x.trim()));
+    const s1=isNaN(pts[0])?'':pts[0]; const s2=isNaN(pts[1])?'':pts[1];
+    const win1=typeof s1==='number'&&typeof s2==='number'&&s1>s2;
+    const _p1T=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
+    const _p2T=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+    const _mr1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0; const _mr2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
+    const _mb1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
+    const _mb2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
+    const _h1=fmtHcpTag(_mr1,_mb1); const _h2=fmtHcpTag(_mr2,_mb2);
+    const _p1L=`${fmtPlayerName(m.p1)}${_p1T?` <span class="tier-inline">${_p1T}</span>`:''}${_h1?` <span class="hcp-tag">${_h1}</span>`:''}`;
+    const _p2L=`${fmtPlayerName(m.p2)}${_p2T?` <span class="tier-inline">${_p2T}</span>`:''}${_h2?` <span class="hcp-tag">${_h2}</span>`:''}`;
+    const _stat=m.status==='approved'?'sp-active':m.status==='rejected'?'sp-suspended':'sp-pending';
+    return `<div class="le ${win1?'lw':'ll'}" style="flex-direction:column;align-items:stretch;gap:0;margin-bottom:4px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_fBH(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}<span class="status-pill ${_stat}" style="font-size:.52rem;margin-left:2px;">● ${m.status}</span></div>
+        <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p1L}</div>
+        <span style="${_scH}color:${win1?'var(--gold)':'var(--chalk2)'};">${s1}</span>
+      </div>
+      <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p2L}</div>
+        <span style="${_scH}color:${!win1?'var(--gold)':'var(--chalk2)'};">${s2}</span>
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -5813,24 +5828,42 @@ function admTab(btn,tab){
           ${i<arr.length-1?`<div style="flex:1;height:1px;background:${s.done?'var(--grn3)':'rgba(255,255,255,.12)'};min-width:10px;margin-bottom:14px;opacity:.55;"></div>`:''}`
         ).join('')}
       </div>`;
-    // ── Helper: renders a single match row with progress tracker ──
-    const _matchRow=(m,progSteps,statusLabel,btnHtml)=>`
-      <div style="background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;margin-bottom:.65rem;">
-        <div style="display:flex;align-items:flex-start;gap:.8rem;flex-wrap:wrap;">
-          <div style="flex:1;min-width:160px;">
-            <div style="font-weight:600;font-size:.9rem;line-height:1.5;">${fmtMatchLabel(m)} <span class="status-pill sp-pending" style="font-size:.55rem;font-weight:400;vertical-align:middle;white-space:nowrap;">● ${statusLabel}</span></div>
-            <div style="font-size:.72rem;color:var(--chalk);margin-top:3px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
-              ${fmtBallTag(m.fmt)}
-              <span class="tag tgd">${m.type}</span>
-              <span style="font-family:'DM Mono',monospace;color:var(--gold);font-size:.75rem;">${m.score}</span>
-              ${m.hcp&&m.hcp!=='None'?`<span style="color:#e55;font-size:.68rem;">· ${m.hcp}</span>`:''}
-            </div>
-            <div style="font-size:.68rem;color:var(--chalk2);margin-top:3px;">📍 ${m.venue} · 📅 ${fmtDate(m.date)}</div>
-            ${_prog(progSteps)}
+    // ── Helper: renders a single match row with dashboard card layout + progress tracker ──
+    const _admFmtB=f=>f==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
+    const _matchRow=(m,progSteps,statusLabel,btnHtml)=>{
+      const _pts=(m.score||'0-0').split(/[-–]/).map(x=>parseInt(x.trim()));
+      const _s1=isNaN(_pts[0])?'':_pts[0]; const _s2=isNaN(_pts[1])?'':_pts[1];
+      const _w1=typeof _s1==='number'&&typeof _s2==='number'&&_s1>_s2;
+      const _scA=`font-family:'DM Mono',monospace;font-weight:700;font-size:1rem;`;
+      const _p1T=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
+      const _p2T=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+      const _mr1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0; const _mr2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
+      const _mb1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
+      const _mb2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
+      const _h1=fmtHcpTag(_mr1,_mb1); const _h2=fmtHcpTag(_mr2,_mb2);
+      const _p1L=`${fmtPlayerName(m.p1)}${_p1T?` <span class="tier-inline">${_p1T}</span>`:''}${_h1?` <span class="hcp-tag">${_h1}</span>`:''}`;
+      const _p2L=`${fmtPlayerName(m.p2)}${_p2T?` <span class="tier-inline">${_p2T}</span>`:''}${_h2?` <span class="hcp-tag">${_h2}</span>`:''}`;
+      return `<div style="background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;margin-bottom:.65rem;overflow:hidden;">
+        <div style="padding:clamp(7px,2.5vw,11px);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_admFmtB(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}<span class="status-pill sp-pending" style="font-size:.52rem;margin-left:2px;">● ${statusLabel}</span></div>
+            <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
           </div>
-          <div style="display:flex;flex-direction:row;gap:6px;padding-top:2px;min-width:200px;">${btnHtml}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p1L}</div>
+            <span style="${_scA}color:var(--chalk);">${_s1}</span>
+          </div>
+          <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p2L}</div>
+            <span style="${_scA}color:var(--chalk);">${_s2}</span>
+          </div>
+          <div style="font-size:.65rem;color:var(--chalk2);margin-top:.35rem;">📍 ${m.venue||'—'}</div>
+          ${_prog(progSteps)}
         </div>
+        <div style="padding:.4rem clamp(7px,2.5vw,11px) .75rem;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:6px;flex-wrap:wrap;">${btnHtml}</div>
       </div>`;
+    };
     c.innerHTML=`
     <!-- ── TILE 1: ALL PENDING — NEEDS ACTION ── -->
     <div class="card" style="margin-bottom:1.1rem;">
@@ -5882,20 +5915,33 @@ function admTab(btn,tab){
         :_processed.map(m=>{
           const _isApproved=m.status==='approved';
           const _isRejected=m.status==='rejected';
-          return`<div style="display:flex;align-items:center;gap:.7rem;padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.05);">
-            <div style="flex:1;min-width:0;">
-              <div style="font-size:.88rem;font-weight:600;line-height:1.5;">${fmtMatchLabel(m)}</div>
-              <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
-                ${fmtBallTag(m.fmt)}
-                <span class="tag tgd">${m.type}</span>
-                <span style="font-family:'DM Mono',monospace;color:var(--gold);">${m.score}</span>
-                ${m.hcp&&m.hcp!=='None'?`<span style="color:#e55;font-size:.66rem;">${m.hcp}</span>`:''}
-              </div>
-              <div style="font-size:.67rem;color:var(--chalk2);margin-top:2px;">📍 ${m.venue} · 📅 ${fmtDate(m.date)}</div>
+          const _statCls=_isApproved?'sp-active':_isRejected?'sp-suspended':'sp-pending';
+          const _vPts=(m.score||'0-0').split(/[-–]/).map(x=>parseInt(x.trim()));
+          const _vs1=isNaN(_vPts[0])?'':_vPts[0]; const _vs2=isNaN(_vPts[1])?'':_vPts[1];
+          const _vw1=typeof _vs1==='number'&&typeof _vs2==='number'&&_vs1>_vs2;
+          const _vScS=`font-family:'DM Mono',monospace;font-weight:700;font-size:1.05rem;`;
+          const _vFB=f=>f==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
+          const _vp1T=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
+          const _vp2T=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+          const _vmr1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0; const _vmr2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
+          const _vmb1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
+          const _vmb2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
+          const _vh1=fmtHcpTag(_vmr1,_vmb1); const _vh2=fmtHcpTag(_vmr2,_vmb2);
+          const _vp1L=`${fmtPlayerName(m.p1)}${_vp1T?` <span class="tier-inline">${_vp1T}</span>`:''}${_vh1?` <span class="hcp-tag">${_vh1}</span>`:''}`;
+          const _vp2L=`${fmtPlayerName(m.p2)}${_vp2T?` <span class="tier-inline">${_vp2T}</span>`:''}${_vh2?` <span class="hcp-tag">${_vh2}</span>`:''}`;
+          return `<div class="le ${_vw1?'lw':'ll'}" style="flex-direction:column;align-items:stretch;gap:0;margin-bottom:4px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+              <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_vFB(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}<span class="status-pill ${_statCls}" style="font-size:.52rem;margin-left:2px;">● ${m.status}</span></div>
+              <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
             </div>
-            <div style="text-align:right;flex-shrink:0;">
-              <span class="status-pill ${_isApproved?'sp-active':_isRejected?'sp-suspended':'sp-pending'}" style="font-size:.58rem;">● ${m.status}</span>
-              ${_isApproved?`<div style="font-size:.62rem;color:var(--chalk2);margin-top:3px;">✓ ${m.p1.split(' ')[0]} · ✓ ${m.p2.split(' ')[0]} · ✓ Venue</div>`:''}
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_vp1L}</div>
+              <span style="${_vScS}color:${_vw1?'var(--gold)':'var(--chalk2)'};">${_vs1}</span>
+            </div>
+            <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_vp2L}</div>
+              <span style="${_vScS}color:${!_vw1?'var(--gold)':'var(--chalk2)'};">${_vs2}</span>
             </div>
           </div>`;
         }).join('')}
