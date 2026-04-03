@@ -5736,21 +5736,21 @@ function admTab(btn,tab){
         const _ru=registeredUsers.find(u=>u.id===p.id||u.username===p.username||(u.email&&u.email===p.email));
         const _email=_ru?.email||p.email||'—';
         const _region=_ru?.region||p.region||'—';
-        return`<div class="adm-row">
-          <div style="display:flex;align-items:center;gap:.9rem;min-width:0;flex:1;">
+        return`<div style="border:1px solid var(--border);border-radius:10px;padding:.8rem clamp(7px,2.5vw,11px);margin-bottom:.55rem;background:rgba(255,255,255,.02);">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem;">
             <div class="av" style="background:${p.colors||'#1a3a22'};flex-shrink:0;">${getInit(p.name)}</div>
-            <div style="min-width:0;">
-              <div style="font-weight:600;font-size:.9rem;">${fmtPlayerName(p.name)}</div>
-              <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;">${_email} · ${_region}</div>
-              <div style="font-size:.68rem;color:var(--chalk2);margin-top:1px;">Joined ${p.joined||'—'} · W:${p.mw} L:${p.ml}</div>
+            <div style="min-width:0;flex:1;">
+              <div style="font-weight:600;font-size:.88rem;line-height:1.4;">${fmtPlayerName(p.name)}</div>
+              <div style="font-size:.68rem;color:var(--chalk);margin-top:2px;">${_email} · ${_region}</div>
+              <div style="font-size:.65rem;color:var(--chalk2);margin-top:1px;">Joined ${p.joined||'—'} · W:${p.mw} L:${p.ml}</div>
             </div>
           </div>
-          <div class="adm-actions">
-            <span class="status-pill ${sClass}">● ${p.status}</span>
-            <select style="width:auto;padding:5px 9px;font-size:.78rem;" onchange="admSetPlayerStatus('${p.id}',this.value)">
+          <div style="display:flex;gap:.45rem;align-items:center;">
+            <span class="status-pill ${sClass}" style="flex-shrink:0;font-size:.58rem;">● ${p.status}</span>
+            <select style="flex:1;min-width:0;padding:4px 6px;font-size:.74rem;" onchange="admSetPlayerStatus('${p.id}',this.value)">
               ${STATUS_OPTS.map(s=>`<option value="${s}"${p.status===s?' selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
             </select>
-            <select style="width:auto;padding:5px 9px;font-size:.78rem;" title="Career Status" onchange="admSetCareer('${p.id}',this.value)">
+            <select style="flex:1;min-width:0;padding:4px 6px;font-size:.74rem;" title="Career Status" onchange="admSetCareer('${p.id}',this.value)">
               ${CAREER_STATUS_LIST.map(t=>`<option value="${t}"${p.careerStatus===t?' selected':''}>${t}</option>`).join('')}
             </select>
           </div>
