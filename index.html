@@ -1304,6 +1304,24 @@ function applyMatchStepUI(){
 }
 /* ══════════════════ DASHBOARD ══════════════════ */
 function buildDashboard(){
+  // — Hero CTA: swap based on logged-in role —
+  const _cta=document.getElementById('hero-cta');
+  if(_cta){
+    const _r=app.user?.role;
+    if(_r==='admin'){
+      _cta.textContent='⚡ Match Approvals';
+      _cta.onclick=()=>{ sv('admin',document.getElementById('nb-admin')); setTimeout(()=>{ document.querySelectorAll('.adm-tab').forEach(t=>{ if(t.textContent.includes('Match')) t.click(); }); },300); };
+    } else if(_r==='owner'){
+      _cta.textContent='⚡ Match Approvals';
+      _cta.onclick=()=>{ sv('portal',document.getElementById('nb-portal')); setTimeout(()=>ptab('matches'),300); };
+    } else if(_r==='player'){
+      _cta.textContent='⚡ Record Match';
+      _cta.onclick=()=>sv('match',null);
+    } else {
+      _cta.textContent='Join PinoyPool';
+      _cta.onclick=openAuth;
+    }
+  }
   // — Stat counters — only admin-approved matches count as "Verified"
   const approvedAdminCount=typeof adminMatches!=='undefined'?adminMatches.filter(x=>x.status==='approved').length:0;
   const el=n=>document.getElementById(n);
@@ -1907,7 +1925,13 @@ function setUser(u){
   // Hero CTA button
   const heroCta=document.getElementById('hero-cta');
   if(heroCta){
-    if(u.role==='player'||u.role==='owner'){
+    if(u.role==='admin'){
+      heroCta.textContent='⚡ Match Approvals';
+      heroCta.onclick=()=>{ sv('admin',document.getElementById('nb-admin')); setTimeout(()=>{ document.querySelectorAll('.adm-tab').forEach(t=>{ if(t.textContent.includes('Match')) t.click(); }); },300); };
+    } else if(u.role==='owner'){
+      heroCta.textContent='⚡ Match Approvals';
+      heroCta.onclick=()=>{ sv('portal',document.getElementById('nb-portal')); setTimeout(()=>ptab('matches'),300); };
+    } else if(u.role==='player'){
       heroCta.textContent='⚡ Record Match';
       heroCta.onclick=()=>sv('match',null);
     } else {
