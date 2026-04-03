@@ -4314,43 +4314,73 @@ function ppTab(btn,tab){
     `;
 
   } else if(tab==='history'){
-    let sort=app.ppSort||'date';
+    const sort=app.ppSort||'date';
+    const fmtF=app.ppFmtFilter||null;
+    const _pName=app.user?.name;
+    // Raw matches for this player from adminMatches
+    let _hMatches=adminMatches.filter(m=>m.status==='approved'&&(m.p1===_pName||m.p2===_pName));
+    const _totalAll=_hMatches.length;
+    // Apply format filter
+    if(sort==='fmt'&&fmtF) _hMatches=_hMatches.filter(m=>m.fmt===fmtF);
+    // Sort
+    if(sort==='venue') _hMatches.sort((a,b)=>(a.venue||'').localeCompare(b.venue||''));
+    else _hMatches.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    const _scStyle=`font-family:'DM Mono',monospace;font-weight:700;font-size:1.05rem;`;
+    const _fmtBadgeFn=f=>f==='9-Ball'
+      ?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${f}</span>`
+      :`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${f}</span>`;
     c.innerHTML=`
     <div class="card">
       <div class="ct">📋 My Match History</div>
-      <div style="display:flex;gap:7px;align-items:center;margin-bottom:1.1rem;flex-wrap:wrap;">
-        <span style="font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Sort by:</span>
-        <button class="tb${sort==='date'?' act':''}" style="flex:none;min-width:70px;" onclick="ppSort(this,'date')">Date</button>
-        <button class="tb${sort==='type'?' act':''}" style="flex:none;min-width:80px;" onclick="ppSort(this,'type')">Match Type</button>
-        <button class="tb${sort==='venue'?' act':''}" style="flex:none;min-width:70px;" onclick="ppSort(this,'venue')">Venue</button>
-        <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--chalk2);">${getPlayerMatchHistory(app.user?.name).length} verified matches</div>
+      <div style="display:flex;gap:7px;align-items:center;margin-bottom:.7rem;flex-wrap:wrap;">
+        <span style="font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">View:</span>
+        <button class="tb${sort==='date'?' act':''}" style="flex:none;min-width:60px;" onclick="ppSort(this,'date')">Date</button>
+        <button class="tb${sort==='fmt'?' act':''}" style="flex:none;min-width:70px;" onclick="ppSort(this,'fmt')">Format</button>
+        <button class="tb${sort==='venue'?' act':''}" style="flex:none;min-width:60px;" onclick="ppSort(this,'venue')">Venue</button>
+        <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--chalk2);">${_totalAll} verified</div>
       </div>
-      <div style="overflow-x:auto;">
-        <table class="rt" style="min-width:640px;">
-          <thead><tr>
-            <th>Date</th><th>Opponent</th><th>Format</th><th>Type</th><th>Score</th><th>Handicap</th><th>Venue</th><th>Status</th>
-          </tr></thead>
-          <tbody>
-            ${(()=>{
-              const rows=ppSortHistory(sort);
-              if(!rows.length) return `<tr><td colspan="8" style="text-align:center;padding:2.5rem;color:var(--chalk2);font-size:.82rem;">🎱 No verified matches yet. Record a match to see your history here.</td></tr>`;
-              return rows.map(m=>`<tr>
-              <td style="font-size:.72rem;color:var(--chalk2);white-space:nowrap;">${fmtDate(m.date)}</td>
-              <td><div style="font-weight:600;">${m.opponent}</div><div style="font-size:.65rem;color:var(--chalk);">#${m.opponentRank}</div></td>
-              <td>${fmtBallTag(m.fmt)}</td>
-              <td style="font-size:.76rem;color:var(--chalk);">${m.type}</td>
-              <td>
-                <span style="font-family:'DM Mono',monospace;color:${m.result==='W'?'var(--grn3)':m.result==='L'?'#e55':'var(--gold)'};">${m.score}</span>
-                <span class="tag ${m.result==='W'?'tok':m.result==='L'?'thc':'tgd'}" style="margin-left:4px;">${m.result==='W'?'WIN':m.result==='L'?'LOSS':'DRAW'}</span>
-              </td>
-              <td style="font-size:.73rem;color:${m.hasHcp?'#e55':'var(--chalk2)'};">${m.hcp}</td>
-              <td style="font-size:.73rem;color:var(--chalk);">${m.venue}</td>
-              <td><span class="tag tok">✓ ${m.status}</span></td>
-            </tr>`).join('');
-            })()}
-          </tbody>
-        </table>
-      </div>
+      ${sort==='fmt'?`<div style="display:flex;gap:6px;margin-bottom:1rem;">
+        <button class="tb${!fmtF?' act':''}" style="flex:none;font-size:.7rem;" onclick="ppFmtFilter(null)">All</button>
+        <button class="tb${fmtF==='9-Ball'?' act':''}" style="flex:none;font-size:.7rem;background:${fmtF==='9-Ball'?'rgba(245,200,66,.15)':''};" onclick="ppFmtFilter('9-Ball')">9-Ball</button>
+        <button class="tb${fmtF==='10-Ball'?' act':''}" style="flex:none;font-size:.7rem;background:${fmtF==='10-Ball'?'rgba(74,158,255,.15)':''};" onclick="ppFmtFilter('10-Ball')">10-Ball</button>
+      </div>`:''}
+      ${_hMatches.length===0
+        ?`<div style="text-align:center;padding:2.5rem;color:var(--chalk2);font-size:.82rem;">🎱 No matches found.</div>`
+        :_hMatches.map(m=>{
+          const _ip1=m.p1===_pName;
+          const _opp=_ip1?m.p2:m.p1;
+          const _oppRank=(PLAYERS.find(p=>p.name===_opp)||{}).rank||'?';
+          const _pts=(m.score||'0-0').split(/[-–]/).map(Number);
+          const _myS=_ip1?_pts[0]:_pts[1]; const _opS=_ip1?_pts[1]:_pts[0];
+          const _win=_myS>_opS;
+          const _myTier=m[_ip1?'p1CareerStatus':'p2CareerStatus']||(PLAYERS.find(p=>p.name===_pName)||{}).status||'';
+          const _opTier=m[_ip1?'p2CareerStatus':'p1CareerStatus']||(PLAYERS.find(p=>p.name===_opp)||{}).status||'';
+          const _mr=Array.isArray(m.hcpRack)?(m.hcpRack[_ip1?0:1]||0):0;
+          const _or=Array.isArray(m.hcpRack)?(m.hcpRack[_ip1?1:0]||0):0;
+          const _mb=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[_ip1?0:1])?m.hcpBalls[_ip1?0:1]:[];
+          const _ob=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[_ip1?1:0])?m.hcpBalls[_ip1?1:0]:[];
+          const _mh=fmtHcpTag(_mr,_mb); const _oh=fmtHcpTag(_or,_ob);
+          const _myLbl=`${fmtPlayerName(_pName)}${_myTier?` <span class="tier-inline">${_myTier}</span>`:''}${_mh?` <span class="hcp-tag">${_mh}</span>`:''}`;
+          const _opLbl=`${fmtPlayerName(_opp)}${_opTier?` <span class="tier-inline">${_opTier}</span>`:''}${_oh?` <span class="hcp-tag">${_oh}</span>`:''}`;
+          const _topLeft=sort==='venue'
+            ?`<span style="font-size:.73rem;color:var(--chalk);">📍 ${m.venue||'—'}</span>`
+            :`${_fmtBadgeFn(m.fmt||'9-Ball')}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}`;
+          return `<div class="le ${_win?'lw':'ll'}" style="flex-direction:column;align-items:stretch;gap:0;margin-bottom:4px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+              <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_topLeft}</div>
+              <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_myLbl}</div>
+              <span style="${_scStyle}color:${_win?'var(--gold)':'var(--chalk2)'};">${_myS}</span>
+            </div>
+            <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_opLbl}</div>
+              <span style="${_scStyle}color:${!_win?'var(--gold)':'var(--chalk2)'};">${_opS}</span>
+            </div>
+          </div>`;
+        }).join('')}
     </div>`;
 
   } else {
@@ -4561,6 +4591,7 @@ function ppSortHistory(sort){
   else d.sort((a,b)=>(b.date||'').localeCompare(a.date||'')); // date: newest first
   return d;
 }
+function ppFmtFilter(f){app.ppFmtFilter=f;ppTab(document.querySelector('.pp-tab[onclick*="history"]'),'history');}
 function playerAcceptMatch(i){
   const m=playerPendingMatches[i];
   if(m.me==='p1') m.p1accept=true; else m.p2accept=true;
