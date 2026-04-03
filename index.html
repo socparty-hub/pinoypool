@@ -5846,8 +5846,8 @@ function admTab(btn,tab){
       return `<div style="background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;margin-bottom:.65rem;overflow:hidden;">
         <div style="padding:clamp(7px,2.5vw,11px);">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
-            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_admFmtB(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}<span class="status-pill sp-pending" style="font-size:.52rem;margin-left:2px;">● ${statusLabel}</span></div>
-            <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_admFmtB(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}<span style="font-size:.63rem;color:var(--chalk);white-space:nowrap;">📍 ${m.venue||'—'}</span></div>
+            <div style="font-size:.62rem;color:var(--chalk2);flex-shrink:0;margin-left:6px;">${fmtDate(m.date)}</div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p1L}</div>
@@ -5858,7 +5858,6 @@ function admTab(btn,tab){
             <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p2L}</div>
             <span style="${_scA}color:var(--chalk);">${_s2}</span>
           </div>
-          <div style="font-size:.65rem;color:var(--chalk2);margin-top:.35rem;">📍 ${m.venue||'—'}</div>
           ${_prog(progSteps)}
         </div>
         <div style="padding:.4rem clamp(7px,2.5vw,11px) .75rem;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:6px;flex-wrap:wrap;">${btnHtml}</div>
