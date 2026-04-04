@@ -356,6 +356,20 @@ textarea{resize:vertical;min-height:75px;}
   nav#main-nav.open .nb:last-child{border-bottom:none;}
   nav#main-nav.open .nb.act{border-bottom:1px solid rgba(212,175,55,.07);border-radius:0;}
   @keyframes hamSlide{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+  /* Rankings sub-items in hamburger */
+  nav#main-nav.open #ham-rank-subs.open{display:block;border-left:2px solid rgba(212,175,55,.25);margin-left:1.4rem;}
+  .ham-rank-sub-item{
+    display:block;width:100%;
+    padding:9px 1rem 9px 1rem;
+    font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:2px;
+    background:transparent;border:none;
+    border-bottom:1px solid rgba(212,175,55,.05);
+    color:var(--chalk);text-align:left;cursor:pointer;
+    transition:color .15s;
+  }
+  .ham-rank-sub-item:last-child{border-bottom:none;}
+  .ham-rank-sub-item:hover,.ham-rank-sub-item.act{color:var(--gold);}
+  .ham-rank-sub-item.act::after{content:' ✓';font-size:.65rem;opacity:.8;}
   /* Hide name, role badge and logout on mobile — avatar only */
   #hdr-name,#hdr-role{display:none!important;}
   #auth-bar .btn{display:none!important;}
@@ -498,46 +512,8 @@ textarea{resize:vertical;min-height:75px;}
 .status-validated{background:var(--grn2);border:1px solid rgba(31,140,78,.3);color:var(--grn3);}
 /* Score dropdowns in portal record form */
 .score-select{max-width:100px;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;text-align:center;color:var(--gold);border-color:rgba(200,168,75,.35);}
-/* Leaderboard tabs */
-.lb-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.2rem;flex-wrap:nowrap;}
-.lb-tab{flex:1;min-width:0;padding:10px 14px;background:transparent;border:none;border-right:1px solid var(--border);cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--chalk);transition:all .2s;text-align:center;white-space:nowrap;}
-.lb-tab:last-child{border-right:none;}
-.lb-tab:hover{background:var(--gold-dim);color:var(--gold);}
-.lb-tab.act{background:linear-gradient(135deg,rgba(200,168,75,.18),rgba(200,168,75,.06));color:var(--gold);border-bottom:2px solid var(--gold);}
-/* Mobile: hamburger replaces tab row */
-#lb-tab-bar{display:none;}
-@media(max-width:600px){
-  .lb-tabs{display:none;}
-  #lb-tab-bar{display:block;position:relative;margin-bottom:12px;}
-  #lb-tab-current{
-    display:flex;justify-content:space-between;align-items:center;
-    background:var(--bg3);border:1px solid var(--gold-border);border-radius:8px;
-    padding:11px 14px;cursor:pointer;user-select:none;
-    font-family:'Space Grotesk',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.5px;
-    color:var(--gold);
-  }
-  #lb-tab-current:active{background:var(--gold-dim);}
-  #lb-ham-icon{font-size:1.1rem;line-height:1;color:var(--gold);transition:transform .2s;}
-  #lb-ham-icon.open{transform:rotate(90deg);}
-  #lb-tab-dropdown{
-    position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:200;
-    background:var(--bg3);border:1px solid var(--gold-border);border-radius:8px;
-    overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);
-    pointer-events:auto;
-  }
-  /* Ensure the bar itself doesn't clip the dropdown */
-  #lb-tab-bar{overflow:visible!important;}
-  .lb-drop-item{
-    display:flex;align-items:center;width:100%;padding:13px 16px;
-    font-family:'Space Grotesk',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.5px;
-    color:var(--chalk);background:transparent;border:none;border-bottom:1px solid rgba(212,175,55,.08);
-    cursor:pointer;text-align:left;gap:8px;
-  }
-  .lb-drop-item:last-child{border-bottom:none;}
-  .lb-drop-item:active,.lb-drop-item:hover{background:var(--gold-dim);color:var(--gold);}
-  .lb-drop-item.act{color:var(--gold);background:rgba(212,175,55,.1);}
-  .lb-drop-item.act::after{content:'✓';margin-left:auto;font-size:.75rem;}
-}
+/* Ham rank subs hidden on desktop */
+#ham-rank-subs{display:none;}
 /* Leaderboard rank badge */
 .lb-rank{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--chalk);text-align:center;min-width:32px;}
 .lb-rank.top1{color:var(--gold2);text-shadow:0 0 12px rgba(200,168,75,.4);}
@@ -651,7 +627,14 @@ textarea{resize:vertical;min-height:75px;}
     <button class="nb act" onclick="sv('dashboard',this)">Dashboard</button>
     <button class="nb" id="nb-match" onclick="sv('match',this)" style="display:none">Record Match</button>
     <button class="nb" onclick="sv('live',this)">Watch Now</button>
-    <button class="nb" onclick="sv('rankings',this)">Rankings</button>
+    <button class="nb" id="nb-rankings" onclick="toggleHamRankSubs(this)">Rankings</button>
+    <div id="ham-rank-subs">
+      <button class="ham-rank-sub-item act" id="ham-rank-global" onclick="svRank('global')">PPR</button>
+      <button class="ham-rank-sub-item" id="ham-rank-performance" onclick="svRank('performance')">Performance</button>
+      <button class="ham-rank-sub-item" id="ham-rank-hcp" onclick="svRank('hcp')">Handicap</button>
+      <button class="ham-rank-sub-item" id="ham-rank-expanded" onclick="svRank('expanded')">Expanded</button>
+      <button class="ham-rank-sub-item" id="ham-rank-advanced" onclick="svRank('advanced')">Advanced</button>
+    </div>
     <button class="nb" onclick="sv('halls',this)">Find Halls</button>
     <button class="nb" id="nb-player-portal" onclick="sv('player-portal',this)" style="display:none">My Portal</button>
     <button class="nb" id="nb-portal" onclick="sv('portal',this)" style="display:none">Hall Portal</button>
@@ -962,30 +945,6 @@ textarea{resize:vertical;min-height:75px;}
 
   <!-- Period badge (hidden — All-Time only mode) -->
   <div id="rank-period-badge" style="display:none;"></div>
-
-  <!-- Mobile hamburger tab selector -->
-  <div id="lb-tab-bar">
-    <div id="lb-tab-current" onclick="toggleLbMenu()">
-      <span id="lb-tab-label">PPR</span>
-      <span id="lb-ham-icon">☰</span>
-    </div>
-    <div id="lb-tab-dropdown" style="display:none;">
-      <button class="lb-drop-item act" onclick="lbTabMobile(this,'global','PPR')">PPR</button>
-      <button class="lb-drop-item" onclick="lbTabMobile(this,'performance','Performance')">Performance</button>
-      <button class="lb-drop-item" onclick="lbTabMobile(this,'hcp','Handicap')">Handicap</button>
-      <button class="lb-drop-item" onclick="lbTabMobile(this,'expanded','Expanded')">Expanded</button>
-      <button class="lb-drop-item" onclick="lbTabMobile(this,'advanced','Advanced')">Advanced</button>
-    </div>
-  </div>
-
-  <!-- Leaderboard type tabs (desktop) -->
-  <div class="lb-tabs" id="lb-tabs">
-    <button class="lb-tab act" onclick="lbTab(this,'global')">PPR</button>
-    <button class="lb-tab" onclick="lbTab(this,'performance')">Performance</button>
-    <button class="lb-tab" onclick="lbTab(this,'hcp')">Handicap</button>
-    <button class="lb-tab" onclick="lbTab(this,'expanded')">Expanded</button>
-    <button class="lb-tab" onclick="lbTab(this,'advanced')">Advanced</button>
-  </div>
 
   <!-- Dynamic leaderboard content -->
   <div id="lb-content"></div>
@@ -1396,6 +1355,21 @@ function closeHamMenu(){
   const ham=document.getElementById('hdr-ham');
   if(nav) nav.classList.remove('open');
   if(ham){ham.classList.remove('open');ham.textContent='☰';}
+  const subs=document.getElementById('ham-rank-subs');
+  if(subs) subs.classList.remove('open');
+}
+function toggleHamRankSubs(btn){
+  const subs=document.getElementById('ham-rank-subs');
+  const open=subs.classList.toggle('open');
+  if(open){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('act'));
+    document.querySelectorAll('.nb').forEach(b=>b.classList.remove('act'));
+    const v=document.getElementById('view-rankings');
+    if(v) v.classList.add('act');
+    btn.classList.add('act');
+    try{localStorage.setItem('pp_last_section','rankings');}catch{}
+    buildRankings();
+  }
 }
 function sv(id, btn){
   if(id==='match' && app.user?.role==='fan'){toast('⚠️ Record Match is not available for Scout/Fan accounts.');return;}
@@ -2058,31 +2032,7 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('#main-nav')&&!e.target.closest('#hdr-ham')){
     closeHamMenu();
   }
-  // Close lb hamburger dropdown on outside click
-  if(!e.target.closest('#lb-tab-bar')){
-    const dd=document.getElementById('lb-tab-dropdown');
-    if(dd) dd.style.display='none';
-    const ic=document.getElementById('lb-ham-icon');
-    if(ic) ic.classList.remove('open');
-  }
 });
-// Close lb dropdown on scroll so it never blocks page scrolling
-window.addEventListener('scroll',()=>{
-  const dd=document.getElementById('lb-tab-dropdown');
-  if(dd&&dd.style.display!=='none'){
-    dd.style.display='none';
-    const ic=document.getElementById('lb-ham-icon');
-    if(ic) ic.classList.remove('open');
-  }
-},{passive:true});
-document.addEventListener('touchmove',e=>{
-  const dd=document.getElementById('lb-tab-dropdown');
-  if(dd&&dd.style.display!=='none'&&!e.target.closest('#lb-tab-dropdown')){
-    dd.style.display='none';
-    const ic=document.getElementById('lb-ham-icon');
-    if(ic) ic.classList.remove('open');
-  }
-},{passive:true});
 
 /* ══════════════════ HANDICAP ══════════════════ */
 // State: rack hcp (+0 to +5), ball hcp (Set of ball numbers)
@@ -2875,11 +2825,22 @@ function setRankFmt(btn,f){
   btn.parentElement.querySelectorAll('.tb').forEach(b=>b.classList.remove('act'));
   btn.classList.add('act');buildRankings();
 }
-function lbTab(btn,tab){
-  document.querySelectorAll('.lb-tab').forEach(b=>b.classList.remove('act'));
-  btn.classList.add('act');
+function lbTab(tab){
   app.lbTab=tab;
   renderLbTab(tab);
+  syncHamRankSub(tab);
+}
+function syncHamRankSub(tab){
+  document.querySelectorAll('.ham-rank-sub-item').forEach(b=>b.classList.remove('act'));
+  const sub=document.getElementById('ham-rank-'+tab);
+  if(sub) sub.classList.add('act');
+}
+function svRank(tab){
+  document.getElementById('ham-rank-subs').classList.remove('open');
+  sv('rankings',document.getElementById('nb-rankings'));
+  app.lbTab=tab;
+  renderLbTab(tab);
+  syncHamRankSub(tab);
 }
 function toggleAvDropdown(){
   const dd=document.getElementById('av-dropdown');
@@ -2919,28 +2880,6 @@ function setPprPeriod(btn,period){
 function setPprRegion(region){
   app.pprRegion=region;
   renderLbTab('global');
-}
-function toggleLbMenu(){
-  const dd=document.getElementById('lb-tab-dropdown');
-  const ic=document.getElementById('lb-ham-icon');
-  const open=dd.style.display!=='none';
-  dd.style.display=open?'none':'block';
-  ic.classList.toggle('open',!open);
-}
-function lbTabMobile(btn,tab,label){
-  // Update label & close menu
-  document.getElementById('lb-tab-label').textContent=label;
-  document.getElementById('lb-tab-dropdown').style.display='none';
-  document.getElementById('lb-ham-icon').classList.remove('open');
-  // Update active state in dropdown
-  document.querySelectorAll('.lb-drop-item').forEach(b=>b.classList.remove('act'));
-  btn.classList.add('act');
-  // Also sync desktop tabs
-  document.querySelectorAll('.lb-tab').forEach(b=>b.classList.remove('act'));
-  const desktopBtn=document.querySelector(`.lb-tab[onclick*="'${tab}'"]`);
-  if(desktopBtn) desktopBtn.classList.add('act');
-  app.lbTab=tab;
-  renderLbTab(tab);
 }
 
 /* ── Career Status → visual tier object (accepts explicit status or derives from win%) ── */
