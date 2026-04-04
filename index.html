@@ -524,16 +524,18 @@ textarea{resize:vertical;min-height:75px;}
 .ppr-title-row{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,4vw,3.2rem);letter-spacing:3px;text-align:center;color:#fff;margin-bottom:1.8rem;line-height:1;}
 .ppr-title-row span{color:var(--gold);}
 /* Podium */
-.ppr-podium{display:grid;grid-template-columns:1.05fr 1.1fr 0.95fr;gap:10px;align-items:end;margin-bottom:1.6rem;}
+.ppr-podium{display:grid;grid-template-columns:0.95fr 1.15fr 0.82fr;gap:10px;align-items:end;margin-bottom:1.6rem;}
 .pod-card{background:linear-gradient(160deg,rgba(27,67,50,.7),rgba(10,18,14,.95));border:1px solid var(--gold-border);border-radius:10px;padding:1rem .8rem .9rem;text-align:center;position:relative;overflow:hidden;}
 .pod-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(212,175,55,.06) 0%,transparent 65%);pointer-events:none;}
 .pod-1{border-color:rgba(212,175,55,.55);background:linear-gradient(160deg,rgba(27,67,50,.9),rgba(10,18,14,.98));padding-top:1.4rem;}
 .pod-2{padding-top:1.2rem;}
+.pod-3{opacity:.88;}
 .pod-star{position:absolute;top:9px;right:11px;color:var(--gold);font-size:1rem;line-height:1;}
 .pod-rank-lbl{font-family:'Space Grotesk',sans-serif;font-size:.52rem;letter-spacing:3px;color:var(--chalk);text-transform:uppercase;margin-bottom:-.3rem;}
 .pod-rank-num{font-family:'Bebas Neue',sans-serif;font-size:3.2rem;line-height:1;color:var(--gold);}
 .pod-1 .pod-rank-num{font-size:4.2rem;}
 .pod-2 .pod-rank-num{font-size:3.7rem;}
+.pod-3 .pod-rank-num{font-size:2.6rem;}
 /* Podium movement arrows — larger than table version */
 .pod-card .pod-move-up span:first-child{font-size:.75rem!important;}
 .pod-card .pod-move-up span:last-child{font-size:.78rem!important;}
@@ -542,9 +544,11 @@ textarea{resize:vertical;min-height:75px;}
 .pod-sil{width:68px;height:95px;margin:.4rem auto .6rem;color:rgba(212,175,55,.18);display:flex;align-items:flex-end;justify-content:center;}
 .pod-1 .pod-sil{width:84px;height:115px;color:rgba(212,175,55,.25);}
 .pod-2 .pod-sil{width:76px;height:105px;}
+.pod-3 .pod-sil{width:54px;height:76px;}
 .pod-name{font-family:'Bebas Neue',sans-serif;font-size:.88rem;letter-spacing:1.5px;color:#fff;margin-bottom:3px;line-height:1.2;}
 .pod-1 .pod-name{font-size:1.05rem;color:var(--gold);}
-.pod-2 .pod-name{font-size:.96rem;}
+.pod-2 .pod-name{font-size:.92rem;}
+.pod-3 .pod-name{font-size:.76rem;color:var(--chalk);}
 .pod-pts{font-family:'Space Grotesk',sans-serif;font-size:.6rem;letter-spacing:1px;color:var(--chalk);text-transform:uppercase;}
 /* Controls */
 .ppr-controls{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:.9rem;flex-wrap:wrap;}
@@ -571,27 +575,63 @@ textarea{resize:vertical;min-height:75px;}
 .ppr-rating-cell{font-family:'DM Mono',monospace;color:#fff;font-weight:600;text-align:center;}
 .ppr-matches-cell{color:var(--chalk);text-align:center;}
 .ppr-win-cell{color:var(--chalk);text-align:center;}
+.ppr-winrate-cell{font-family:'DM Mono',monospace;font-weight:700;text-align:center;color:#4ade80;}
+.ppr-streak-cell{text-align:center;}
+.ppr-form-cell{text-align:center;}
+.ppr-perf-cell{text-align:center;}
+.ppr-streak-w{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.62rem;font-weight:700;background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);}
+.ppr-streak-l{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.62rem;font-weight:700;background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);}
+.ppr-streak-n{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.62rem;font-weight:700;background:rgba(255,255,255,.06);color:var(--chalk2);border:1px solid var(--border);}
+.ppr-dot-w{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4ade80;}
+.ppr-dot-l{display:inline-block;width:8px;height:8px;border-radius:50%;background:#f87171;}
+.ppr-dot-n{display:inline-block;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);}
+/* Stats bar */
+.rank-stats-bar{display:flex;flex-wrap:wrap;align-items:center;gap:0;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;margin-bottom:1.2rem;overflow:hidden;}
+.rank-stat-item{display:flex;align-items:center;gap:10px;padding:12px 20px;border-right:1px solid var(--border);flex:1;}
+.rank-stat-item:last-child{border-right:none;}
+.rank-stat-icon{font-size:1.15rem;color:var(--grn);}
+.rank-stat-lbl{font-family:'Space Grotesk',sans-serif;font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);}
+.rank-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;color:#fff;line-height:1.1;}
+.rank-live-badge{margin-left:auto;display:flex;align-items:center;gap:6px;padding:12px 16px;}
+.rank-live-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:lbPulse 1.4s infinite;}
+@keyframes lbPulse{0%,100%{opacity:1}50%{opacity:.35}}
+.rank-live-lbl{font-family:'Space Grotesk',sans-serif;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:#4ade80;}
+/* Rank sidebar */
+.rank-outer{display:flex;gap:1.4rem;align-items:flex-start;}
+.rank-main{flex:1;min-width:0;}
+.rank-sidebar{width:290px;flex-shrink:0;display:none;}
+.rank-sidebar-hall{background:linear-gradient(160deg,rgba(27,67,50,.7),rgba(10,18,14,.95));border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:.9rem;}
+.rank-sidebar-hall-img{height:100px;background:linear-gradient(135deg,#1b4332,#0a120e);display:flex;align-items:center;justify-content:center;position:relative;}
+.rank-sidebar-hall-body{padding:.85rem;}
+.rank-sidebar-cta{background:linear-gradient(135deg,rgba(53,94,59,.35),rgba(27,67,50,.2));border:1px solid rgba(53,94,59,.35);border-radius:10px;padding:.85rem 1rem;margin-bottom:.9rem;cursor:pointer;transition:all .2s;}
+.rank-sidebar-cta:hover{background:linear-gradient(135deg,rgba(53,94,59,.5),rgba(27,67,50,.35));}
+.rank-sidebar-activity{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;}
+.rank-activity-dot{width:6px;height:6px;border-radius:50%;background:var(--grn);flex-shrink:0;}
+@media(min-width:900px){.rank-sidebar{display:block;}}
 /* Load More */
 .ppr-load-more-wrap{text-align:center;margin-top:1.2rem;}
 /* Mobile podium */
 @media(max-width:600px){
-  .ppr-podium{gap:6px;grid-template-columns:1fr 1.15fr 0.9fr;}
+  .ppr-podium{gap:6px;grid-template-columns:0.9fr 1.15fr 0.76fr;}
   .pod-rank-num{font-size:2.4rem;}
   .pod-1 .pod-rank-num{font-size:3rem;}
   .pod-2 .pod-rank-num{font-size:2.6rem;}
+  .pod-3 .pod-rank-num{font-size:1.9rem;}
   .pod-sil{width:48px;height:68px;}
   .pod-1 .pod-sil{width:60px;height:84px;}
   .pod-2 .pod-sil{width:52px;height:74px;}
+  .pod-3 .pod-sil{width:38px;height:54px;}
   .pod-name{font-size:.72rem;}
   .pod-1 .pod-name{font-size:.86rem;}
   .pod-2 .pod-name{font-size:.76rem;}
+  .pod-3 .pod-name{font-size:.62rem;}
   .pod-2{padding-top:1rem;}
   .ppr-controls{flex-direction:column;align-items:stretch;}
   .ppr-search-wrap{max-width:100%;}
   .ppr-filters{justify-content:flex-start;}
   .ppr-tbl th,.ppr-tbl td{padding:9px 10px;font-size:.72rem;}
-  .ppr-matches-cell,.ppr-win-cell{display:none;}
-  .ppr-tbl th:nth-child(4),.ppr-tbl th:nth-child(5){display:none;}
+  .ppr-matches-cell,.ppr-win-cell,.ppr-winrate-cell,.ppr-streak-cell,.ppr-form-cell,.ppr-perf-cell{display:none;}
+  .ppr-tbl th:nth-child(n+4){display:none;}
 }
 /* Rating badge */
 .rating-val{font-family:'DM Mono',monospace;font-size:.95rem;color:var(--gold);font-weight:500;}
@@ -614,6 +654,91 @@ textarea{resize:vertical;min-height:75px;}
 .rc-nt{color:var(--chalk2);}
 /* Activity dot */
 .act-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--grn3);margin-right:4px;}
+
+/* ═══════════════════════════════════════
+   NEW DASHBOARD DESIGN
+═══════════════════════════════════════ */
+/* Hero */
+.dash-hero{position:relative;border-radius:1.5rem;overflow:hidden;background:linear-gradient(135deg,#0a1a0d 0%,#080d09 60%);margin-bottom:2rem;min-height:230px;display:flex;align-items:center;padding:2.5rem clamp(1.2rem,5vw,3.5rem);border:1px solid #181818;}
+.dash-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(53,94,59,.22) 0%,transparent 60%);pointer-events:none;}
+.dash-hero-content{position:relative;z-index:2;max-width:520px;}
+.dash-hero-label{color:#355E3B;font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;margin-bottom:.55rem;}
+.dash-hero-title{font-family:'Epilogue',sans-serif;font-size:clamp(1.7rem,4vw,3rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1.3rem;}
+.dash-hero-title span{color:#355E3B;}
+.dash-hero-btns{display:flex;gap:.6rem;flex-wrap:wrap;}
+.dash-feature-card{display:none;position:absolute;right:clamp(1.2rem,4vw,2.5rem);top:50%;transform:translateY(-50%);background:rgba(5,25,12,.75);backdrop-filter:blur(12px);border:1px solid rgba(53,94,59,.3);border-radius:1.25rem;padding:1.35rem;width:230px;z-index:2;}
+@media(min-width:860px){.dash-feature-card{display:block;}.dash-hero-content{max-width:440px;}}
+.dash-feat-icon{width:38px;height:38px;background:rgba(53,94,59,.35);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.9rem;font-size:1.1rem;}
+.dash-feat-label{font-family:'Space Grotesk',sans-serif;font-size:.55rem;font-weight:700;color:var(--chalk2);letter-spacing:3px;text-transform:uppercase;margin-bottom:.2rem;}
+.dash-feat-title{font-family:'Epilogue',sans-serif;font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:.35rem;}
+.dash-feat-sub{font-size:.68rem;color:var(--chalk2);font-family:'Manrope',sans-serif;line-height:1.5;margin-bottom:.85rem;}
+.dash-feat-btn{font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;color:var(--grn);letter-spacing:2px;text-transform:uppercase;background:none;border:none;cursor:pointer;padding:0;}
+.dash-feat-btn:hover{color:#4ade80;}
+/* Stats grid */
+.dash-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:2rem;}
+@media(max-width:860px){.dash-stats-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:440px){.dash-stats-grid{grid-template-columns:1fr 1fr;gap:.6rem;}}
+.dash-stat-card{background:linear-gradient(145deg,#111 0%,#0d1a11 100%);border:1px solid rgba(53,94,59,.15);border-radius:1.1rem;padding:1.1rem 1.25rem .95rem;transition:border-color .2s,transform .2s;}
+.dash-stat-card:hover{border-color:rgba(53,94,59,.45);transform:translateY(-2px);}
+.dash-stat-card--accent{border-left:2px solid #355E3B;}
+.dash-stat-lbl{font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#555;margin-bottom:.55rem;}
+.dash-stat-row{display:flex;align-items:flex-end;justify-content:space-between;gap:.4rem;}
+.dash-stat-val{font-family:'Epilogue',sans-serif;font-size:2rem;font-weight:800;color:#fff;line-height:1;}
+.dash-stat-trend{font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:700;color:#355E3B;padding-bottom:.1rem;}
+.dash-stat-stable{font-family:'Space Grotesk',sans-serif;font-size:.68rem;color:#3a3a3a;font-style:italic;padding-bottom:.1rem;}
+.dash-format-dots{display:flex;padding-bottom:.1rem;}
+.dash-dot{width:18px;height:18px;border-radius:50%;border:2px solid #0a0a0a;margin-left:-4px;}
+.dash-dot:first-child{margin-left:0;}
+.dash-dot--gold{background:#f5c842;}
+.dash-dot--blue{background:#4a9eff;}
+/* Main 2-col layout */
+.dash-grid{display:grid;grid-template-columns:1fr 360px;gap:1.6rem;align-items:start;}
+@media(max-width:960px){.dash-grid{grid-template-columns:1fr;}}
+.dash-section-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;}
+.dash-section-title{font-family:'Epilogue',sans-serif;font-size:1.05rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:.4rem;}
+.dash-view-all{font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;color:#355E3B;letter-spacing:2px;text-transform:uppercase;background:none;border:none;cursor:pointer;transition:color .2s;}
+.dash-view-all:hover{color:#4ade80;}
+/* Matches table */
+.dash-matches-wrap{background:rgba(255,255,255,.02);border:1px solid #1f1f1f;border-radius:1.1rem;overflow:hidden;}
+.dash-matches-tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+.dash-matches-tbl thead tr{background:rgba(0,0,0,.3);border-bottom:1px solid #1f1f1f;}
+.dash-matches-tbl th{font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#4a4a4a;padding:.85rem 1.1rem;text-align:left;white-space:nowrap;}
+.dash-matches-tbl td{padding:.95rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+.dash-matches-tbl tbody tr:last-child td{border-bottom:none;}
+.dash-matches-tbl tbody tr:hover{background:rgba(53,94,59,.04);}
+.dash-match-id{font-family:'DM Mono',monospace;font-size:.68rem;color:#4a4a4a;white-space:nowrap;}
+.dash-match-players{color:#fff;font-weight:600;white-space:nowrap;font-size:.84rem;}
+.dash-match-score{font-family:'DM Mono',monospace;font-weight:700;color:var(--gold);text-align:right;white-space:nowrap;}
+.dash-match-status-v{display:flex;align-items:center;gap:5px;color:#355E3B;font-family:'Space Grotesk',sans-serif;font-size:.65rem;font-weight:700;}
+.dash-status-dot{width:5px;height:5px;border-radius:50%;background:#355E3B;animation:lbPulse 1.5s infinite;}
+/* Top 5 */
+.dash-top5-wrap{background:rgba(255,255,255,.02);border:1px solid #1f1f1f;border-radius:1.1rem;padding:1.1rem;display:flex;flex-direction:column;gap:.4rem;margin-bottom:.7rem;}
+.dash-p5-item{display:flex;align-items:center;gap:.75rem;padding:.65rem .75rem;border-radius:.75rem;transition:background .2s;cursor:pointer;}
+.dash-p5-item:hover{background:rgba(255,255,255,.04);}
+.dash-p5-item--gold{background:rgba(53,94,59,.1);border:1px solid rgba(53,94,59,.22);}
+.dash-p5-rank{font-family:'Epilogue',sans-serif;font-size:1.1rem;font-weight:800;font-style:italic;color:#3a3a3a;width:26px;flex-shrink:0;}
+.dash-p5-item--gold .dash-p5-rank{color:#f5c842;}
+.dash-p5-avatar{width:36px;height:36px;border-radius:.5rem;background:#1a1a1a;border:1px solid #252525;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:.72rem;font-weight:700;color:#3a3a3a;flex-shrink:0;}
+.dash-p5-item--gold .dash-p5-avatar{border-color:rgba(53,94,59,.35);background:rgba(53,94,59,.12);color:#4ade80;}
+.dash-p5-info{flex:1;min-width:0;}
+.dash-p5-name{font-weight:700;font-size:.82rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dash-p5-rating{font-family:'Space Grotesk',sans-serif;font-size:.58rem;color:#444;letter-spacing:1px;text-transform:uppercase;margin-top:1px;}
+.dash-p5-wp{font-family:'Space Grotesk',sans-serif;font-size:.75rem;font-weight:700;color:#355E3B;flex-shrink:0;}
+.dash-leaderboard-btn{width:100%;background:rgba(53,94,59,.08);border:1px solid rgba(53,94,59,.18);border-radius:.75rem;color:#355E3B;font-family:'Space Grotesk',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:.8rem;cursor:pointer;transition:background .2s;}
+.dash-leaderboard-btn:hover{background:rgba(53,94,59,.18);}
+/* Footer */
+.site-footer{background:#050a06;border-top:1px solid #141814;margin-top:2rem;}
+.site-footer-inner{display:flex;flex-direction:column;gap:1.5rem;align-items:center;padding:2.2rem 1.5rem;max-width:1100px;margin:0 auto;}
+@media(min-width:700px){.site-footer-inner{flex-direction:row;justify-content:space-between;align-items:center;}}
+.site-footer-brand{font-family:'Epilogue',sans-serif;font-size:1.1rem;font-weight:800;color:#fff;}
+.site-footer-brand span{color:#f5c842;}
+.site-footer-copy{font-size:.68rem;color:#3a3a3a;margin-top:2px;}
+.site-footer-links{display:flex;flex-wrap:wrap;gap:1.2rem;justify-content:center;}
+.site-footer-links a{font-family:'Space Grotesk',sans-serif;font-size:.65rem;color:#3a3a3a;text-decoration:none;letter-spacing:1.5px;text-transform:uppercase;transition:color .2s;}
+.site-footer-links a:hover{color:#fff;}
+.site-footer-socials{display:flex;gap:.55rem;}
+.site-footer-social-btn{width:30px;height:30px;border-radius:50%;background:#111;border:1px solid #1f1f1f;display:flex;align-items:center;justify-content:center;color:#3a3a3a;cursor:pointer;transition:color .2s,border-color .2s;font-size:.75rem;}
+.site-footer-social-btn:hover{color:#fff;border-color:#444;}
 </style>
 </head>
 <body>
@@ -666,39 +791,92 @@ textarea{resize:vertical;min-height:75px;}
      DASHBOARD
 ══════════════════════════════════════════ -->
 <div id="view-dashboard" class="view act">
-  <div style="text-align:center;padding:2.5rem 0 2rem;position:relative;">
-    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(200,168,75,.07) 0%,transparent 65%);pointer-events:none;"></div>
-    <div style="font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:.7rem;">🇵🇭 The Official Home of Philippine Pool</div>
-    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,8vw,5.5rem);line-height:.9;text-shadow:0 4px 38px rgba(0,0,0,.5);margin-bottom:.9rem;">WHERE LEGENDS<br><span style="color:var(--gold);">ARE DISCOVERED</span></h2>
-    <p style="color:var(--chalk);max-width:460px;margin:0 auto 1.4rem;line-height:1.65;font-size:.93rem;">Verified matches. National rankings. Real talent, real recognition.</p>
-    <div class="hero-btns">
-      <button class="btn btn-p" id="hero-cta" onclick="openAuth()">Join PinoyPool</button>
-      <button class="btn btn-o" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">View Rankings</button>
-      <button class="btn btn-g" onclick="sv('live',document.querySelectorAll('.nb')[2])">Watch Now</button>
+
+  <!-- ── Hero Banner ── -->
+  <section class="dash-hero">
+    <div class="dash-hero-content">
+      <p class="dash-hero-label">🇵🇭 Live Ecosystem Dashboard</p>
+      <h1 class="dash-hero-title">Mastering the Filipino <span>Green Cloth.</span></h1>
+      <div class="dash-hero-btns">
+        <button class="btn btn-p" id="hero-cta" onclick="openAuth()">Join PinoyPool</button>
+        <button class="btn btn-o" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">View Rankings</button>
+        <button class="btn btn-g" onclick="sv('live',document.querySelectorAll('.nb')[2])">Watch Now</button>
+      </div>
+    </div>
+    <!-- Quick Feature Card — desktop only -->
+    <div class="dash-feature-card">
+      <div class="dash-feat-icon">✓</div>
+      <p class="dash-feat-label">Active Season</p>
+      <h3 class="dash-feat-title">PRO-9</h3>
+      <p class="dash-feat-sub">Regional Qualifiers: Manila Bay Invitational</p>
+      <button class="dash-feat-btn" onclick="sv('live',document.querySelectorAll('.nb')[2])">Watch Now →</button>
+    </div>
+  </section>
+
+  <!-- ── Pending Area ── -->
+  <div id="pend-area"></div>
+
+  <!-- ── Stats Grid ── -->
+  <div class="dash-stats-grid">
+    <div class="dash-stat-card">
+      <p class="dash-stat-lbl">Registered Players</p>
+      <div class="dash-stat-row">
+        <span class="dash-stat-val" id="stat-players">0</span>
+        <span class="dash-stat-trend" id="stat-players-trend"></span>
+      </div>
+    </div>
+    <div class="dash-stat-card dash-stat-card--accent">
+      <p class="dash-stat-lbl">Verified Matches</p>
+      <div class="dash-stat-row">
+        <span class="dash-stat-val" id="stat-matches">0</span>
+        <span class="dash-stat-trend" id="stat-matches-trend"></span>
+      </div>
+    </div>
+    <div class="dash-stat-card">
+      <p class="dash-stat-lbl">Billiard Halls</p>
+      <div class="dash-stat-row">
+        <span class="dash-stat-val" id="stat-halls">0</span>
+        <span class="dash-stat-stable">Stable</span>
+      </div>
+    </div>
+    <div class="dash-stat-card">
+      <p class="dash-stat-lbl">Ball Formats</p>
+      <div class="dash-stat-row">
+        <span class="dash-stat-val">9/10</span>
+        <div class="dash-format-dots">
+          <div class="dash-dot dash-dot--gold"></div>
+          <div class="dash-dot dash-dot--blue"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="srow">
-    <div class="sc"><div class="sn" id="stat-players">0</div><div class="sl">Registered Players</div></div>
-    <div class="sc"><div class="sn" id="stat-matches">0</div><div class="sl">Verified Matches</div></div>
-    <div class="sc"><div class="sn" id="stat-halls">0</div><div class="sl">Billiard Halls</div></div>
-    <div class="sc"><div class="sn">9 / 10</div><div class="sl">Ball Formats</div></div>
-  </div>
+  <!-- ── Main Content Grid ── -->
+  <div class="dash-grid">
 
-  <div id="pend-area"></div>
-
-  <div class="g2">
-    <div class="card">
-      <div class="ct">🔥 Recent Verified Matches</div>
+    <!-- Recent Verified Matches -->
+    <div>
+      <div class="dash-section-hdr">
+        <h2 class="dash-section-title"><span style="color:var(--gold);">🔥</span> Recent Verified Matches</h2>
+        <button class="dash-view-all" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">View All</button>
+      </div>
       <div class="mlog" id="dash-log">
         <div style="text-align:center;padding:1.5rem;color:var(--chalk2);font-size:.82rem;">No verified matches yet.</div>
       </div>
     </div>
-    <div class="card">
-      <div class="ct">🏆 Overall Top 5</div>
-      <table class="rt" id="dash-top5"><thead><tr><th>#</th><th>Player</th><th style="text-align:center;">Total Matches</th><th style="text-align:center;">Win%</th></tr></thead>
-      <tbody><tr><td colspan="4" style="text-align:center;color:var(--chalk2);padding:1.2rem;font-size:.82rem;">No registered players yet.</td></tr></tbody></table>
+
+    <!-- Top 5 Overall -->
+    <div>
+      <div class="dash-section-hdr">
+        <h2 class="dash-section-title"><span style="color:var(--gold);">🏆</span> Overall Top 5</h2>
+      </div>
+      <table class="rt" id="dash-top5">
+        <thead><tr><th>#</th><th>Player</th><th style="text-align:center;">Total Matches</th><th style="text-align:center;">Win%</th></tr></thead>
+        <tbody><tr><td colspan="4" style="text-align:center;color:var(--chalk2);padding:1.2rem;font-size:.82rem;">No registered players yet.</td></tr></tbody>
+      </table>
+      <button class="dash-leaderboard-btn" onclick="sv('rankings',document.querySelectorAll('.nb')[3])" style="margin-top:.8rem;">View Full Leaderboard</button>
     </div>
+
   </div>
 </div>
 
@@ -1004,13 +1182,7 @@ textarea{resize:vertical;min-height:75px;}
      RANKINGS
 ══════════════════════════════════════════ -->
 <div id="view-rankings" class="view">
-  <div class="ph">Official Leaderboard</div>
-  <div class="ps">PinoyPool National Rankings · Official Ranking System · Only verified matches count</div>
-
-  <!-- Period badge (hidden — All-Time only mode) -->
   <div id="rank-period-badge" style="display:none;"></div>
-
-  <!-- Dynamic leaderboard content -->
   <div id="lb-content"></div>
 </div>
 
@@ -1351,17 +1523,17 @@ function buildDashboard(){
   if(el('stat-players')) el('stat-players').textContent=PLAYERS.length.toLocaleString();
   if(el('stat-matches')) el('stat-matches').textContent=approvedAdminCount.toLocaleString();
   if(el('stat-halls'))   el('stat-halls').textContent=(typeof approvedHalls!=='undefined'?approvedHalls.length:0).toLocaleString();
+  // Trend indicators
+  if(el('stat-players-trend')&&PLAYERS.length>0) el('stat-players-trend').textContent='↑ '+PLAYERS.length;
+  if(el('stat-matches-trend')&&approvedAdminCount>0) el('stat-matches-trend').textContent='↑ '+approvedAdminCount;
 
-  // — Recent Verified Matches — only admin-approved matches shown here
+  // — Recent Verified Matches — card format with full player/score/hcp detail
   const lc=el('dash-log');
   if(lc){
     const adminVer=typeof adminMatches!=='undefined'
-      ?adminMatches.filter(x=>x.status==='approved').map(x=>({
-          ...x,sc:x.score,ts:x.date,label:'Admin Approved'
-        }))
+      ?adminMatches.filter(x=>x.status==='approved').map(x=>({...x,sc:x.score,ts:x.date,label:'Admin Approved'}))
       :[];
-    const allM=[...adminVer];
-    allM.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    const allM=[...adminVer].sort((a,b)=>new Date(b.date)-new Date(a.date));
     const recent=allM.slice(0,5);
     if(recent.length===0){
       lc.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--chalk2);font-size:.82rem;">No verified matches yet.</div>`;
@@ -1390,7 +1562,7 @@ function buildDashboard(){
     }
   }
 
-  // — National Top 5 —
+  // — National Top 5 — table with #, Player, Total Matches, Win%
   const tbody=document.querySelector('#dash-top5 tbody');
   if(tbody){
     const top5=[...PLAYERS].filter(p=>{const adm=adminPlayers.find(a=>a.name===p.name||(a.email&&a.email===p.email));return !adm||adm.status==='active';}).sort((a,b)=>b.ppr-a.ppr).slice(0,5);
@@ -1401,7 +1573,7 @@ function buildDashboard(){
         const total=p.mw+p.ml;
         const wp=total?Math.round(p.mw/total*100):0;
         const tier=careerTier(p.mw,p.ml,p.status||p.careerStatus);
-        return `<tr style="cursor:pointer" onclick="sv('rankings',document.querySelectorAll('.nb')[3])"><td class="rn${i<3?' top':''}">${i+1}</td><td><div class="pp">${fmtPlayerName(p.name)} ${tierBadge(tier)}</div></td><td style="text-align:center;">${total}</td><td style="text-align:center;"><div class="wrb" style="justify-content:center;"><div class="bt"><div class="bf" style="width:${wp}%;"></div></div>${wp}%</div></td></tr>`;
+        return `<tr style="cursor:pointer" onclick="sv('rankings',document.querySelectorAll('.nb')[3])"><td class="rn${i<3?' top':''}">${i+1}</td><td><div class="pp">${fmtPlayerName(p.name)} ${tierBadge(tier)}</div></td><td style="text-align:center;">${total}</td><td style="text-align:center;">${wp}%</td></tr>`;
       }).join('');
     }
   }
@@ -2783,12 +2955,6 @@ function finalizeMatch(){
   });
   saveAdminMatches();
   buildDashboard();
-  const lc=document.getElementById('dash-log');
-  const e=document.createElement('div');
-  e.className=`le ${wi===1?'lw':'ll'}`;
-  const _fb=app.fmt==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${app.fmt}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${app.fmt}</span>`;
-  e.innerHTML=`<div><div style="font-weight:600;">${app.p1} vs ${app.p2}</div><div style="font-size:.72rem;color:var(--chalk);margin-top:2px;">${_fb} <span class="tag tgd">${app.matchType}</span></div></div><div style="text-align:right;"><div style="font-family:'DM Mono',monospace;color:var(--gold);">${app.scores[0]} – ${app.scores[1]}</div><div style="font-size:.67rem;color:var(--chalk2);">Just now</div></div>`;
-  lc.prepend(e);
 }
 
 function resetMatch(){
@@ -2940,11 +3106,45 @@ function toggleAvDropdown(){
 }
 function filterPprTable(val){
   const q=val.toLowerCase().trim();
+  // New card-based leaderboard
+  const cards=document.querySelectorAll('#ppr-card-list .ppr-card');
+  if(cards.length){
+    cards.forEach(c=>{
+      const tierMatch=!app._pprTierFilter||(c.dataset.tier===app._pprTierFilter);
+      const nameMatch=!q||c.dataset.name.includes(q);
+      c.style.display=(tierMatch&&nameMatch)?'':'none';
+    });
+    return;
+  }
+
+  // Legacy table rows
   document.querySelectorAll('#ppr-tbody .ppr-row').forEach(r=>{
     const regionMatch=!app.pprRegion||(r.dataset.region===app.pprRegion);
     const nameMatch=!q||r.dataset.name.includes(q);
     r.style.display=(regionMatch&&nameMatch)?'':'none';
   });
+}
+function setPprTierFilter(tier){
+  app._pprTierFilter=(tier===null||app._pprTierFilter===tier)?null:tier;
+  renderLbTab('global');
+}
+function openPprFilters(){
+  const ov=document.getElementById('ppr-filter-overlay');
+  if(ov){ov.style.display='flex';document.body.style.overflow='hidden';}
+}
+function closePprFilters(){
+  const ov=document.getElementById('ppr-filter-overlay');
+  if(ov){ov.style.display='none';document.body.style.overflow='';}
+}
+function applyPprFilters(){
+  const fmt=document.getElementById('pf-fmt')?.value||'all';
+  const tier=document.getElementById('pf-tier')?.value||null;
+  const region=document.getElementById('pf-region')?.value||null;
+  app.rankFmt=fmt;
+  app._pprTierFilter=tier||null;
+  app.pprRegion=region||null;
+  closePprFilters();
+  renderLbTab('global');
 }
 function setPprPeriod(btn,period){
   document.querySelectorAll('.ppr-flt').forEach(b=>b.classList.remove('act'));
@@ -3201,6 +3401,13 @@ function genPlayerStats(p, mult){
       else{break;}
     }
   }
+  // Recent Form — last 5 match outcomes (true=W, false=L), most recent first
+  const recentForm=_sortedMs.slice(-5).reverse().map(am=>{
+    const pts=(am.score||'').split(/[-–]/).map(s=>parseInt(s.trim())).filter(n=>!isNaN(n));
+    if(pts.length!==2) return null;
+    const iP1=am.p1===p.name;
+    return (iP1?pts[0]:pts[1])>(iP1?pts[1]:pts[0]);
+  }).filter(v=>v!==null);
   // Hcp net
   const hcpGiven=hcpNum<0?Math.abs(hcpNum)*Math.round(mw*.3):0;
   const hcpTaken=hcpNum>0?hcpNum*Math.round(ml*.3):0;
@@ -3221,7 +3428,7 @@ function genPlayerStats(p, mult){
   const sos=p.sos||calcSoS(avgOpp);
   return{...p,mw,ml,rw,rl,ppr,ppr9,ppr10,r9,r10,overall,pr,mi,sos,
          tW,tL,mngW,mngL,exW,exL,last20W,last20L,ratingChange,
-         strN,strW,hcpGiven,hcpTaken,hcpNet,avgMargin:parseFloat(avgMargin),
+         strN,strW,recentForm,hcpGiven,hcpTaken,hcpNet,avgMargin:parseFloat(avgMargin),
          peak,avgOpp,activity,hcpNum,
          rackGivenW,rackGivenL,rackRecW,rackRecL,
          lbGivenW,lbGivenL,lbRecW,lbRecL,hcpScore,hcpMatchCount};
@@ -3234,6 +3441,57 @@ function saveRankSnapshot(){
     [...PLAYERS].sort((a,b)=>b.ppr-a.ppr).forEach((p,i)=>{snap[p.name]=i+1;});
     localStorage.setItem('pp_rank_snap_next',JSON.stringify(snap));
   }catch(e){}
+}
+function _buildRankSidebar(display){
+  const sb=document.getElementById('rank-sidebar');
+  if(!sb) return;
+  // Featured Hall — pick first active hall or fallback placeholder
+  const _halls=(typeof adminHalls!=='undefined'?adminHalls:[]).filter(h=>h.status==='active');
+  const featHall=_halls[0]||null;
+  const hallHtml=`
+  <div class="rank-sidebar-hall">
+    <div class="rank-sidebar-hall-img">
+      ${featHall
+        ?`<div style="text-align:center;padding:1rem;"><div style="font-size:2rem;margin-bottom:.3rem;">🏠</div><div style="font-size:.7rem;color:var(--chalk2);font-family:'Space Grotesk',sans-serif;letter-spacing:1px;">FEATURED HALL</div></div>`
+        :`<div style="text-align:center;padding:1rem;"><div style="font-size:2rem;margin-bottom:.3rem;">🎱</div><div style="font-size:.7rem;color:var(--chalk2);font-family:'Space Grotesk',sans-serif;letter-spacing:1px;">FEATURED HALL</div></div>`
+      }
+    </div>
+    <div class="rank-sidebar-hall-body">
+      <div style="font-size:.58rem;font-family:'Space Grotesk',sans-serif;letter-spacing:2px;text-transform:uppercase;background:var(--grn);color:#fff;padding:2px 7px;border-radius:3px;display:inline-block;margin-bottom:.4rem;">Featured Hall</div>
+      <div style="font-weight:700;font-size:.92rem;color:#fff;margin-bottom:.3rem;">${featHall?featHall.name:'PinoyPool Venue'}</div>
+      <div style="font-size:.68rem;color:var(--chalk2);font-family:'Manrope',sans-serif;margin-bottom:.65rem;line-height:1.5;">${featHall?(featHall.address||featHall.region||'Registered Hall'):'No halls registered yet. Be the first to list your venue.'}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:.6rem;color:var(--chalk2);">${featHall?('📍 '+( featHall.region||'Philippines')):'—'}</span>
+        ${featHall?`<button class="btn btn-xs btn-p" onclick="sv('halls',null)" style="font-size:.62rem;padding:4px 10px;">View Halls</button>`:`<button class="btn btn-xs" onclick="sv('halls',null)" style="font-size:.62rem;padding:4px 10px;background:var(--bg3);color:var(--chalk);">Find Halls</button>`}
+      </div>
+    </div>
+  </div>`;
+  // Join the League CTA
+  const ctaHtml=`
+  <div class="rank-sidebar-cta" onclick="${app.user?'sv(\'portal\',null)':'openAuth()'}">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem;">
+      <div style="font-weight:700;font-size:.88rem;color:#fff;">Join the League</div>
+      <span style="color:var(--grn);font-size:.85rem;">→</span>
+    </div>
+    <div style="font-size:.68rem;color:var(--chalk2);font-family:'Manrope',sans-serif;line-height:1.55;">${app.user?'View your stats, submit matches and track your performance in the national rankings.':'Season 4 qualifiers are open. Register your account to compete in the official PinoyPool ranking system.'}</div>
+  </div>`;
+  // Recent Activity — last 4 approved matches
+  const _recentMs=(typeof adminMatches!=='undefined'?adminMatches:[])
+    .filter(m=>m.status==='approved')
+    .slice(-4).reverse();
+  const activityHtml=`
+  <div class="rank-sidebar-activity">
+    <div style="font-size:.55rem;font-family:'Space Grotesk',sans-serif;letter-spacing:2.5px;text-transform:uppercase;color:var(--chalk2);margin-bottom:.65rem;">Recent Activity</div>
+    ${_recentMs.length?_recentMs.map(m=>`
+    <div style="display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.55rem;">
+      <div class="rank-activity-dot" style="margin-top:4px;"></div>
+      <div style="font-size:.68rem;color:var(--chalk);font-family:'Manrope',sans-serif;line-height:1.45;">
+        <span style="font-weight:700;color:#fff;">${fmtPlayerName(m.p1)}</span> vs <span style="font-weight:700;color:#fff;">${fmtPlayerName(m.p2)}</span>
+        <span style="color:var(--chalk2);"> · ${m.score||'—'}</span>
+      </div>
+    </div>`).join(''):`<div style="font-size:.68rem;color:var(--chalk2);font-family:'Manrope',sans-serif;">No recent matches yet.</div>`}
+  </div>`;
+  sb.innerHTML=hallHtml+ctaHtml+activityHtml;
 }
 function buildRankings(){
   const periods={alltime:'All-Time',year:'2026',month:'February 2026',jan:'January 2026',dec25:'December 2025'};
@@ -3281,6 +3539,8 @@ function renderLbTab(tab){
     return !adm||adm.status==='active';
   }).map(p=>genPlayerStats(p,m));
   const c=document.getElementById('lb-content');
+  // Clear sidebar for non-global tabs
+  if(tab!=='global'){const sb=document.getElementById('rank-sidebar');if(sb)sb.innerHTML='';}
 
   /* ── GLOBAL PPR LEADERBOARD (official PinoyPool Ranking System) ── */
   if(tab==='global'){
@@ -3289,8 +3549,9 @@ function renderLbTab(tab){
     const sorted=[...data].sort((a,b)=>b[_sortKey]-a[_sortKey]);
     // Derive unique regions for the picker
     const allRegions=[...new Set(data.map(p=>p.region).filter(Boolean))].sort();
-    // Apply region filter only (all players appear in all format leaderboards)
+    // Apply region + tier filters
     let display=app.pprRegion?sorted.filter(p=>p.region===app.pprRegion):sorted;
+    if(app._pprTierFilter) display=display.filter(p=>careerTier(p.mw,p.ml,p.status).label===app._pprTierFilter);
 
     // Silhouette SVG
     const sil=`<svg viewBox="0 0 60 110" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -3332,70 +3593,217 @@ function renderLbTab(tab){
       // Show format-specific match counts when in format mode
       const fmtTotal=app.rankFmt==='9-Ball'?(p.mw9||0)+(p.ml9||0):app.rankFmt==='10-Ball'?(p.mw10||0)+(p.ml10||0):p.mw+p.ml;
       const fmtWins=app.rankFmt==='9-Ball'?(p.mw9||0):app.rankFmt==='10-Ball'?(p.mw10||0):p.mw;
-      const wpct=Math.round(fmtWins/(fmtTotal||1)*100);
+      const wpct=fmtTotal>0?Math.round(fmtWins/fmtTotal*100):0;
       const rc=rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
       const tier=careerTier(p.mw,p.ml,p.status);
+      // Streak badge
+      const noM=p.mw+p.ml===0;
+      const streakHtml=noM?`<span class="ppr-streak-n">—</span>`:
+        p.strN?( p.strW?`<span class="ppr-streak-w">W${p.strN}</span>`:`<span class="ppr-streak-l">L${p.strN}</span>` ):
+        `<span class="ppr-streak-n">—</span>`;
+      // Recent Form dots (last 5, most recent left)
+      const rf=p.recentForm||[];
+      const formHtml='<div style="display:flex;justify-content:center;gap:3px;">'+
+        (rf.length?rf.map(w=>w?'<span class="ppr-dot-w"></span>':'<span class="ppr-dot-l"></span>').join(''):
+        '<span style="color:var(--chalk2);font-size:.65rem;">—</span>')+
+        '</div>';
+      // Performance trend
+      const rc2=p.ratingChange||0;
+      const perfHtml=noM?'<span style="color:var(--chalk2);">—</span>':
+        rc2>0?'<span style="color:#4ade80;font-size:.9rem;">↑</span>':
+        rc2<0?'<span style="color:#f87171;font-size:.9rem;">↓</span>':
+        '<span style="color:var(--chalk2);">—</span>';
       return`<tr class="ppr-row" data-name="${p.name.toLowerCase()}" data-region="${p.region||''}" data-fmt="${p.fmt||'9-Ball'}">
         <td class="ppr-rank-cell ${rc}"><div style="display:flex;align-items:center;gap:7px;">${rank}${rankMoveHtml(p.name,rank)}</div></td>
         <td class="ppr-player-cell"><span style="margin-right:8px;">${fmtPlayerName(p.name)}</span>${tierBadge(tier)}</td>
         <td class="ppr-rating-cell">${(p[_sortKey]||p.ppr).toLocaleString()}</td>
         <td class="ppr-matches-cell">${fmtTotal}</td>
-        <td class="ppr-win-cell">${wpct}%</td>
+        <td class="ppr-winrate-cell">${fmtTotal>0?wpct+'%':'—'}</td>
+        <td class="ppr-streak-cell">${streakHtml}</td>
+        <td class="ppr-form-cell">${formHtml}</td>
+        <td class="ppr-perf-cell">${perfHtml}</td>
       </tr>`;
     }).join('');
 
-    // Active period filter
-    const periods=[
-      {k:'alltime',l:'OVERALL'},
-      {k:'9ball',l:'9-BALL'},
-      {k:'10ball',l:'10-BALL'},
-      {k:'region',l:'REGION'}
+    // Card name formatter: "First LAST" with last in gold
+    const cardName=(name)=>{
+      const parts=name.trim().split(/\s+/);
+      if(parts.length===1) return `<span style="color:var(--gold2);">${name.toUpperCase()}</span>`;
+      const last=parts[parts.length-1];
+      const first=parts.slice(0,-1).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+      return `${first} <span style="color:var(--gold2);text-transform:uppercase;">${last}</span>`;
+    };
+
+    // Tier chip for new card design
+    const tierChipNew=(tier)=>{
+      const cfg={
+        Elite:  {dot:'var(--gold2)',border:'rgba(200,168,75,.3)',bg:'rgba(200,168,75,.1)',txt:'var(--gold2)'},
+        Pro:    {dot:'#5dade2',border:'rgba(52,130,219,.3)',bg:'rgba(52,130,219,.1)',txt:'#5dade2'},
+        'Semi-Pro':{dot:'#2196F3',border:'rgba(33,150,243,.3)',bg:'rgba(33,150,243,.1)',txt:'#2196F3'},
+        Skilled:{dot:'var(--grn3)',border:'rgba(31,140,78,.3)',bg:'rgba(31,140,78,.1)',txt:'var(--grn3)'},
+        Amateur:{dot:'#64748B',border:'rgba(100,116,139,.25)',bg:'rgba(100,116,139,.08)',txt:'#94a3b8'},
+      };
+      const c=cfg[tier.label]||cfg.Amateur;
+      return `<div style="display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;border:1px solid ${c.border};background:${c.bg};white-space:nowrap;">
+        <span style="width:6px;height:6px;border-radius:50%;background:${c.dot};display:inline-block;flex-shrink:0;"></span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:${c.txt};">${tier.label}</span>
+      </div>`;
+    };
+
+    // Build a rank card
+    const rankCard=(p,rank,sortKey)=>{
+      const fmtTotal=app.rankFmt==='9-Ball'?(p.mw9||0)+(p.ml9||0):app.rankFmt==='10-Ball'?(p.mw10||0)+(p.ml10||0):p.mw+p.ml;
+      const fmtWins=app.rankFmt==='9-Ball'?(p.mw9||0):app.rankFmt==='10-Ball'?(p.mw10||0):p.mw;
+      const wpct=fmtTotal>0?Math.round(fmtWins/fmtTotal*100):0;
+      const tier=careerTier(p.mw,p.ml,p.status);
+      const rating=(p[sortKey]||p.ppr).toLocaleString();
+      const move=rankMoveHtml(p.name,rank);
+      const isFirst=rank===1;
+      if(isFirst){
+        return`<div class="ppr-card" data-name="${p.name.toLowerCase()}" data-tier="${tier.label}" data-region="${(p.region||'').toLowerCase()}" style="background:linear-gradient(160deg,rgba(27,67,50,.7),rgba(10,18,14,.97));border-radius:10px;padding:.75rem .9rem;display:flex;align-items:center;gap:.7rem;border:1px solid rgba(212,175,55,.35);">
+          <div style="min-width:36px;display:flex;align-items:center;gap:3px;">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold2);line-height:1;">#1</span>
+            ${move}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;line-height:1.2;">
+              <span style="font-weight:700;color:#fff;font-size:.85rem;">${cardName(p.name)}</span>
+              ${tierBadge(tier)}
+            </div>
+            <span style="font-size:.55rem;font-family:'Space Grotesk',sans-serif;color:var(--chalk2);text-transform:uppercase;letter-spacing:2px;display:block;margin-top:.2rem;">${p.region||'—'}</span>
+          </div>
+          <div style="flex-shrink:0;text-align:right;">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--gold2);line-height:1;">${rating}</span>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:.45rem;color:var(--chalk2);text-transform:uppercase;letter-spacing:1.5px;margin-top:1px;">Rating</div>
+          </div>
+        </div>`;
+      }
+      return`<div class="ppr-card" data-name="${p.name.toLowerCase()}" data-tier="${tier.label}" data-region="${(p.region||'').toLowerCase()}" style="background:var(--bg3);border-radius:10px;padding:.7rem .9rem;display:flex;align-items:center;gap:.7rem;border:1px solid rgba(53,94,59,.15);">
+        <div style="min-width:36px;display:flex;align-items:center;justify-content:center;gap:3px;">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--chalk);line-height:1;">#${rank}</span>
+          ${move}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;line-height:1.2;">
+            <span style="font-weight:700;color:#fff;font-size:.85rem;">${cardName(p.name)}</span>
+            ${tierBadge(tier)}
+          </div>
+          <span style="font-size:.55rem;font-family:'Space Grotesk',sans-serif;color:var(--chalk2);text-transform:uppercase;letter-spacing:2px;display:block;margin-top:.2rem;">${p.region||'—'}</span>
+        </div>
+        <div style="flex-shrink:0;text-align:right;">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#fff;line-height:1;">${rating}</span>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:.45rem;color:var(--chalk2);text-transform:uppercase;letter-spacing:1.5px;margin-top:1px;">Rating</div>
+        </div>
+      </div>`;
+    };
+
+    // Tier filter chips config
+    const tierChipsConfig=[
+      {key:'Elite',   icon:'★', label:'Elite',    iconCol:'var(--gold2)'},
+      {key:'Pro',     icon:'●', label:'Pro',       iconCol:'#5dade2'},
+      {key:'Semi-Pro',icon:'●', label:'Semi Pro',  iconCol:'#2196F3'},
+      {key:'Skilled', icon:'●', label:'Skilled',   iconCol:'var(--grn3)'},
+      {key:'Amateur', icon:'●', label:'Amateur',   iconCol:'#94a3b8'},
     ];
 
     c.innerHTML=`
     <div class="ppr-wrap">
-      <div class="ppr-title-row">PINOYPOOL <span>${_fmtLabel} RANKINGS</span></div>
-
-      <!-- Podium top 3 -->
-      <div class="ppr-podium">
-        ${top3[1]?podCard(top3[1],2):'<div class="pod-card pod-2"></div>'}
-        ${top3[0]?podCard(top3[0],1):'<div class="pod-card pod-1"></div>'}
-        ${top3[2]?podCard(top3[2],3):'<div class="pod-card pod-3"></div>'}
+      <!-- Title -->
+      <div style="margin-bottom:1.5rem;">
+        <h1 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,5vw,2.4rem);letter-spacing:2px;color:#fff;margin:0 0 .3rem;line-height:1.1;">National Rankings</h1>
+        <p style="font-size:.72rem;color:var(--chalk2);font-family:'Manrope',sans-serif;margin:0;">Real-time standings for the official circuit.</p>
       </div>
 
-      <!-- Search + filters -->
-      <div class="ppr-controls">
-        <div class="ppr-search-wrap">
-          <span>🔍</span>
-          <input class="ppr-search" id="ppr-search" placeholder="Search Players..." oninput="filterPprTable(this.value)">
+      <!-- Search + Filters row -->
+      ${(()=>{
+        const activeCt=[(app.rankFmt&&app.rankFmt!=='all')?1:0,app._pprTierFilter?1:0,app.pprRegion?1:0].reduce((a,b)=>a+b,0);
+        const fmtLabel=app.rankFmt==='9-Ball'?'9-Ball':app.rankFmt==='10-Ball'?'10-Ball':'Overall';
+        const tierLabel=app._pprTierFilter||'';
+        const regionLabel=app.pprRegion||'';
+        const summaryParts=[fmtLabel!=='Overall'?fmtLabel:'',tierLabel,regionLabel].filter(Boolean);
+        const badge=activeCt?`<span style="background:var(--gold2);color:#0a120e;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:.52rem;font-weight:800;margin-left:3px;">${activeCt}</span>`:'';
+        return`
+        <div style="display:flex;gap:.5rem;margin-bottom:1rem;align-items:center;">
+          <div style="position:relative;flex:1;">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.82rem;pointer-events:none;">🔍</span>
+            <input id="ppr-search" style="width:100%;background:var(--bg3);border:1px solid rgba(53,94,59,.15);border-radius:9px;padding:.65rem .75rem .65rem 2.2rem;font-size:.8rem;color:#fff;font-family:'Manrope',sans-serif;outline:none;box-sizing:border-box;" placeholder="Search player name..." oninput="filterPprTable(this.value)">
+          </div>
+          <button onclick="openPprFilters()" style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;padding:.62rem .9rem;border-radius:9px;border:1px solid ${activeCt?'rgba(212,175,55,.5)':'rgba(53,94,59,.2)'};background:${activeCt?'rgba(212,175,55,.1)':'var(--bg3)'};cursor:pointer;">
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:${activeCt?'var(--gold2)':'var(--chalk)'};">Filters</span>
+            ${badge}
+            <span style="color:${activeCt?'var(--gold2)':'var(--chalk2)'};font-size:.7rem;margin-left:1px;">›</span>
+          </button>
         </div>
-        <div class="ppr-filters">
-          ${periods.map(f=>`<button class="ppr-flt${
-            (app._pprRegionMode&&f.k==='region')||
-            (app.rankFmt==='9-Ball'&&f.k==='9ball')||
-            (app.rankFmt==='10-Ball'&&f.k==='10ball')||
-            ((app.rankFmt==='all'||!app.rankFmt)&&!app._pprRegionMode&&(app.rankPeriod||'alltime')===f.k)
-            ?' act':''}" onclick="setPprPeriod(this,'${f.k}')">${f.l}</button>`).join('')}
+        ${summaryParts.length?`<div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.8rem;">${summaryParts.map(s=>`<span style="padding:.25rem .6rem;border-radius:5px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);font-family:'Space Grotesk',sans-serif;font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold2);">${s}</span>`).join('')}<button onclick="app.rankFmt='all';app._pprTierFilter=null;app.pprRegion=null;renderLbTab('global')" style="padding:.25rem .6rem;border-radius:5px;background:transparent;border:1px solid rgba(255,255,255,.1);font-family:'Space Grotesk',sans-serif;font-size:.54rem;color:var(--chalk2);cursor:pointer;">Clear ✕</button></div>`:''}`;
+      })()}
+
+      <!-- Filter overlay (bottom sheet) -->
+      <div id="ppr-filter-overlay" onclick="closePprFilters()" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.65);align-items:flex-end;justify-content:center;">
+        <div onclick="event.stopPropagation()" style="width:100%;max-width:520px;background:#0d1f15;border-radius:20px 20px 0 0;padding:1.4rem 1.3rem 2.2rem;border-top:1px solid rgba(53,94,59,.4);">
+          <!-- Header -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;padding-bottom:.9rem;border-bottom:1px solid rgba(53,94,59,.25);">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:#fff;letter-spacing:2px;">Filters</span>
+            <button onclick="closePprFilters()" style="display:flex;align-items:center;gap:.3rem;background:transparent;border:none;cursor:pointer;padding:0;">
+              <span style="font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:700;color:var(--chalk2);text-transform:uppercase;letter-spacing:1px;">Close</span>
+              <span style="color:var(--gold2);font-size:.9rem;">‹</span>
+            </button>
+          </div>
+
+          <!-- Format -->
+          <div style="margin-bottom:1.2rem;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--chalk2);margin-bottom:.5rem;">Format</div>
+            <select id="pf-fmt" style="width:100%;background:#0a1810;color:#fff;border:1px solid rgba(53,94,59,.35);border-radius:9px;padding:.75rem 1rem;font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;">
+              <option value="all" ${(app.rankFmt==='all'||!app.rankFmt)?'selected':''}>Overall</option>
+              <option value="9-Ball" ${app.rankFmt==='9-Ball'?'selected':''}>9-Ball</option>
+              <option value="10-Ball" ${app.rankFmt==='10-Ball'?'selected':''}>10-Ball</option>
+            </select>
+          </div>
+
+          <!-- Career Status -->
+          <div style="margin-bottom:1.2rem;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--chalk2);margin-bottom:.5rem;">Career Status</div>
+            <select id="pf-tier" style="width:100%;background:#0a1810;color:#fff;border:1px solid rgba(53,94,59,.35);border-radius:9px;padding:.75rem 1rem;font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;">
+              <option value="" ${!app._pprTierFilter?'selected':''}>All Players</option>
+              <option value="Elite" ${app._pprTierFilter==='Elite'?'selected':''}>Elite</option>
+              <option value="Pro" ${app._pprTierFilter==='Pro'?'selected':''}>Pro</option>
+              <option value="Semi-Pro" ${app._pprTierFilter==='Semi-Pro'?'selected':''}>Semi-Pro</option>
+              <option value="Skilled" ${app._pprTierFilter==='Skilled'?'selected':''}>Skilled</option>
+              <option value="Amateur" ${app._pprTierFilter==='Amateur'?'selected':''}>Amateur</option>
+            </select>
+          </div>
+
+          <!-- Region -->
+          <div style="margin-bottom:1.6rem;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--chalk2);margin-bottom:.5rem;">Region</div>
+            <select id="pf-region" style="width:100%;background:#0a1810;color:#fff;border:1px solid rgba(53,94,59,.35);border-radius:9px;padding:.75rem 1rem;font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;">
+              <option value="" ${!app.pprRegion?'selected':''}>All Regions</option>
+              ${allRegions.map(r=>`<option value="${r}" ${app.pprRegion===r?'selected':''}>${r}</option>`).join('')}
+            </select>
+          </div>
+
+          <!-- Apply -->
+          <button onclick="applyPprFilters()" style="width:100%;padding:.9rem;border-radius:10px;background:var(--gold2);color:#0a120e;font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;cursor:pointer;border:none;">Apply Filters</button>
         </div>
       </div>
 
-      <!-- Region sub-picker (shown when region mode active) -->
-      ${app._pprRegionMode?`
-      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.9rem;">
-        <button class="ppr-flt${!app.pprRegion?' act':''}" onclick="setPprRegion(null)">All Regions</button>
-        ${allRegions.map(r=>`<button class="ppr-flt${app.pprRegion===r?' act':''}" onclick="setPprRegion('${r}')">${r}</button>`).join('')}
-      </div>`:''}
+      <!-- Ranking cards -->
+      <div style="display:flex;flex-direction:column;gap:.75rem;" id="ppr-card-list">
+        ${display.length
+          ? display.map((p,i)=>rankCard(p,i+1,_sortKey)).join('')
+          : `<div style="text-align:center;padding:2.5rem 1rem;color:var(--chalk2);font-size:.82rem;">No players found.</div>`
+        }
+      </div>
 
-      <!-- Table (ranks 4+) -->
-      <div class="ppr-tbl-wrap">
-        <table class="ppr-tbl" id="ppr-tbl">
-          <thead><tr>
-            <th>Rank</th><th>Player</th><th style="text-align:center;">${_ratingHdr}</th><th style="text-align:center;">Matches Played</th><th style="text-align:center;">Win %</th>
-          </tr></thead>
-          <tbody id="ppr-tbody">
-            ${display.length>3?tableRows(display.slice(3),4):'<tr><td colspan="5" style="text-align:center;color:var(--chalk);padding:1.5rem;">No players found for this region.</td></tr>'}
-          </tbody>
-        </table>
+      <!-- Rating info footer -->
+      <div style="margin-top:2.5rem;padding:1.2rem 1.4rem;border-radius:16px;background:rgba(53,94,59,.05);border:1px solid rgba(53,94,59,.2);position:relative;overflow:hidden;">
+        <div style="position:relative;z-index:1;">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;">
+            <span style="color:var(--gold2);font-size:.9rem;">ℹ</span>
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:.62rem;font-weight:700;color:var(--gold2);text-transform:uppercase;letter-spacing:2px;">Tournament Rating System</span>
+          </div>
+          <p style="font-size:.7rem;color:var(--chalk2);line-height:1.7;margin:0;">Official ratings are recalibrated every 24 hours based on tournament weight, opponent strength, and sanctioned club performance.</p>
+        </div>
+        <span style="position:absolute;right:-1rem;bottom:-1rem;font-size:5rem;opacity:.07;line-height:1;pointer-events:none;">🎱</span>
       </div>
     </div>`;
 
@@ -3403,6 +3811,8 @@ function renderLbTab(tab){
     app._pprSorted=display;
     // Save snapshot for next-session movement comparison
     saveRankSnapshot();
+    // Build sidebar
+    _buildRankSidebar(display);
 
   /* ── PERFORMANCE RANKING (PR) LEADERBOARD ── */
   } else if(tab==='performance'){
@@ -6653,5 +7063,29 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
 
 
 </script>
+
+<!-- ══════════════════════════════════════════
+     SITE FOOTER
+══════════════════════════════════════════ -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div>
+      <div class="site-footer-brand">Pinoy<span>Pool</span></div>
+      <div class="site-footer-copy">© 2024 PinoyPool Platform. Professional Billiards Network.</div>
+    </div>
+    <div class="site-footer-links">
+      <a href="#">Terms of Service</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Contact Support</a>
+      <a href="#">About Us</a>
+    </div>
+    <div class="site-footer-socials">
+      <div class="site-footer-social-btn" title="Twitter/X">𝕏</div>
+      <div class="site-footer-social-btn" title="Instagram">◎</div>
+      <div class="site-footer-social-btn" title="Facebook">f</div>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>
