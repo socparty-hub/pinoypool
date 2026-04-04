@@ -3710,7 +3710,7 @@ function renderLbTab(tab){
     <div class="ppr-wrap">
       <!-- Title -->
       ${(()=>{
-        const _titleFmt=app.rankFmt==='9-Ball'?'9-Ball PinoyPool Ranking':app.rankFmt==='10-Ball'?'10-Ball PinoyPool Ranking':'Overall PinoyPool Ranking';
+        const _titleFmt=app.rankFmt==='9-Ball'?'PinoyPool Ranking - 9 Ball':app.rankFmt==='10-Ball'?'PinoyPool Ranking - 10 Ball':'PinoyPool Ranking - Overall';
         return`<div style="margin-bottom:1.5rem;">
           <h1 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,5vw,2.4rem);letter-spacing:2px;color:#fff;margin:0 0 .3rem;line-height:1.1;">${_titleFmt}</h1>
           <p style="font-size:.72rem;color:var(--chalk2);font-family:'Manrope',sans-serif;margin:0;">Real-time standings for the official circuit.</p>
