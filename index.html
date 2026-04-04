@@ -1042,17 +1042,17 @@ textarea{resize:vertical;min-height:75px;}
      PLAYER PORTAL
 ══════════════════════════════════════════ -->
 <div id="view-player-portal" class="view">
-  <div class="pp-hdr">
+  <div class="pp-tabs">
+    <button class="pp-tab act" onclick="ppTab(this,'validation')">⚡ Match Validation</button>
+    <button class="pp-tab" onclick="ppTab(this,'history')">📋 Match History</button>
+    <button class="pp-tab" onclick="ppTab(this,'profile')">👤 Player Profile</button>
+  </div>
+  <div id="pp-hdr" class="pp-hdr" style="display:none;">
     <div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:var(--gold);" id="pp-title">Player Portal</div>
       <div style="font-size:.76rem;color:var(--chalk);margin-top:2px;" id="pp-subtitle">Your match history · Rankings · Pending validations</div>
     </div>
     <div id="pp-hdr-stats" style="display:flex;gap:1.2rem;text-align:center;flex-wrap:wrap;"></div>
-  </div>
-  <div class="pp-tabs">
-    <button class="pp-tab act" onclick="ppTab(this,'validation')">⚡ Match Validation</button>
-    <button class="pp-tab" onclick="ppTab(this,'history')">📋 Match History</button>
-    <button class="pp-tab" onclick="ppTab(this,'profile')">👤 Player Profile</button>
   </div>
   <div id="pp-content"></div>
 </div>
@@ -4094,6 +4094,8 @@ function buildPlayerPortal(){
         </div>
       </div>`;
     if(ppTabs) ppTabs.style.display='none';
+    const hdrEl=document.getElementById('pp-hdr');
+    if(hdrEl) hdrEl.style.display='';
     const dob=u.dob||'';
     let dobDisplay='—', ageStr='';
     if(dob){
@@ -4186,6 +4188,8 @@ function buildPlayerPortal(){
 function ppTab(btn,tab){
   document.querySelectorAll('.pp-tab').forEach(b=>b.classList.remove('act'));
   if(btn) btn.classList.add('act');
+  const hdr=document.getElementById('pp-hdr');
+  if(hdr) hdr.style.display=tab==='profile'?'':'none';
   const c=document.getElementById('pp-content');
   const p=PLAYERS.find(x=>x.name===app.user?.name)||PLAYERS[0]||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||'Amateur',status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
 
