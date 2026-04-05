@@ -5898,9 +5898,9 @@ function ptab(tab){
     buildPortal();
     return;
   }
-  // Hide tile grid on profile tab; show for all others
+  // Hide tile grid on profile and tournaments tabs; show for all others
   const _paGrid=document.querySelector('.pa-grid');
-  if(_paGrid) _paGrid.style.display=tab==='profile'?'none':'';
+  if(_paGrid) _paGrid.style.display=(tab==='profile'||tab==='tournaments')?'none':'';
   // Highlight active tile
   document.querySelectorAll('.pa-tile').forEach((t,i)=>{
     const tabs=['matches','tournaments','history','profile'];
