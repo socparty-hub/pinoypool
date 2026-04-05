@@ -1024,9 +1024,10 @@ textarea{resize:vertical;min-height:75px;}
       </div>
       <div class="fg" style="margin-bottom:.8rem;">
         <div class="ac-wrap">
-          <div class="iw"><span class="ii">🎱</span><input type="text" id="p1-inp" placeholder="Type name to search..." oninput="acSearch('p1-inp','p1-list','p1-hcp-sel')" autocomplete="off"></div>
+          <div class="iw"><span class="ii">🔍</span><input type="text" id="p1-inp" placeholder="Type name to search..." oninput="acSearch('p1-inp','p1-list','p1-hcp-sel')" autocomplete="off"></div>
           <div class="ac-list" id="p1-list"></div>
         </div>
+        <div id="p1-tier-tag" style="margin-top:.45rem;min-height:18px;"></div>
       </div>
 
       <!-- P1 Score — slider -->
@@ -1084,6 +1085,7 @@ textarea{resize:vertical;min-height:75px;}
           <div class="iw"><span class="ii">🔍</span><input type="text" id="p2-inp" placeholder="Enter name or Player ID..." oninput="acSearch('p2-inp','p2-list','p2-hcp-sel')" autocomplete="off"></div>
           <div class="ac-list" id="p2-list"></div>
         </div>
+        <div id="p2-tier-tag" style="margin-top:.45rem;min-height:18px;"></div>
       </div>
 
       <!-- P2 Score — slider -->
@@ -2230,7 +2232,14 @@ function setUser(u){
     // Look in PLAYERS first; fall back to adminPlayers(active) in case initFromBackend hasn't finished
     const found=PLAYERS.find(p=>p.name===u.name||p.name.replace(/\./g,'').toLowerCase()===u.name.replace(/\./g,'').toLowerCase()||p.name.toLowerCase().startsWith(u.name.toLowerCase())||u.name.toLowerCase().startsWith(p.name.toLowerCase()))
       ||(typeof adminPlayers!=='undefined'?adminPlayers.find(p=>(p.name===u.name||p.email===u.email)&&p.status==='active'):null);
-    if(found){app.p1id=found.id;const _dp1=document.getElementById('dp1');if(_dp1)_dp1.textContent=u.name.split(' ')[0];}
+    if(found){
+      app.p1id=found.id;
+      const _dp1=document.getElementById('dp1');if(_dp1)_dp1.textContent=u.name.split(' ')[0];
+      const _status=found.careerStatus||found.status||u.careerStatus||'Amateur';
+      const _t=careerTier(0,0,_status);
+      const _tt=document.getElementById('p1-tier-tag');
+      if(_tt&&_t) _tt.innerHTML=`<span style="font-size:.62rem;padding:2px 9px;border-radius:4px;background:${_t.bg};color:${_t.color};border:1px solid ${_t.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">${_t.label}</span>`;
+    }
     inp.readOnly=true;
     inp.style.color='var(--gold)';
     inp.style.cursor='default';
@@ -2333,6 +2342,7 @@ function logout(){
   const inp=document.getElementById('p1-inp');
   inp.value='';inp.readOnly=false;inp.style.color='';inp.style.cursor='';
   app.p1='';app.p1id=null;
+  [1,2].forEach(p=>{const t=document.getElementById('p'+p+'-tier-tag');if(t)t.innerHTML='';});
   const venSel=document.getElementById('sel-venue');
   if(venSel){venSel.value='';venSel.readOnly=false;venSel.style.color='';venSel.style.cursor='';}
   sv('dashboard',document.querySelector('.nb'));
@@ -2373,6 +2383,11 @@ function selectPlayer(id,inpId,listId){
   if(!p) return;
   document.getElementById(inpId).value=fmtPlayerName(p.name);
   document.getElementById(listId).classList.remove('open');
+  const pNum=inpId==='p1-inp'?'1':'2';
+  const status=p.careerStatus||p.status||'Amateur';
+  const tier=careerTier(0,0,status);
+  const tagEl=document.getElementById('p'+pNum+'-tier-tag');
+  if(tagEl&&tier) tagEl.innerHTML=`<span style="font-size:.62rem;padding:2px 9px;border-radius:4px;background:${tier.bg};color:${tier.color};border:1px solid ${tier.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">${tier.label}</span>`;
   if(inpId==='p1-inp'){app.p1=p.name;app.p1id=id;const _dpx1=document.getElementById('dp1');if(_dpx1)_dpx1.textContent=p.name.split(' ')[0];}
   else{app.p2=p.name;app.p2id=id;const _dpx2=document.getElementById('dp2');if(_dpx2)_dpx2.textContent=p.name.split(' ')[0];}
 }
@@ -3095,6 +3110,7 @@ function resetMatch(){
   [1,2].forEach(p=>{
     const numEl=document.getElementById('cs-s'+p);if(numEl) numEl.textContent='0';
     const rangeEl=document.getElementById('score-range-'+p);if(rangeEl) rangeEl.value=0;
+    const tagEl=document.getElementById('p'+p+'-tier-tag');if(tagEl) tagEl.innerHTML='';
   });
   if(!app.user||app.user.role!=='player'){app.p1='';app.p1id=null;}
   app.p2='';app.p2id=null;
