@@ -2364,7 +2364,7 @@ function doLogin(){
     closeM('m-auth');
     const fn=ru.name.split(' ')[0];
     if(ru.role==='admin'){toast('🔐 Welcome, <strong>Admin</strong>. Full system access granted.');setTimeout(()=>sv('admin',document.getElementById('nb-admin')),600);}
-    else if(ru.role==='owner'){toast(`✅ Welcome back, <strong>${fn}</strong>!`);setTimeout(()=>sv('dashboard',document.getElementById('nb-dashboard')),600);}
+    else if(ru.role==='owner'){toast(`✅ Welcome back, <strong>${fn}</strong>!`);setTimeout(()=>sv('portal',document.getElementById('nb-portal')),600);}
     else if(ru.role==='player'){toast(`✅ Welcome back, <strong>${fn}</strong>!`);setTimeout(()=>sv('player-portal',document.getElementById('nb-player-portal')),600);}
     else{toast(`✅ Welcome back, <strong>${fn}</strong>!`);}
     return;
@@ -2380,7 +2380,7 @@ function doLogin(){
       setTimeout(()=>sv('admin',document.getElementById('nb-admin')),600);
     } else if(ta.role==='owner'){
       toast(`✅ Welcome back, <strong>${ta.name.split(' ')[0]}</strong>!`);
-      setTimeout(()=>sv('dashboard',document.getElementById('nb-dashboard')),600);
+      setTimeout(()=>sv('portal',document.getElementById('nb-portal')),600);
     } else if(ta.role==='player'){
       toast(`✅ Welcome back, <strong>${ta.name.split(' ')[0]}</strong>!`);
       setTimeout(()=>sv('player-portal',document.getElementById('nb-player-portal')),600);
@@ -2452,7 +2452,7 @@ function doRegister(){
     }
     closeM('m-auth');
     toast(`🎉 Welcome, <strong>@${un}</strong>! ${role==='player'?'Your account is pending admin verification.':`Your hall registration is pending admin approval.`}`);
-    if(role==='owner') setTimeout(()=>sv('dashboard',document.getElementById('nb-dashboard')),600);
+    if(role==='owner') setTimeout(()=>sv('portal',document.getElementById('nb-portal')),600);
   };
   fetch('/api/register',{
     method:'POST',
@@ -2542,6 +2542,9 @@ function setUser(u){
   } else if(u.role==='fan'){
     // fan sees nothing extra
   } else if(u.role==='owner'){
+    // Hide Dashboard nav — Hall Portal is the owner's primary nav
+    const nbDash=document.getElementById('nb-dashboard');
+    if(nbDash) nbDash.style.display='none';
     if(nbMatch) nbMatch.style.display='inline-block';
     if(nbPortal) nbPortal.style.display='inline-block';
     const cBtn=document.getElementById('send-challenge-btn');
@@ -2655,6 +2658,9 @@ function logout(){
   ['nb-match','nb-portal','nb-player-portal','nb-admin'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
+  // Restore Dashboard nav (hidden for owner while logged in)
+  const _nbDash=document.getElementById('nb-dashboard');
+  if(_nbDash) _nbDash.style.display='';
   // Hide privileged ranking sub-items on logout
   ['ham-rank-performance','ham-rank-hcp','ham-rank-expanded','ham-rank-advanced'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
@@ -7704,8 +7710,8 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
     if(!u||!u.role) return;
     setUser(u);
     let sec=localStorage.getItem('pp_last_section')||'dashboard';
-    // Owner's primary landing is always the dashboard (which shows match validation)
-    if(u.role==='owner' && sec==='portal') sec='dashboard';
+    // Owner's primary landing is the Hall Portal
+    if(u.role==='owner' && sec==='dashboard') sec='portal';
     const nbMap={'player-portal':'nb-player-portal','portal':'nb-portal','admin':'nb-admin','match':'nb-match'};
     const btnEl=nbMap[sec]?document.getElementById(nbMap[sec]):null;
     sv(sec,btnEl);
