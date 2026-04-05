@@ -766,6 +766,7 @@ textarea{resize:vertical;min-height:75px;}
           </div>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('player-portal',null)" id="av-dd-portal" style="display:none;">My Portal</button>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('portal',null)" id="av-dd-hall" style="display:none;">Hall Portal</button>
+          <button class="av-dd-item" onclick="toggleAvDropdown();sv('portal',null);setTimeout(()=>ptab('profile'),300)" id="av-dd-hall-profile" style="display:none;">Hall Profile</button>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('admin',null)" id="av-dd-admin" style="display:none;">Admin</button>
           <button class="av-dd-item logout" onclick="toggleAvDropdown();logout()">Logout</button>
         </div>
@@ -1324,7 +1325,6 @@ textarea{resize:vertical;min-height:75px;}
     <div class="pa-tile" onclick="ptab('matches')"><div class="ic">⚡</div><div class="lb">Match Validation</div><div class="dc">Confirm matches at your venue</div></div>
     <div class="pa-tile" onclick="ptab('tournaments')"><div class="ic">🏆</div><div class="lb">Tournaments</div><div class="dc">Register &amp; manage tournaments</div></div>
     <div class="pa-tile" onclick="ptab('history')"><div class="ic">📋</div><div class="lb">Match History</div><div class="dc">Verified matches at your venue</div></div>
-    <div class="pa-tile" onclick="ptab('profile')"><div class="ic">🏢</div><div class="lb">Hall Profile</div><div class="dc">Update your listing</div></div>
   </div>
   <div id="portal-content"></div>
 </div>
@@ -2509,9 +2509,11 @@ function setUser(u){
   if(avDdRole) avDdRole.textContent=roleLabels[u.role]||u.role;
   const avDdPortal=document.getElementById('av-dd-portal');
   const avDdHall=document.getElementById('av-dd-hall');
+  const avDdHallProfile=document.getElementById('av-dd-hall-profile');
   const avDdAdmin=document.getElementById('av-dd-admin');
   if(avDdPortal) avDdPortal.style.display=u.role==='player'?'flex':'none';
   if(avDdHall) avDdHall.style.display=u.role==='owner'?'flex':'none';
+  if(avDdHallProfile) avDdHallProfile.style.display=u.role==='owner'?'flex':'none';
   if(avDdAdmin) avDdAdmin.style.display=u.role==='admin'?'flex':'none';
 
   // Role badge
