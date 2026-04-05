@@ -355,10 +355,6 @@ textarea{resize:vertical;min-height:75px;}
   }
   nav#main-nav.open .nb:last-child{border-bottom:none;}
   nav#main-nav.open .nb.act{border-bottom:1px solid rgba(212,175,55,.07);border-radius:0;}
-  /* Guest/player hamburger: hide non-essential nav items */
-  nav#main-nav.open.ham-restricted #nb-dashboard,
-  nav#main-nav.open.ham-restricted #nb-live,
-  nav#main-nav.open.ham-restricted #nb-halls{display:none!important;}
   @keyframes hamSlide{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
   /* Rankings sub-items in hamburger */
   nav#main-nav.open #ham-rank-subs.open{display:block;border-left:2px solid rgba(212,175,55,.25);margin-left:1.4rem;}
@@ -733,7 +729,7 @@ textarea{resize:vertical;min-height:75px;}
   <a class="logo" onclick="sv('dashboard',this)">
     <img src="pinoypool-logo.png" alt="PinoyPool" style="height:62px;width:auto;object-fit:cover;object-position:center;display:block;margin:-1px 0;">
   </a>
-  <nav id="main-nav" class="ham-restricted">
+  <nav id="main-nav">
     <button class="nb act" id="nb-dashboard" onclick="sv('dashboard',this)">Dashboard</button>
     <button class="nb" id="nb-match" onclick="sv('match',this)" style="display:none">Record Match</button>
     <button class="nb" id="nb-live" onclick="sv('live',this)">Watch Now</button>
@@ -2074,15 +2070,8 @@ function setUser(u){
   const nbPortal=document.getElementById('nb-portal');
   const nbPP=document.getElementById('nb-player-portal');
   const nbAdmin=document.getElementById('nb-admin');
-  const nbDash=document.getElementById('nb-dashboard');
-  const nbLive=document.getElementById('nb-live');
-  const nbHalls=document.getElementById('nb-halls');
-  // Hide everything first, then show per role
+  // Hide role-specific items first, then show per role
   [nbMatch,nbPortal,nbPP,nbAdmin].forEach(b=>{if(b)b.style.display='none';});
-  const isPrivileged=u.role==='admin'||u.role==='owner';
-  // Hamburger: restrict to Rankings-only for non-privileged roles
-  const _nav=document.getElementById('main-nav');
-  if(_nav) _nav.classList.toggle('ham-restricted',!isPrivileged);
   if(u.role==='admin'){
     if(nbAdmin) nbAdmin.style.display='inline-block';
   } else if(u.role==='fan'){
@@ -2195,8 +2184,6 @@ function logout(){
   ['nb-match','nb-portal','nb-player-portal','nb-admin'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
-  const _navOut=document.getElementById('main-nav');
-  if(_navOut) _navOut.classList.add('ham-restricted');
   document.getElementById('pend-area').innerHTML='';
   const rb=document.getElementById('hdr-role');if(rb)rb.remove();
   // Restore hero CTA
