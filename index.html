@@ -1360,9 +1360,9 @@ textarea{resize:vertical;min-height:75px;}
       <button class="tabbtn" onclick="atab('register',this)">Register</button>
     </div>
     <div id="al">
-      <div class="fg"><label>Username</label><input type="text" id="le" placeholder="Enter your username" autocomplete="username" style="font-family:'DM Mono',monospace;letter-spacing:.5px;"></div>
-      <div class="fg"><label>Password</label><input type="password" id="lp" placeholder="••••••••"></div>
-      <button class="btn btn-p btn-f" onclick="doLogin()" style="margin-top:.5rem;">Login to PinoyPool</button>
+      <div class="fg"><label>Username</label><input type="text" id="le" placeholder="Enter your username" autocomplete="username" style="font-family:'DM Mono',monospace;letter-spacing:.5px;" onkeydown="if(event.key==='Enter')doLogin();"></div>
+      <div class="fg"><label>Password</label><input type="password" id="lp" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin();"></div>
+      <button class="btn btn-p btn-f" onclick="doLogin()" ontouchend="event.preventDefault();doLogin();" style="margin-top:.5rem;">Login to PinoyPool</button>
       <div style="text-align:center;margin-top:.9rem;font-size:.78rem;color:var(--chalk);">No account? <span class="lktxt" onclick="atab('register',null)">Register now</span></div>
     </div>
     <div id="ar" style="display:none;">
