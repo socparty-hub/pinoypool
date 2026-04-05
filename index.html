@@ -1947,11 +1947,11 @@ function buildDashboard(){
         const hcpB1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
         const hcpB2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
         function hcpTag(rack,balls){
-          const parts=[];
-          if(rack>0) parts.push(`+${rack}`);
-          if(balls.length>0) parts.push(balls.join(','));
-          if(!parts.length) return '';
-          return `<span style="font-size:.75rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;letter-spacing:0;">(${parts.join(' · ')})</span>`;
+          let s='';
+          if(rack>0) s+=`(+${rack})`;
+          if(balls&&balls.length>0) s+=`(${[...balls].sort((a,b)=>a-b).join(',')})`;
+          if(!s) return '';
+          return `<span style="font-size:.75rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;letter-spacing:0;">${s}</span>`;
         }
         const hcpTag1=hcpTag(hcpR[0],hcpB1);
         const hcpTag2=hcpTag(hcpR[1],hcpB2);
