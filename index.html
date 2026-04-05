@@ -1310,24 +1310,17 @@ textarea{resize:vertical;min-height:75px;}
      HALL PORTAL
 ══════════════════════════════════════════ -->
 <div id="view-portal" class="view">
-  <div class="portal-hdr">
-    <div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:var(--gold);">🏢 Hall Owner Portal</div>
-      <div style="font-size:.76rem;color:var(--chalk);margin-top:2px;">Manage your venue · Validate matches · Track tables</div>
+  <!-- Hidden elements kept for JS references (portal name/loc populated by buildPortal) -->
+  <span id="portal-hn" style="display:none;">—</span>
+  <span id="portal-hloc" style="display:none;">—</span>
+  <div class="pa-grid" style="grid-template-columns:1fr 1fr;margin-bottom:1.2rem;">
+    <div class="pa-tile" onclick="ptab('matches')" style="display:flex;flex-direction:row;align-items:center;gap:.75rem;text-align:left;padding:.85rem 1rem;">
+      <div class="ic" style="font-size:1.5rem;flex-shrink:0;margin:0;">⚡</div>
+      <div><div class="lb" style="font-size:.72rem;">Match Validation</div><div class="dc" style="font-size:.62rem;">Confirm matches</div></div>
     </div>
-    <div style="text-align:right;">
-      <div id="portal-hn" style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;">—</div>
-      <div id="portal-hloc" style="font-size:.7rem;color:var(--chalk);">—</div>
-    </div>
-  </div>
-  <div class="pa-grid" style="grid-template-columns:1fr 1fr;">
-    <div class="pa-tile" onclick="ptab('matches')" style="grid-column:1/-1;display:flex;flex-direction:row;align-items:center;gap:1rem;text-align:left;padding:1rem 1.2rem;">
-      <div class="ic" style="font-size:1.8rem;flex-shrink:0;">⚡</div>
-      <div><div class="lb">Match Validation</div><div class="dc">Confirm matches at your venue</div></div>
-    </div>
-    <div class="pa-tile" onclick="ptab('history')" style="grid-column:1/-1;display:flex;flex-direction:row;align-items:center;gap:1rem;text-align:left;padding:1rem 1.2rem;">
-      <div class="ic" style="font-size:1.8rem;flex-shrink:0;">📋</div>
-      <div><div class="lb">Match History</div><div class="dc">Verified matches at your venue</div></div>
+    <div class="pa-tile" onclick="ptab('history')" style="display:flex;flex-direction:row;align-items:center;gap:.75rem;text-align:left;padding:.85rem 1rem;">
+      <div class="ic" style="font-size:1.5rem;flex-shrink:0;margin:0;">📋</div>
+      <div><div class="lb" style="font-size:.72rem;">Match History</div><div class="dc" style="font-size:.62rem;">Verified matches</div></div>
     </div>
   </div>
   <div id="portal-content"></div>
