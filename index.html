@@ -1310,9 +1310,16 @@ textarea{resize:vertical;min-height:75px;}
      HALL PORTAL
 ══════════════════════════════════════════ -->
 <div id="view-portal" class="view">
-  <!-- Hidden elements kept for JS references (portal name/loc populated by buildPortal) -->
-  <span id="portal-hn" style="display:none;">—</span>
-  <span id="portal-hloc" style="display:none;">—</span>
+  <div class="portal-hdr" id="portal-hdr-card">
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:var(--gold);">🏢 Hall Owner Portal</div>
+      <div style="font-size:.76rem;color:var(--chalk);margin-top:2px;">Manage your venue · Validate matches · Track tables</div>
+    </div>
+    <div style="text-align:right;">
+      <div id="portal-hn" style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;">—</div>
+      <div id="portal-hloc" style="font-size:.7rem;color:var(--chalk);">—</div>
+    </div>
+  </div>
   <div class="pa-grid" style="grid-template-columns:1fr 1fr;margin-bottom:1.2rem;">
     <div class="pa-tile" onclick="ptab('matches')" style="display:flex;flex-direction:row;align-items:center;gap:.75rem;text-align:left;padding:.85rem 1rem;">
       <div class="ic" style="font-size:1.5rem;flex-shrink:0;margin:0;">⚡</div>
@@ -5896,6 +5903,9 @@ function ptab(tab){
     buildPortal();
     return;
   }
+  // Show hall card only on profile/tournaments; hide for matches/history
+  const _portalHdr=document.getElementById('portal-hdr-card');
+  if(_portalHdr) _portalHdr.style.display=(tab==='profile'||tab==='tournaments')?'':'none';
   // Hide tile grid on profile and tournaments tabs; show for all others
   const _paGrid=document.querySelector('.pa-grid');
   if(_paGrid) _paGrid.style.display=(tab==='profile'||tab==='tournaments')?'none':'';
