@@ -1495,10 +1495,13 @@ function buildDashboard(){
       ?adminMatches.filter(x=>x.status==='approved').map(x=>({...x,sc:x.score,ts:x.date,label:'Admin Approved'}))
       :[];
     const allM=[...adminVer].sort((a,b)=>new Date(b.date)-new Date(a.date));
-    const recent=allM.slice(0,5);
+    const recent=allM.slice(0,15);
     if(recent.length===0){
       lc.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--chalk2);font-size:.82rem;">No verified matches yet.</div>`;
     } else {
+      const cardHeight=118; // approx px per card inc gap
+      const visibleH=cardHeight*3+16; // show 3 cards
+      lc.style.cssText=`max-height:${visibleH}px;overflow-y:auto;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:rgba(53,94,59,.4) transparent;`;
       lc.innerHTML=recent.map(m=>{
         const fmtBadge=m.fmt==='9-Ball'
           ?`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
