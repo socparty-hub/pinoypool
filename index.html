@@ -1551,7 +1551,7 @@ function buildDashboard(){
         const tb=`<span style="font-size:.6rem;padding:1px 5px;border-radius:3px;background:${tier.bg};color:${tier.color};border:1px solid ${tier.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;display:inline-block;width:fit-content;margin-top:2px;">${tier.label}</span>`;
         return `<tr style="cursor:pointer" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">
           <td><span class="${i===0?'dash-top5-rank-1':'dash-top5-rank'}">${i+1}</span></td>
-          <td><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:.78rem;font-weight:700;">${fmtPlayerName(p.name)}</span>${tb}</div></td>
+          <td><div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;"><span style="font-size:.78rem;font-weight:700;">${fmtPlayerName(p.name)}</span>${tb}</div></td>
           <td>${total}</td>
           <td>${wp}%</td>
         </tr>`;
