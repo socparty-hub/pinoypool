@@ -659,71 +659,52 @@ textarea{resize:vertical;min-height:75px;}
    NEW DASHBOARD DESIGN
 ═══════════════════════════════════════ */
 /* Hero */
-.dash-hero{position:relative;border-radius:1.5rem;overflow:hidden;background:linear-gradient(135deg,#0a1a0d 0%,#080d09 60%);margin-bottom:2rem;min-height:230px;display:flex;align-items:center;padding:2.5rem clamp(1.2rem,5vw,3.5rem);border:1px solid #181818;}
-.dash-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(53,94,59,.22) 0%,transparent 60%);pointer-events:none;}
-.dash-hero-content{position:relative;z-index:2;max-width:520px;}
-.dash-hero-label{color:#355E3B;font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;margin-bottom:.55rem;}
-.dash-hero-title{font-family:'Epilogue',sans-serif;font-size:clamp(1.7rem,4vw,3rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1.3rem;}
-.dash-hero-title span{color:#355E3B;}
-.dash-hero-btns{display:flex;gap:.6rem;flex-wrap:wrap;}
-.dash-feature-card{display:none;position:absolute;right:clamp(1.2rem,4vw,2.5rem);top:50%;transform:translateY(-50%);background:rgba(5,25,12,.75);backdrop-filter:blur(12px);border:1px solid rgba(53,94,59,.3);border-radius:1.25rem;padding:1.35rem;width:230px;z-index:2;}
-@media(min-width:860px){.dash-feature-card{display:block;}.dash-hero-content{max-width:440px;}}
-.dash-feat-icon{width:38px;height:38px;background:rgba(53,94,59,.35);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.9rem;font-size:1.1rem;}
-.dash-feat-label{font-family:'Space Grotesk',sans-serif;font-size:.55rem;font-weight:700;color:var(--chalk2);letter-spacing:3px;text-transform:uppercase;margin-bottom:.2rem;}
-.dash-feat-title{font-family:'Epilogue',sans-serif;font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:.35rem;}
-.dash-feat-sub{font-size:.68rem;color:var(--chalk2);font-family:'Manrope',sans-serif;line-height:1.5;margin-bottom:.85rem;}
-.dash-feat-btn{font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;color:var(--grn);letter-spacing:2px;text-transform:uppercase;background:none;border:none;cursor:pointer;padding:0;}
-.dash-feat-btn:hover{color:#4ade80;}
+.dash-hero{text-align:center;padding:3rem 1.2rem 2.5rem;margin-bottom:1.5rem;}
+.dash-hero-eyebrow{display:flex;align-items:center;justify-content:center;gap:.4rem;margin-bottom:1rem;}
+.dash-hero-eyebrow span:first-child{font-size:.75rem;}
+.dash-hero-eyebrow span:last-child{font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(224,224,224,.55);}
+.dash-hero-title{font-family:'Epilogue',sans-serif;font-size:clamp(2rem,8vw,2.8rem);font-weight:800;line-height:1.08;margin-bottom:1rem;display:flex;flex-direction:column;align-items:center;}
+.dash-hero-title .t-white{color:#fff;}
+.dash-hero-title .t-gold{color:var(--gold2);}
+.dash-hero-sub{font-size:.78rem;color:rgba(224,224,224,.55);margin-bottom:2rem;max-width:280px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.dash-hero-btns{display:flex;flex-direction:column;gap:.65rem;max-width:340px;margin:0 auto;}
+.dash-hero-btns .btn{width:100%;justify-content:center;}
 /* Stats grid */
-.dash-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:2rem;}
-@media(max-width:860px){.dash-stats-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:440px){.dash-stats-grid{grid-template-columns:1fr 1fr;gap:.6rem;}}
-.dash-stat-card{background:linear-gradient(145deg,#111 0%,#0d1a11 100%);border:1px solid rgba(53,94,59,.15);border-radius:1.1rem;padding:1.1rem 1.25rem .95rem;transition:border-color .2s,transform .2s;}
-.dash-stat-card:hover{border-color:rgba(53,94,59,.45);transform:translateY(-2px);}
-.dash-stat-card--accent{border-left:2px solid #355E3B;}
-.dash-stat-lbl{font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#555;margin-bottom:.55rem;}
-.dash-stat-row{display:flex;align-items:flex-end;justify-content:space-between;gap:.4rem;}
-.dash-stat-val{font-family:'Epilogue',sans-serif;font-size:2rem;font-weight:800;color:#fff;line-height:1;}
-.dash-stat-trend{font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:700;color:#355E3B;padding-bottom:.1rem;}
-.dash-stat-stable{font-family:'Space Grotesk',sans-serif;font-size:.68rem;color:#3a3a3a;font-style:italic;padding-bottom:.1rem;}
-.dash-format-dots{display:flex;padding-bottom:.1rem;}
-.dash-dot{width:18px;height:18px;border-radius:50%;border:2px solid #0a0a0a;margin-left:-4px;}
-.dash-dot:first-child{margin-left:0;}
-.dash-dot--gold{background:#f5c842;}
-.dash-dot--blue{background:#4a9eff;}
-/* Main 2-col layout */
-.dash-grid{display:grid;grid-template-columns:1fr 360px;gap:1.6rem;align-items:start;}
-@media(max-width:960px){.dash-grid{grid-template-columns:1fr;}}
-.dash-section-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;}
-.dash-section-title{font-family:'Epilogue',sans-serif;font-size:1.05rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:.4rem;}
-.dash-view-all{font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;color:#355E3B;letter-spacing:2px;text-transform:uppercase;background:none;border:none;cursor:pointer;transition:color .2s;}
+.dash-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:2rem;}
+.dash-stat-card{background:#121d18;border:1px solid rgba(53,94,59,.3);border-radius:1.1rem;padding:1.25rem 1rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.35rem;}
+.dash-stat-val{font-family:'Epilogue',sans-serif;font-size:2rem;font-weight:800;color:var(--gold2);line-height:1;}
+.dash-stat-lbl{font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(224,224,224,.45);}
+/* Section headers */
+.dash-section-hdr{display:flex;align-items:center;gap:.7rem;margin-bottom:1.25rem;}
+.dash-section-title{font-family:'Space Grotesk',sans-serif;font-size:.72rem;font-weight:700;color:var(--gold2);text-transform:uppercase;letter-spacing:.2em;}
+.dash-section-line{flex:1;height:1px;background:rgba(53,94,59,.3);}
+.dash-view-all{font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;color:#355E3B;letter-spacing:2px;text-transform:uppercase;background:none;border:none;cursor:pointer;transition:color .2s;margin-left:auto;}
 .dash-view-all:hover{color:#4ade80;}
-/* Matches table */
-.dash-matches-wrap{background:rgba(255,255,255,.02);border:1px solid #1f1f1f;border-radius:1.1rem;overflow:hidden;}
-.dash-matches-tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
-.dash-matches-tbl thead tr{background:rgba(0,0,0,.3);border-bottom:1px solid #1f1f1f;}
-.dash-matches-tbl th{font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#4a4a4a;padding:.85rem 1.1rem;text-align:left;white-space:nowrap;}
-.dash-matches-tbl td{padding:.95rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
-.dash-matches-tbl tbody tr:last-child td{border-bottom:none;}
-.dash-matches-tbl tbody tr:hover{background:rgba(53,94,59,.04);}
-.dash-match-id{font-family:'DM Mono',monospace;font-size:.68rem;color:#4a4a4a;white-space:nowrap;}
-.dash-match-players{color:#fff;font-weight:600;white-space:nowrap;font-size:.84rem;}
-.dash-match-score{font-family:'DM Mono',monospace;font-weight:700;color:var(--gold);text-align:right;white-space:nowrap;}
-.dash-match-status-v{display:flex;align-items:center;gap:5px;color:#355E3B;font-family:'Space Grotesk',sans-serif;font-size:.65rem;font-weight:700;}
-.dash-status-dot{width:5px;height:5px;border-radius:50%;background:#355E3B;animation:lbPulse 1.5s infinite;}
-/* Top 5 */
-.dash-top5-wrap{background:rgba(255,255,255,.02);border:1px solid #1f1f1f;border-radius:1.1rem;padding:1.1rem;display:flex;flex-direction:column;gap:.4rem;margin-bottom:.7rem;}
-.dash-p5-item{display:flex;align-items:center;gap:.75rem;padding:.65rem .75rem;border-radius:.75rem;transition:background .2s;cursor:pointer;}
-.dash-p5-item:hover{background:rgba(255,255,255,.04);}
-.dash-p5-item--gold{background:rgba(53,94,59,.1);border:1px solid rgba(53,94,59,.22);}
-.dash-p5-rank{font-family:'Epilogue',sans-serif;font-size:1.1rem;font-weight:800;font-style:italic;color:#3a3a3a;width:26px;flex-shrink:0;}
-.dash-p5-item--gold .dash-p5-rank{color:#f5c842;}
-.dash-p5-avatar{width:36px;height:36px;border-radius:.5rem;background:#1a1a1a;border:1px solid #252525;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:.72rem;font-weight:700;color:#3a3a3a;flex-shrink:0;}
-.dash-p5-item--gold .dash-p5-avatar{border-color:rgba(53,94,59,.35);background:rgba(53,94,59,.12);color:#4ade80;}
-.dash-p5-info{flex:1;min-width:0;}
-.dash-p5-name{font-weight:700;font-size:.82rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.dash-p5-rating{font-family:'Space Grotesk',sans-serif;font-size:.58rem;color:#444;letter-spacing:1px;text-transform:uppercase;margin-top:1px;}
-.dash-p5-wp{font-family:'Space Grotesk',sans-serif;font-size:.75rem;font-weight:700;color:#355E3B;flex-shrink:0;}
+/* Match cards */
+.dash-match-card{background:#121d18;border-radius:1rem;overflow:hidden;border-left:4px solid var(--gold2);border:1px solid rgba(255,255,255,.05);border-left:4px solid var(--gold2);margin-bottom:.85rem;}
+.dash-match-card-inner{padding:.9rem 1rem;}
+.dash-match-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;}
+.dash-match-card-badges{display:flex;gap:.35rem;align-items:center;}
+.dash-match-card-date{font-family:'Space Grotesk',sans-serif;font-size:.6rem;color:rgba(224,224,224,.4);}
+.dash-match-card-body{display:flex;justify-content:space-between;align-items:center;}
+.dash-match-players-col{display:flex;flex-direction:column;gap:.6rem;}
+.dash-match-player-row{display:flex;align-items:center;gap:.45rem;}
+.dash-match-vs{font-size:.65rem;color:rgba(224,224,224,.4);font-family:'Space Grotesk',sans-serif;padding-left:2px;}
+.dash-match-scores-col{display:flex;flex-direction:column;align-items:flex-end;gap:.6rem;}
+.dash-match-score-win{font-family:'Epilogue',sans-serif;font-size:1.3rem;font-weight:800;color:var(--gold2);line-height:1;}
+.dash-match-score-lose{font-family:'Epilogue',sans-serif;font-size:1.3rem;font-weight:800;color:rgba(224,224,224,.45);line-height:1;}
+/* Top 5 table */
+.dash-top5-wrap{background:#121d18;border-radius:1.1rem;border:1px solid rgba(53,94,59,.3);overflow:hidden;margin-bottom:.85rem;}
+.dash-top5-wrap table{width:100%;border-collapse:collapse;}
+.dash-top5-wrap thead tr{background:rgba(10,18,14,.5);border-bottom:1px solid rgba(53,94,59,.3);}
+.dash-top5-wrap th{padding:.85rem 1rem;font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:rgba(212,175,55,.6);}
+.dash-top5-wrap th:not(:first-child){text-align:right;}
+.dash-top5-wrap td{padding:.85rem 1rem;border-bottom:1px solid rgba(53,94,59,.15);vertical-align:middle;}
+.dash-top5-wrap tbody tr:last-child td{border-bottom:none;}
+.dash-top5-wrap tbody tr:hover{background:rgba(53,94,59,.06);cursor:pointer;}
+.dash-top5-wrap td:not(:first-child):not(:nth-child(2)){text-align:right;font-size:.78rem;font-weight:700;}
+.dash-top5-rank-1{color:var(--gold2);font-family:'Epilogue',sans-serif;font-size:1rem;font-weight:800;}
+.dash-top5-rank{color:rgba(224,224,224,.5);font-family:'Epilogue',sans-serif;font-size:1rem;font-weight:800;}
 .dash-leaderboard-btn{width:100%;background:rgba(53,94,59,.08);border:1px solid rgba(53,94,59,.18);border-radius:.75rem;color:#355E3B;font-family:'Space Grotesk',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:.8rem;cursor:pointer;transition:background .2s;}
 .dash-leaderboard-btn:hover{background:rgba(53,94,59,.18);}
 /* Footer */
@@ -792,92 +773,72 @@ textarea{resize:vertical;min-height:75px;}
 ══════════════════════════════════════════ -->
 <div id="view-dashboard" class="view act">
 
-  <!-- ── Hero Banner ── -->
-  <section class="dash-hero">
-    <div class="dash-hero-content">
-      <p class="dash-hero-label">🇵🇭 Live Ecosystem Dashboard</p>
-      <h1 class="dash-hero-title">Mastering the Filipino <span>Green Cloth.</span></h1>
-      <div class="dash-hero-btns">
-        <button class="btn btn-p" id="hero-cta" onclick="openAuth()">Join PinoyPool</button>
-        <button class="btn btn-o" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">View Rankings</button>
-        <button class="btn btn-g" onclick="sv('live',document.querySelectorAll('.nb')[2])">Watch Now</button>
-      </div>
-    </div>
-    <!-- Quick Feature Card — desktop only -->
-    <div class="dash-feature-card">
-      <div class="dash-feat-icon">✓</div>
-      <p class="dash-feat-label">Active Season</p>
-      <h3 class="dash-feat-title">PRO-9</h3>
-      <p class="dash-feat-sub">Regional Qualifiers: Manila Bay Invitational</p>
-      <button class="dash-feat-btn" onclick="sv('live',document.querySelectorAll('.nb')[2])">Watch Now →</button>
-    </div>
-  </section>
-
   <!-- ── Pending Area ── -->
   <div id="pend-area"></div>
+
+  <!-- ── Hero Section ── -->
+  <section class="dash-hero">
+    <div class="dash-hero-eyebrow">
+      <span>🇵🇭</span>
+      <span>The Official Home of Philippine Pool</span>
+    </div>
+    <h1 class="dash-hero-title">
+      <span class="t-white">WHERE LEGENDS</span>
+      <span class="t-gold">ARE DISCOVERED</span>
+    </h1>
+    <p class="dash-hero-sub">Verified matches. National rankings. Real talent, real recognition.</p>
+    <div class="dash-hero-btns">
+      <button class="btn btn-p" id="hero-cta" onclick="openAuth()">⚡ Join PinoyPool</button>
+      <button class="btn btn-o" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">View Rankings</button>
+      <button class="btn btn-g" onclick="sv('live',document.querySelectorAll('.nb')[2])">Watch Now</button>
+    </div>
+  </section>
 
   <!-- ── Stats Grid ── -->
   <div class="dash-stats-grid">
     <div class="dash-stat-card">
-      <p class="dash-stat-lbl">Registered Players</p>
-      <div class="dash-stat-row">
-        <span class="dash-stat-val" id="stat-players">0</span>
-        <span class="dash-stat-trend" id="stat-players-trend"></span>
-      </div>
-    </div>
-    <div class="dash-stat-card dash-stat-card--accent">
-      <p class="dash-stat-lbl">Verified Matches</p>
-      <div class="dash-stat-row">
-        <span class="dash-stat-val" id="stat-matches">0</span>
-        <span class="dash-stat-trend" id="stat-matches-trend"></span>
-      </div>
+      <span class="dash-stat-val" id="stat-players">0</span>
+      <span class="dash-stat-lbl">Registered Players</span>
     </div>
     <div class="dash-stat-card">
-      <p class="dash-stat-lbl">Billiard Halls</p>
-      <div class="dash-stat-row">
-        <span class="dash-stat-val" id="stat-halls">0</span>
-        <span class="dash-stat-stable">Stable</span>
-      </div>
+      <span class="dash-stat-val" id="stat-matches">0</span>
+      <span class="dash-stat-lbl">Verified Matches</span>
     </div>
     <div class="dash-stat-card">
-      <p class="dash-stat-lbl">Ball Formats</p>
-      <div class="dash-stat-row">
-        <span class="dash-stat-val">9/10</span>
-        <div class="dash-format-dots">
-          <div class="dash-dot dash-dot--gold"></div>
-          <div class="dash-dot dash-dot--blue"></div>
-        </div>
-      </div>
+      <span class="dash-stat-val" id="stat-halls">0</span>
+      <span class="dash-stat-lbl">Billiard Halls</span>
+    </div>
+    <div class="dash-stat-card">
+      <span class="dash-stat-val">9 / 10</span>
+      <span class="dash-stat-lbl">Ball Formats</span>
     </div>
   </div>
 
-  <!-- ── Main Content Grid ── -->
-  <div class="dash-grid">
-
-    <!-- Recent Verified Matches -->
-    <div>
-      <div class="dash-section-hdr">
-        <h2 class="dash-section-title"><span style="color:var(--gold);">🔥</span> Recent Verified Matches</h2>
-        <button class="dash-view-all" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">View All</button>
-      </div>
-      <div class="mlog" id="dash-log">
-        <div style="text-align:center;padding:1.5rem;color:var(--chalk2);font-size:.82rem;">No verified matches yet.</div>
-      </div>
-    </div>
-
-    <!-- Top 5 Overall -->
-    <div>
-      <div class="dash-section-hdr">
-        <h2 class="dash-section-title"><span style="color:var(--gold);">🏆</span> Overall Top 5</h2>
-      </div>
-      <table class="rt" id="dash-top5">
-        <thead><tr><th>#</th><th>Player</th><th style="text-align:center;">Total Matches</th><th style="text-align:center;">Win%</th></tr></thead>
-        <tbody><tr><td colspan="4" style="text-align:center;color:var(--chalk2);padding:1.2rem;font-size:.82rem;">No registered players yet.</td></tr></tbody>
-      </table>
-      <button class="dash-leaderboard-btn" onclick="sv('rankings',document.querySelectorAll('.nb')[3])" style="margin-top:.8rem;">View Full Leaderboard</button>
-    </div>
-
+  <!-- ── Recent Verified Matches ── -->
+  <div class="dash-section-hdr">
+    <span style="font-size:1.1rem;">🔥</span>
+    <h2 class="dash-section-title">Recent Verified Matches</h2>
+    <div class="dash-section-line"></div>
+    <button class="dash-view-all" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">View All</button>
   </div>
+  <div id="dash-log">
+    <div style="text-align:center;padding:1.5rem;color:var(--chalk2);font-size:.82rem;">No verified matches yet.</div>
+  </div>
+
+  <!-- ── Overall Top 5 ── -->
+  <div class="dash-section-hdr" style="margin-top:2rem;">
+    <span style="font-size:1.1rem;">🏆</span>
+    <h2 class="dash-section-title">Overall Top 5</h2>
+    <div class="dash-section-line"></div>
+  </div>
+  <div class="dash-top5-wrap">
+    <table id="dash-top5">
+      <thead><tr><th>#</th><th>Player</th><th>Total</th><th>Win%</th></tr></thead>
+      <tbody><tr><td colspan="4" style="text-align:center;color:var(--chalk2);padding:1.2rem;font-size:.82rem;">No registered players yet.</td></tr></tbody>
+    </table>
+  </div>
+  <button class="dash-leaderboard-btn" onclick="sv('rankings',document.querySelectorAll('.nb')[3])" style="margin-top:.5rem;">View Full Leaderboard</button>
+
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -1540,24 +1501,38 @@ function buildDashboard(){
     } else {
       lc.innerHTML=recent.map(m=>{
         const fmtBadge=m.fmt==='9-Ball'
-          ?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${m.fmt}</span>`
-          :`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${m.fmt}</span>`;
+          ?`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
+          :`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">10-Ball</span>`;
+        const typeBadge=m.type?`<span style="padding:2px 8px;background:rgba(53,94,59,.4);border:1px solid rgba(53,94,59,.3);color:var(--gold2);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.type}</span>`:'';
         const sc=m.sc||'';
-        const parts=sc.split(/[-–]/).map(x=>parseInt(x.trim()));
-        const isWin=parts.length===2&&parts[0]>parts[1];
+        const scParts=sc.split(/[-–]/).map(x=>parseInt(x.trim()));
+        const s1=isNaN(scParts[0])?'—':scParts[0];
+        const s2=isNaN(scParts[1])?'—':scParts[1];
+        const isWin=scParts.length===2&&scParts[0]>scParts[1];
         const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)?.status||'');
         const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
-        const r1=Array.isArray(m.hcpRack)?(m.hcpRack[0]||0):0;
-        const r2=Array.isArray(m.hcpRack)?(m.hcpRack[1]||0):0;
-        const b1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
-        const b2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
-        const h1=fmtHcpTag(r1,b1); const h2=fmtHcpTag(r2,b2);
-        const p1l=`${fmtPlayerName(m.p1)}${t1?` <span class="tier-inline">${t1}</span>`:''}${h1?` <span class="hcp-tag">${h1}</span>`:''}`;
-        const p2l=`${fmtPlayerName(m.p2)}${t2?` <span class="tier-inline">${t2}</span>`:''}${h2?` <span class="hcp-tag">${h2}</span>`:''}`;
-        const scParts=sc.split(/[-–]/).map(x=>parseInt(x.trim()));
-        const s1=isNaN(scParts[0])?'':scParts[0]; const s2=isNaN(scParts[1])?'':scParts[1];
-        const scColor=`font-family:'DM Mono',monospace;font-weight:700;font-size:1.05rem;`;
-        return `<div class="le ${isWin?'lw':'ll'}" style="flex-direction:column;align-items:stretch;gap:0;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.45rem;"><div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${fmtBadge}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}</div><div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.ts||m.date)}</div></div><div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:.84rem;font-weight:600;line-height:1.5;">${p1l}</div><span style="${scColor}color:${isWin?'var(--gold)':'var(--chalk2)'};">${s1}</span></div><div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div><div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:.84rem;font-weight:600;line-height:1.5;">${p2l}</div><span style="${scColor}color:${!isWin?'var(--gold)':'var(--chalk2)'};">${s2}</span></div></div>`;
+        const tier1=t1?careerTier(0,0,t1):null;
+        const tier2=t2?careerTier(0,0,t2):null;
+        const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:'';
+        const tb2=tier2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier2.bg};color:${tier2.color};border:1px solid ${tier2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier2.label}</span>`:'';
+        return `<div class="dash-match-card"><div class="dash-match-card-inner">
+          <div class="dash-match-card-head">
+            <div class="dash-match-card-badges">${fmtBadge}${typeBadge}</div>
+            <span class="dash-match-card-date">${fmtDate(m.ts||m.date)}</span>
+          </div>
+          <div class="dash-match-card-body">
+            <div class="dash-match-players-col">
+              <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:700;color:#fff;">${fmtPlayerName(m.p1)}</span>${tb1}</div>
+              <div class="dash-match-vs">vs</div>
+              <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:700;color:rgba(224,224,224,.75);">${fmtPlayerName(m.p2)}</span>${tb2}</div>
+            </div>
+            <div class="dash-match-scores-col">
+              <span class="${isWin?'dash-match-score-win':'dash-match-score-lose'}">${s1}</span>
+              <span style="font-size:.6rem;color:transparent;user-select:none;">vs</span>
+              <span class="${!isWin?'dash-match-score-win':'dash-match-score-lose'}">${s2}</span>
+            </div>
+          </div>
+        </div></div>`;
       }).join('');
     }
   }
@@ -1573,7 +1548,13 @@ function buildDashboard(){
         const total=p.mw+p.ml;
         const wp=total?Math.round(p.mw/total*100):0;
         const tier=careerTier(p.mw,p.ml,p.status||p.careerStatus);
-        return `<tr style="cursor:pointer" onclick="sv('rankings',document.querySelectorAll('.nb')[3])"><td class="rn${i<3?' top':''}">${i+1}</td><td><div class="pp">${fmtPlayerName(p.name)} ${tierBadge(tier)}</div></td><td style="text-align:center;">${total}</td><td style="text-align:center;">${wp}%</td></tr>`;
+        const tb=`<span style="font-size:.6rem;padding:1px 5px;border-radius:3px;background:${tier.bg};color:${tier.color};border:1px solid ${tier.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;display:inline-block;width:fit-content;margin-top:2px;">${tier.label}</span>`;
+        return `<tr style="cursor:pointer" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">
+          <td><span class="${i===0?'dash-top5-rank-1':'dash-top5-rank'}">${i+1}</span></td>
+          <td><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:.78rem;font-weight:700;">${fmtPlayerName(p.name)}</span>${tb}</div></td>
+          <td>${total}</td>
+          <td>${wp}%</td>
+        </tr>`;
       }).join('');
     }
   }
