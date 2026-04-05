@@ -3111,8 +3111,9 @@ function filterPprTable(val){
   if(cards.length){
     cards.forEach(c=>{
       const tierMatch=!app._pprTierFilter||(c.dataset.tier===app._pprTierFilter);
+      const regionMatch=!app.pprRegion||(c.dataset.region===app.pprRegion.toLowerCase());
       const nameMatch=!q||c.dataset.name.includes(q);
-      c.style.display=(tierMatch&&nameMatch)?'':'none';
+      c.style.display=(tierMatch&&regionMatch&&nameMatch)?'flex':'none';
     });
     return;
   }
