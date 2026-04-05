@@ -738,6 +738,7 @@ textarea{resize:vertical;min-height:75px;}
     <img src="pinoypool-logo.png" alt="PinoyPool" style="height:62px;width:auto;object-fit:cover;object-position:center;display:block;margin:-1px 0;">
   </a>
   <nav id="main-nav">
+    <button class="nb" id="nb-player-portal" onclick="sv('player-portal',this)" style="display:none">My Portal</button>
     <button class="nb act" id="nb-dashboard" onclick="sv('dashboard',this)">Dashboard</button>
     <button class="nb" id="nb-matches" onclick="sv('matches',this)">Matches</button>
     <button class="nb" id="nb-match" onclick="sv('match',this)" style="display:none">Record Match</button>
@@ -751,7 +752,6 @@ textarea{resize:vertical;min-height:75px;}
       <button class="ham-rank-sub-item" id="ham-rank-advanced" onclick="svRank('advanced')" style="display:none">Advanced</button>
     </div>
     <button class="nb" id="nb-halls" onclick="sv('halls',this)">Find Halls</button>
-    <button class="nb" id="nb-player-portal" onclick="sv('player-portal',this)" style="display:none">My Portal</button>
     <button class="nb" id="nb-portal" onclick="sv('portal',this)" style="display:none">Hall Portal</button>
     <button class="nb" id="nb-admin" onclick="sv('admin',this)" style="display:none!important;color:#e55;border-color:rgba(184,50,40,.3);">Admin</button>
   </nav>
@@ -764,7 +764,7 @@ textarea{resize:vertical;min-height:75px;}
             <div class="av-dd-name" id="av-dd-name">—</div>
             <div class="av-dd-role" id="av-dd-role"></div>
           </div>
-          <button class="av-dd-item" onclick="toggleAvDropdown();sv('player-portal',null);setTimeout(()=>{const _b=document.querySelector('.pp-tab:last-child');if(_b)ppTab(_b,'profile');},300)" id="av-dd-player-profile" style="display:none;">Player Profile</button>
+          <button class="av-dd-item" onclick="toggleAvDropdown();sv('player-portal',null);setTimeout(()=>{const _b=document.getElementById('pp-tab-profile');if(_b)ppTab(_b,'profile');},300)" id="av-dd-player-profile" style="display:none;">Player Profile</button>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('portal',null);setTimeout(()=>ptab('profile'),300)" id="av-dd-hall-profile" style="display:none;">Hall Profile</button>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('admin',null)" id="av-dd-admin" style="display:none;">Admin</button>
           <button class="av-dd-item logout" onclick="toggleAvDropdown();logout()">Logout</button>
@@ -1294,7 +1294,7 @@ textarea{resize:vertical;min-height:75px;}
   <div class="pp-tabs">
     <button class="pp-tab act" onclick="ppTab(this,'validation')">⚡ Match Validation</button>
     <button class="pp-tab" onclick="ppTab(this,'history')">📋 Match History</button>
-    <button class="pp-tab" onclick="ppTab(this,'profile')">👤 Player Profile</button>
+    <button class="pp-tab" id="pp-tab-profile" onclick="ppTab(this,'profile')" style="display:none;">👤 Player Profile</button>
   </div>
   <div id="pp-hdr" class="pp-hdr" style="display:none;">
     <div>
@@ -5332,7 +5332,7 @@ function ppTab(btn,tab){
     );
     // ── Section C: Score edit proposed by opponent — I (p1) need to respond ──
     const _editProposed=adminMatches.filter(m=>m.p1===_myName&&m.editPending);
-    // ── Section D: Owner-recorded matches not yet validated (live until owner validates) ──
+    // ── Section D: Owner-recorded matches not yet validated ──
     const _ownerRecorded=adminMatches.filter(m=>
       (m.status==='owner-recorded'||m.status==='owner-pending')&&(m.p1===_myName||m.p2===_myName)
     );
@@ -5341,138 +5341,115 @@ function ppTab(btn,tab){
       (m.status==='pending-admin'||m.status==='pending')&&(m.p1===_myName||m.p2===_myName)
     );
 
-    const _scSt=`font-family:'DM Mono',monospace;font-weight:700;font-size:1rem;`;
-    const _fmtB=f=>f==='9-Ball'
-      ?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`
-      :`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
-    const _pendCard=(m,isMyP1,statusBadge,actionHtml,extraTop='')=>{
-      const _sc=(m.score||m.sc||'0-0').split(/[-–]/).map(x=>x.trim());
-      const _myS=isMyP1?(_sc[0]||''):(_sc[1]||''); const _opS=isMyP1?(_sc[1]||''):(_sc[0]||'');
-      const _myN=isMyP1?m.p1:m.p2; const _opN=isMyP1?m.p2:m.p1;
-      const _myT=m[isMyP1?'p1CareerStatus':'p2CareerStatus']||(PLAYERS.find(p=>p.name===_myN)||{}).status||'';
-      const _opT=m[isMyP1?'p2CareerStatus':'p1CareerStatus']||(PLAYERS.find(p=>p.name===_opN)||{}).status||'';
-      const _mr=Array.isArray(m.hcpRack)?(m.hcpRack[isMyP1?0:1]||0):0;
-      const _or=Array.isArray(m.hcpRack)?(m.hcpRack[isMyP1?1:0]||0):0;
-      const _mb=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[isMyP1?0:1])?m.hcpBalls[isMyP1?0:1]:[];
-      const _ob=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[isMyP1?1:0])?m.hcpBalls[isMyP1?1:0]:[];
-      const _mh=fmtHcpTag(_mr,_mb); const _oh=fmtHcpTag(_or,_ob);
-      const _myL=`${fmtPlayerName(_myN)}${_myT?` <span class="tier-inline">${_myT}</span>`:''}${_mh?` <span class="hcp-tag">${_mh}</span>`:''}`;
-      const _opL=`${fmtPlayerName(_opN)}${_opT?` <span class="tier-inline">${_opT}</span>`:''}${_oh?` <span class="hcp-tag">${_oh}</span>`:''}`;
-      return `<div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;margin-bottom:.8rem;overflow:hidden;">
-        <div style="padding:clamp(7px,2.5vw,11px);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
-            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_fmtB(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}${statusBadge?` ${statusBadge}`:''}</div>
-            <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
-          </div>
-          ${extraTop}
+    // ── Card helpers — mirror owner validation design ──
+    const _ppBadge=`<svg width="18" height="18" viewBox="0 0 24 24" fill="#D4AF37" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.47 1.89-3.2 3.61-.82-.34-3.69L23 12zm-12.91 4.72L6.43 13.06l1.42-1.42 2.24 2.24 4.94-4.94 1.42 1.41-6.36 6.37z"/></svg>`;
+    const _ppBadgeEmpty=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;opacity:0;"><path d="M1 1"/></svg>`;
+    const _ppHcp=(rack,balls)=>{let s='';if(rack>0)s+=`(+${rack})`;if(balls&&balls.length>0)s+=`(${[...balls].sort((a,b)=>a-b).join(',')})`;return s?`<span style="font-size:.68rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;letter-spacing:0;">${s}</span>`:''};
+    const _ppName=(name)=>{const p=name.trim().split(' ');return p.length===1?`<span style="text-transform:uppercase;letter-spacing:.5px;">${p[0]}</span>`:`${p[0]}<br><span style="text-transform:uppercase;letter-spacing:.5px;">${p.slice(1).join(' ')}</span>`};
+    const _ppTier=(status)=>{if(!status)return '';const t=careerTier(0,0,status);return `<span style="font-size:.55rem;font-weight:800;padding:1px 6px;border-radius:3px;background:${t.bg};color:${t.color};border:1px solid ${t.border};font-family:'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:.5px;">${t.label}</span>`};
+    const _ppFmt=(fmt)=>fmt==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt||'9-Ball'}</span>`;
+    const _ppType=(type)=>type?`<span class="tag tgd">${type}</span>`:'';
+    const _ppCard=(m,p1ok,p2ok,actionHtml,extraInfo='')=>{
+      const sc=(m.score||m.sc||'0-0').split(/[-–]/).map(x=>x.trim());
+      const s1=sc[0]||'0'; const s2=sc[1]||'0';
+      const win1=parseInt(s1)>parseInt(s2);
+      const r1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0;
+      const r2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
+      const b1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
+      const b2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
+      const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
+      const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+      return `<div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;overflow:hidden;margin-bottom:1rem;box-shadow:0 4px 16px rgba(0,0,0,.35);">
+        <div style="background:rgba(0,0,0,.25);padding:.6rem 1rem;border-bottom:1px solid #2e3732;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_myL}</div>
-            <span style="${_scSt}color:var(--chalk);">${_myS}</span>
+            <div style="display:flex;gap:.4rem;align-items:center;">${_ppFmt(m.fmt||'9-Ball')}${_ppType(m.type)}</div>
+            <span style="font-size:.6rem;color:#d0c5af;">${fmtDate(m.date||m.ts)}</span>
           </div>
-          <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_opL}</div>
-            <span style="${_scSt}color:var(--chalk);">${_opS}</span>
-          </div>
-          <div style="font-size:.65rem;color:var(--chalk2);margin-top:.35rem;">📍 ${m.venue||'—'}</div>
+          ${extraInfo}
         </div>
-        ${actionHtml?`<div style="padding:.4rem clamp(7px,2.5vw,11px) .75rem;border-top:1px solid rgba(255,255,255,.05);">${actionHtml}</div>`:''}
+        <div style="padding:.9rem 1rem 1rem;">
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.6rem;margin-bottom:.9rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="font-family:'Epilogue',sans-serif;font-weight:800;font-size:.82rem;line-height:1.25;color:#fff;">${_ppName(m.p1)}</div>
+                <div style="margin-top:.15rem;display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;">${_ppTier(t1)}${_ppHcp(r1,b1)}</div>
+              </div>
+              <div style="margin-left:.4rem;">${p1ok?_ppBadge:_ppBadgeEmpty}</div>
+            </div>
+            <div style="text-align:center;min-width:52px;">
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;line-height:1;color:${win1?'#D4AF37':'rgba(255,255,255,.35)'};">${s1}</div>
+              <div style="font-size:.55rem;color:#5a6e60;letter-spacing:1px;font-family:'Space Grotesk',sans-serif;margin:1px 0;">VS</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;line-height:1;color:${!win1?'#D4AF37':'rgba(255,255,255,.35)'};">${s2}</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-direction:row-reverse;">
+              <div style="text-align:right;">
+                <div style="font-family:'Epilogue',sans-serif;font-weight:800;font-size:.82rem;line-height:1.25;color:#fff;">${_ppName(m.p2)}</div>
+                <div style="margin-top:.15rem;display:flex;align-items:center;justify-content:flex-end;gap:.3rem;flex-wrap:wrap;">${_ppHcp(r2,b2)}${_ppTier(t2)}</div>
+              </div>
+              <div style="margin-right:.4rem;">${p2ok?_ppBadge:_ppBadgeEmpty}</div>
+            </div>
+          </div>
+          <div style="font-size:.65rem;color:#7a8e80;text-align:center;">📍 ${m.venue||'—'}</div>
+        </div>
+        ${actionHtml?`<div style="padding:.75rem 1rem 1rem;border-top:1px solid #2e3732;">${actionHtml}</div>`:''}
       </div>`;
     };
 
     c.innerHTML=`
     ${_editProposed.length?`
-    <div class="card" style="margin-bottom:1rem;border:1px solid rgba(229,85,85,.3);">
-      <div class="ct" style="color:#e55;">⚠️ Score Edit Proposed
-        <span style="background:#e55;color:#fff;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${_editProposed.length}</span>
-      </div>
-      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">Your opponent proposed a different score. Review and accept or reject.</p>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:#e55;margin-bottom:.6rem;">⚠️ Score Disputed <span style="background:rgba(229,85,85,.15);border:1px solid rgba(229,85,85,.4);color:#e55;border-radius:10px;padding:1px 8px;font-size:.6rem;margin-left:4px;">${_editProposed.length}</span></div>
       ${_editProposed.map(m=>{
-        const statusBadge=`<span style="padding:2px 8px;border-radius:6px;font-size:.63rem;background:rgba(229,85,85,.1);border:1px solid #e55;color:#e55;white-space:nowrap;">Score Disputed</span>`;
-        const extraTop=`<div style="background:rgba(200,168,75,.07);border:1px solid rgba(200,168,75,.2);border-radius:7px;padding:.55rem .75rem;margin-bottom:.45rem;font-size:.78rem;">
-          <span style="color:var(--chalk2);">Proposed by ${m.p2.split(' ')[0]}:</span> <strong style="color:var(--gold);font-family:'DM Mono',monospace;">${m.proposedScore}</strong>
+        const extraInfo=`<div style="margin-top:.4rem;background:rgba(200,168,75,.07);border:1px solid rgba(200,168,75,.2);border-radius:6px;padding:.4rem .7rem;font-size:.72rem;">
+          <span style="color:#d0c5af;">Proposed by ${m.p2.split(' ')[0]}:</span> <strong style="color:#D4AF37;font-family:'DM Mono',monospace;">${m.proposedScore}</strong>
         </div>`;
         const actionHtml=`<div style="display:flex;gap:.5rem;flex-wrap:wrap;">
           <button class="btn btn-d btn-sm" style="flex:1;" onclick="initiatorRejectEdit('${m.id}')">↩️ Keep Original</button>
           <button class="btn btn-s btn-sm" style="flex:1;" onclick="initiatorAcceptEdit('${m.id}')">✓ Accept ${m.proposedScore}</button>
         </div>`;
-        return _pendCard(m,true,statusBadge,actionHtml,extraTop);
-      }).join('')}
-    </div>`:''}
+        return _ppCard(m,true,false,actionHtml,extraInfo);
+      }).join('')}`:''}
 
     ${_needMyResponse.length?`
-    <div class="card" style="margin-bottom:1rem;border:1px solid rgba(31,140,78,.2);">
-      <div class="ct">⚡ Confirm Match Results
-        <span style="background:#e55;color:#fff;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${_needMyResponse.length}</span>
-      </div>
-      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">These matches were submitted with you as the opponent. Approve, propose a different score, or reject.</p>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gold);margin-bottom:.6rem;">⚡ Confirm Match Results <span style="background:rgba(229,85,85,.15);border:1px solid rgba(229,85,85,.4);color:#e55;border-radius:10px;padding:1px 8px;font-size:.6rem;margin-left:4px;">${_needMyResponse.length}</span></div>
       ${_needMyResponse.map(m=>{
-        const isP1=(m.p1===_myName);
-        const statusBadge=`<span style="padding:2px 8px;border-radius:6px;font-size:.63rem;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.35);color:var(--gold);white-space:nowrap;">Awaiting You</span>`;
         const actionHtml=`<div style="display:flex;gap:.5rem;flex-wrap:wrap;">
           <button class="btn btn-d btn-sm" style="flex:1;min-width:80px;" onclick="opponentRejectMatch('${m.id}')">✗ Reject</button>
           <button class="btn btn-sm" style="flex:1;min-width:80px;background:rgba(200,168,75,.1);border-color:rgba(200,168,75,.3);color:var(--gold);" onclick="opponentEditScore('${m.id}')">✏️ Edit Score</button>
           <button class="btn btn-s btn-sm" style="flex:1;min-width:80px;" onclick="opponentApproveMatch('${m.id}')">✓ Approve</button>
         </div>
         <div id="opp-edit-${m.id}"></div>`;
-        return _pendCard(m,isP1,statusBadge,actionHtml);
-      }).join('')}
-    </div>`:''}
+        return _ppCard(m,true,false,actionHtml);
+      }).join('')}`:''}
 
     ${_mySubmitted.length?`
-    <div class="card" style="margin-bottom:1rem;">
-      <div class="ct">📨 Matches You Submitted
-        <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;color:var(--chalk);">${_mySubmitted.length}</span>
-      </div>
-      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">Awaiting opponent and/or venue confirmation. Rankings update once all parties confirm and Admin approves.</p>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gold);margin-bottom:.6rem;">📨 Submitted by You</div>
       ${_mySubmitted.map(m=>{
         const oppDone=!!m.p2ok; const venueDone=!!m.venueOk;
-        const statusBadge=`<span style="padding:2px 8px;border-radius:6px;font-size:.63rem;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.35);color:#f5a623;white-space:nowrap;">⏳ Pending</span>`;
-        const actionHtml=`<div style="display:flex;gap:6px;flex-wrap:wrap;font-size:.7rem;">
-          <span style="padding:2px 8px;border-radius:6px;border:1px solid var(--grn3);color:var(--grn3);">✓ You Submitted</span>
-          <span style="padding:2px 8px;border-radius:6px;border:1px solid ${oppDone?'var(--grn3)':'rgba(245,166,35,.4)'};color:${oppDone?'var(--grn3)':'#f5a623'};">${oppDone?'✓ Opponent Confirmed':'⏳ Awaiting Opponent'}</span>
-          <span style="padding:2px 8px;border-radius:6px;border:1px solid ${venueDone?'var(--grn3)':'rgba(245,166,35,.4)'};color:${venueDone?'var(--grn3)':'#f5a623'};">${venueDone?'✓ Venue Confirmed':'⏳ Awaiting Venue'}</span>
+        const actionHtml=`<div style="display:flex;gap:6px;flex-wrap:wrap;font-size:.68rem;">
+          <span style="padding:2px 8px;border-radius:6px;border:1px solid #2e7d46;color:var(--grn3);background:rgba(31,140,78,.1);">✓ You Submitted</span>
+          <span style="padding:2px 8px;border-radius:6px;background:${oppDone?'rgba(31,140,78,.1)':'rgba(200,168,75,.06)'};border:1px solid ${oppDone?'#2e7d46':'rgba(200,168,75,.25)'};color:${oppDone?'var(--grn3)':'#c9a84c'};">${oppDone?'✓ Opponent Confirmed':'Awaiting Opponent'}</span>
+          <span style="padding:2px 8px;border-radius:6px;background:${venueDone?'rgba(31,140,78,.1)':'rgba(200,168,75,.06)'};border:1px solid ${venueDone?'#2e7d46':'rgba(200,168,75,.25)'};color:${venueDone?'var(--grn3)':'#c9a84c'};">${venueDone?'✓ Venue Confirmed':'Awaiting Venue'}</span>
         </div>`;
-        return _pendCard(m,true,statusBadge,actionHtml);
-      }).join('')}
-    </div>`:''}
+        return _ppCard(m,true,oppDone,actionHtml);
+      }).join('')}`:''}
 
     ${_ownerRecorded.length?`
-    <div class="card" style="margin-bottom:1rem;">
-      <div class="ct">🏢 Owner-Recorded — Pending Validation
-        <span style="background:#e55;color:#fff;border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${_ownerRecorded.length}</span>
-      </div>
-      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">Recorded by your Hall Owner. You can confirm the result now, or wait — once the owner validates the match you will receive a notification.</p>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:#4a9eff;margin-bottom:.6rem;">🏢 Owner Recorded <span style="background:rgba(229,85,85,.15);border:1px solid rgba(229,85,85,.4);color:#e55;border-radius:10px;padding:1px 8px;font-size:.6rem;margin-left:4px;">${_ownerRecorded.length}</span></div>
       ${_ownerRecorded.map(m=>{
         const isP1=m.p1===_myName;
-        const opp=isP1?m.p2:m.p1;
         const myOk=isP1?!!m.p1ok:!!m.p2ok;
-        const oppOk=isP1?!!m.p2ok:!!m.p1ok;
-        const statusBadge=`<span style="padding:2px 8px;border-radius:6px;font-size:.63rem;background:rgba(52,130,219,.1);border:1px solid rgba(52,130,219,.35);color:#4a9eff;white-space:nowrap;">🏢 Owner Recorded</span>`;
-        const actionHtml=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.7rem;">
-          <span style="padding:2px 8px;border-radius:6px;border:1px solid ${myOk?'var(--grn3)':'var(--border)'};color:${myOk?'var(--grn3)':'var(--chalk2)'};">${myOk?'✓ You Confirmed':'— Not Confirmed'}</span>
-          <span style="padding:2px 8px;border-radius:6px;border:1px solid ${oppOk?'var(--grn3)':'var(--border)'};color:${oppOk?'var(--grn3)':'var(--chalk2)'};">${oppOk?`✓ ${opp.split(' ')[0]} Confirmed`:`⏳ ${opp.split(' ')[0]} Waiting`}</span>
-          ${!myOk?`<button class="btn btn-s btn-sm" style="margin-left:auto;" onclick="playerConfirmOwnerMatch('${m.id}')">✓ Confirm</button>`:''}
+        const actionHtml=`<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+          ${!myOk?`<button class="btn btn-s btn-sm" onclick="playerConfirmOwnerMatch('${m.id}')">✓ Confirm Result</button>`:'<span style="font-size:.7rem;color:var(--grn3);">✓ You Confirmed</span>'}
         </div>`;
-        return _pendCard(m,isP1,statusBadge,actionHtml);
-      }).join('')}
-    </div>`:''}
+        return _ppCard(m,!!m.p1ok,!!m.p2ok,actionHtml);
+      }).join('')}`:''}
 
     ${_awaitAdmin.length?`
-    <div class="card" style="margin-bottom:1rem;border:1px solid rgba(200,168,75,.15);">
-      <div class="ct">⏳ Awaiting Admin Approval
-        <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;color:#f5a623;">${_awaitAdmin.length}</span>
-      </div>
-      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1rem;">All parties confirmed. Rankings will update once Admin gives final approval.</p>
-      ${_awaitAdmin.map(m=>{
-        const isP1=m.p1===_myName;
-        const statusBadge=`<span style="padding:2px 8px;border-radius:6px;font-size:.63rem;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:var(--gold);white-space:nowrap;">⏳ Awaiting Admin</span>`;
-        return _pendCard(m,isP1,statusBadge,'');
-      }).join('')}
-    </div>`:''}
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:#c9a84c;margin-bottom:.6rem;">⏳ Awaiting Admin Approval</div>
+      ${_awaitAdmin.map(m=>_ppCard(m,true,true,'')).join('')}`:''}
 
     ${!_editProposed.length&&!_needMyResponse.length&&!_mySubmitted.length&&!_ownerRecorded.length&&!_awaitAdmin.length?`
-    <div class="card"><div style="text-align:center;padding:2rem;color:var(--chalk2);font-size:.82rem;">🎉 No pending validations</div></div>`:''}
+    <div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;padding:2rem;text-align:center;color:#d0c5af;font-size:.82rem;">🎉 No pending validations — all clear ✓</div>`:''}
     `;
 
   } else if(tab==='history'){
