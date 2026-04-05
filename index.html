@@ -3203,6 +3203,7 @@ function submitFinalScore(){
       p1accept:false,p2accept:false,
       venue:_mpVenueEntry?.name||app.user?.hall||'—'
     });
+    saveManualPending();
     // ── Immediately visible to Admin as 'owner-pending' — admin can approve at any time ──
     adminMatches.push({
       id:_mpId,
@@ -5853,8 +5854,9 @@ const pendVal=[]; // Populated as players submit matches for hall validation
 // Verified match history — populated as hall owners verify matches
 const hallHistory=[];
 
-// Manual entry pending player acceptance
-const manualPending=[];
+// Manual entry pending player acceptance — persisted to localStorage so owner-recorded matches survive page refresh
+const manualPending=(()=>{try{return JSON.parse(localStorage.getItem('pp_manualPending')||'[]');}catch{return [];}})();
+function saveManualPending(){const v=JSON.stringify(manualPending);try{localStorage.setItem('pp_manualPending',v);}catch{}apiPersist('pp_manualPending',v);}
 
 function buildPortal(){
   const u=app.user;
@@ -6034,26 +6036,18 @@ function ptab(tab){
         ?`<div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;padding:2rem;text-align:center;color:#d0c5af;font-size:.82rem;">No pending actions — all clear ✓</div>`
         :`${_ownedPending.map(m=>{
             const idx=manualPending.indexOf(m);
-            const statusRow=`<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem;">
-              <span style="font-size:.6rem;padding:2px 7px;border-radius:4px;background:${m.p1accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.08)'};border:1px solid ${m.p1accept?'rgba(31,140,78,.5)':'rgba(200,168,75,.2)'};color:${m.p1accept?'var(--grn3)':'#d0c5af'};">${m.p1accept?'✓ ':''} ${(m.p1||'').split(' ')[0]}</span>
-              <span style="font-size:.6rem;padding:2px 7px;border-radius:4px;background:${m.p2accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.08)'};border:1px solid ${m.p2accept?'rgba(31,140,78,.5)':'rgba(200,168,75,.2)'};color:${m.p2accept?'var(--grn3)':'#d0c5af'};">${m.p2accept?'✓ ':''} ${(m.p2||'').split(' ')[0]}</span>
-            </div>`;
             return _mvCard(m,
               `ownerValidateMatch('${m.id}')`,
               `cancelOwnerMatch('${m.id}')`,
-              statusRow, !!m.p1accept, !!m.p2accept);
+              '', !!m.p1accept, !!m.p2accept);
           }).join('')}
           ${_playerSetMatches.map(m=>{
             const oppConfirmed=!!m.p2ok;
-            const statusRow=`<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem;">
-              <span style="font-size:.6rem;padding:2px 7px;border-radius:4px;background:rgba(31,140,78,.2);border:1px solid rgba(31,140,78,.5);color:var(--grn3);">✓ ${(m.p1||'').split(' ')[0]} Submitted</span>
-              <span style="font-size:.6rem;padding:2px 7px;border-radius:4px;background:${oppConfirmed?'rgba(31,140,78,.2)':'rgba(200,168,75,.08)'};border:1px solid ${oppConfirmed?'rgba(31,140,78,.5)':'rgba(200,168,75,.2)'};color:${oppConfirmed?'var(--grn3)':'#d0c5af'};">${oppConfirmed?'✓ ':''} ${(m.p2||'').split(' ')[0]} ${oppConfirmed?'Confirmed':'Pending'}</span>
-            </div>`;
             // p1 always submitted (they created it); p2ok = opponent confirmed
             return _mvCard(m,
               `ownerApproveVenueMatch('${m.id}')`,
               `ownerRejectPlayerMatch('${m.id}')`,
-              statusRow, true, oppConfirmed);
+              '', true, oppConfirmed);
           }).join('')}`
       }
       ${_venueSpotlight}
@@ -6387,6 +6381,7 @@ function submitManualMatch(){
     venue:adminHalls.find(h=>h.owner===app.user?.name||h.username===app.user?.username)?.name||app.user?.hall||'—'
   };
   manualPending.push(entry);
+  saveManualPending();
   renderManualPending();
 
   // Reset form fields
@@ -6446,10 +6441,12 @@ function simAccept(i,p){
   else manualPending[i].p2accept=true;
   if(manualPending[i].p1accept&&manualPending[i].p2accept){
     const m=manualPending.splice(i,1)[0];
+    saveManualPending();
     hallHistory.unshift({...m,date:new Date().toISOString().slice(0,10),ts:'Just now'});
     buildDashboard();
     toast(`✅ Both players accepted! Match recorded and rankings updated.`);
   } else {
+    saveManualPending();
     toast(`✅ ${p===1?manualPending[i]?.p1:manualPending[i]?.p2} accepted. Waiting for other player…`);
   }
   ptab('matches');
@@ -6492,11 +6489,13 @@ function ownerConfirm(i,p){
         status:'pending', submittedAt:new Date().toISOString(), p1ok:true, p2ok:true, venueOk:true
       });
     }
+    saveManualPending();
     saveAdminMatches();
     toast(`⏳ Both players confirmed! Match is awaiting <strong>Admin verification</strong> before rankings are updated.`);
   } else {
     const confirmed=p===1?m.p1:m.p2;
     const waiting =p===1?m.p2:m.p1;
+    saveManualPending();
     saveAdminMatches(); // save partial p1ok/p2ok flag
     toast(`✅ ${confirmed.split(' ')[0]} confirmed. Waiting for ${waiting.split(' ')[0]}…`);
   }
@@ -6507,6 +6506,7 @@ function ownerConfirm(i,p){
 function cancelOwnerMatch(id){
   const idx=manualPending.findIndex(m=>m.id===id);
   if(idx>=0) manualPending.splice(idx,1);
+  saveManualPending();
   const amIdx=adminMatches.findIndex(m=>m.id===id);
   if(amIdx>=0) adminMatches.splice(amIdx,1);
   saveAdminMatches();
@@ -6520,6 +6520,7 @@ function ownerValidateMatch(id){
   // Remove from manualPending
   const mpIdx=manualPending.findIndex(m=>m.id===id);
   if(mpIdx>=0) manualPending.splice(mpIdx,1);
+  saveManualPending();
   // Update adminMatches entry
   const m=adminMatches.find(x=>x.id===id);
   if(!m) return;
