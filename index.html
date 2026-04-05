@@ -1750,15 +1750,14 @@ function odTab(tab, btn){
     <div class="card">
       <div class="ct">📋 Match History — Your Venue</div>
       <div style="display:flex;gap:6px;margin-bottom:1.3rem;flex-wrap:wrap;">
-        <button class="tb act" style="flex:none;min-width:80px;" onclick="filterHistoryOD(this,'all')">All</button>
-        <button class="tb" style="flex:none;min-width:80px;" onclick="filterHistoryOD(this,'day')">Today</button>
+        <button class="tb act" style="flex:none;min-width:80px;" onclick="filterHistoryOD(this,'day')">Today</button>
         <button class="tb" style="flex:none;min-width:100px;" onclick="filterHistoryOD(this,'month')">This Month</button>
-        <button class="tb" style="flex:none;min-width:80px;" onclick="filterHistoryOD(this,'year')">This Year</button>
+        <button class="tb" style="flex:none;min-width:80px;" onclick="filterHistoryOD(this,'all')">All</button>
       </div>
       <div id="od-history-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1.2rem;"></div>
       <div id="od-history-cards"></div>
     </div>`;
-    filterHistoryOD(null,'all');
+    filterHistoryOD(null,'day');
 
   } else if(tab==='tournaments'){
     const _ownerHall=typeof adminHalls!=='undefined'?adminHalls.find(h=>h.email===u?.email||h.username===u?.username||h.owner===u?.name):null;
@@ -6039,15 +6038,14 @@ function ptab(tab){
     <div class="card">
       <div class="ct">📋 Match History — Your Venue</div>
       <div style="display:flex;gap:6px;margin-bottom:1.3rem;flex-wrap:wrap;">
-        <button class="tb act" style="flex:none;min-width:80px;" onclick="filterHistory(this,'all')">All</button>
-        <button class="tb" style="flex:none;min-width:80px;" onclick="filterHistory(this,'day')">Today</button>
+        <button class="tb act" style="flex:none;min-width:80px;" onclick="filterHistory(this,'day')">Today</button>
         <button class="tb" style="flex:none;min-width:100px;" onclick="filterHistory(this,'month')">This Month</button>
-        <button class="tb" style="flex:none;min-width:80px;" onclick="filterHistory(this,'year')">This Year</button>
+        <button class="tb" style="flex:none;min-width:80px;" onclick="filterHistory(this,'all')">All</button>
       </div>
       <div id="history-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1.2rem;"></div>
       <div id="history-cards"></div>
     </div>`;
-    filterHistory(document.querySelector('#portal-content .tb.act'),'all');
+    filterHistory(document.querySelector('#portal-content .tb.act'),'day');
 
   /* ── TOURNAMENTS ── */
   } else if(tab==='tournaments'){
