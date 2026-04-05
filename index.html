@@ -736,10 +736,10 @@ textarea{resize:vertical;min-height:75px;}
     <button class="nb" id="nb-rankings" onclick="toggleHamRankSubs(this)">Rankings</button>
     <div id="ham-rank-subs">
       <button class="ham-rank-sub-item act" id="ham-rank-global" onclick="svRank('global')">PPR</button>
-      <button class="ham-rank-sub-item" id="ham-rank-performance" onclick="svRank('performance')">Performance</button>
-      <button class="ham-rank-sub-item" id="ham-rank-hcp" onclick="svRank('hcp')">Handicap</button>
-      <button class="ham-rank-sub-item" id="ham-rank-expanded" onclick="svRank('expanded')">Expanded</button>
-      <button class="ham-rank-sub-item" id="ham-rank-advanced" onclick="svRank('advanced')">Advanced</button>
+      <button class="ham-rank-sub-item" id="ham-rank-performance" onclick="svRank('performance')" style="display:none">Performance</button>
+      <button class="ham-rank-sub-item" id="ham-rank-hcp" onclick="svRank('hcp')" style="display:none">Handicap</button>
+      <button class="ham-rank-sub-item" id="ham-rank-expanded" onclick="svRank('expanded')" style="display:none">Expanded</button>
+      <button class="ham-rank-sub-item" id="ham-rank-advanced" onclick="svRank('advanced')" style="display:none">Advanced</button>
     </div>
     <button class="nb" id="nb-halls" onclick="sv('halls',this)">Find Halls</button>
     <button class="nb" id="nb-player-portal" onclick="sv('player-portal',this)" style="display:none">My Portal</button>
@@ -2072,6 +2072,10 @@ function setUser(u){
   const nbAdmin=document.getElementById('nb-admin');
   // Hide role-specific items first, then show per role
   [nbMatch,nbPortal,nbPP,nbAdmin].forEach(b=>{if(b)b.style.display='none';});
+  // Ranking sub-items: only visible to admin/owner
+  const _rankSubs=['ham-rank-performance','ham-rank-hcp','ham-rank-expanded','ham-rank-advanced'];
+  const _isPriv=u.role==='admin'||u.role==='owner';
+  _rankSubs.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=_isPriv?'block':'none';});
   if(u.role==='admin'){
     if(nbAdmin) nbAdmin.style.display='inline-block';
   } else if(u.role==='fan'){
@@ -2182,6 +2186,10 @@ function logout(){
   document.getElementById('btn-login').style.display='inline-flex';
   document.getElementById('auth-bar').style.display='none';
   ['nb-match','nb-portal','nb-player-portal','nb-admin'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  // Hide privileged ranking sub-items on logout
+  ['ham-rank-performance','ham-rank-hcp','ham-rank-expanded','ham-rank-advanced'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
   document.getElementById('pend-area').innerHTML='';
