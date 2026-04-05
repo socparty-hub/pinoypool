@@ -1525,9 +1525,9 @@ function buildDashboard(){
           </div>
           <div class="dash-match-card-body">
             <div class="dash-match-players-col">
-              <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:700;color:#fff;">${fmtPlayerName(m.p1)}</span>${tb1}</div>
+              <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:${isWin?'800':'500'};color:${isWin?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p1)}</span>${tb1}</div>
               <div class="dash-match-vs">vs</div>
-              <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:700;color:rgba(224,224,224,.75);">${fmtPlayerName(m.p2)}</span>${tb2}</div>
+              <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:${!isWin?'800':'500'};color:${!isWin?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p2)}</span>${tb2}</div>
             </div>
             <div class="dash-match-scores-col">
               <span class="${isWin?'dash-match-score-win':'dash-match-score-lose'}">${s1}</span>
