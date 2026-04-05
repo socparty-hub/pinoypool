@@ -765,6 +765,7 @@ textarea{resize:vertical;min-height:75px;}
             <div class="av-dd-role" id="av-dd-role"></div>
           </div>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('player-portal',null)" id="av-dd-portal" style="display:none;">My Portal</button>
+          <button class="av-dd-item" onclick="toggleAvDropdown();sv('player-portal',null);setTimeout(()=>{const _b=document.querySelector('.pp-tab:last-child');if(_b)ppTab(_b,'profile');},300)" id="av-dd-player-profile" style="display:none;">Player Profile</button>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('portal',null);setTimeout(()=>ptab('profile'),300)" id="av-dd-hall-profile" style="display:none;">Hall Profile</button>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('admin',null)" id="av-dd-admin" style="display:none;">Admin</button>
           <button class="av-dd-item logout" onclick="toggleAvDropdown();logout()">Logout</button>
@@ -2511,9 +2512,11 @@ function setUser(u){
   if(avDdName) avDdName.textContent=fmtPlayerName(u.name);
   if(avDdRole) avDdRole.textContent=roleLabels[u.role]||u.role;
   const avDdPortal=document.getElementById('av-dd-portal');
+  const avDdPlayerProfile=document.getElementById('av-dd-player-profile');
   const avDdHallProfile=document.getElementById('av-dd-hall-profile');
   const avDdAdmin=document.getElementById('av-dd-admin');
   if(avDdPortal) avDdPortal.style.display=u.role==='player'?'flex':'none';
+  if(avDdPlayerProfile) avDdPlayerProfile.style.display=u.role==='player'?'flex':'none';
   if(avDdHallProfile) avDdHallProfile.style.display=u.role==='owner'?'flex':'none';
   if(avDdAdmin) avDdAdmin.style.display=u.role==='admin'?'flex':'none';
 
@@ -2697,6 +2700,10 @@ function logout(){
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
   document.getElementById('pend-area').innerHTML='';
+  // Hide all role-specific avatar dropdown items
+  ['av-dd-portal','av-dd-player-profile','av-dd-hall-profile','av-dd-admin'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
   const rb=document.getElementById('hdr-role');if(rb)rb.remove();
   // Restore hero CTA
   const heroCta=document.getElementById('hero-cta');
