@@ -2546,7 +2546,12 @@ function setUser(u){
     const nbDash=document.getElementById('nb-dashboard');
     if(nbDash) nbDash.style.display='none';
     if(nbMatch) nbMatch.style.display='inline-block';
-    if(nbPortal) nbPortal.style.display='inline-block';
+    if(nbPortal){
+      nbPortal.style.display='inline-block';
+      // Move Hall Portal to top of nav (first item)
+      const nav=document.getElementById('main-nav');
+      if(nav) nav.insertBefore(nbPortal, nav.firstChild);
+    }
     const cBtn=document.getElementById('send-challenge-btn');
     if(cBtn) cBtn.innerHTML='📊 Next: Confirm Score';
   } else {
@@ -2661,6 +2666,11 @@ function logout(){
   // Restore Dashboard nav (hidden for owner while logged in)
   const _nbDash=document.getElementById('nb-dashboard');
   if(_nbDash) _nbDash.style.display='';
+  // Restore Hall Portal to its original position (after nb-player-portal)
+  const _nbPortalR=document.getElementById('nb-portal');
+  const _nbPPR=document.getElementById('nb-player-portal');
+  const _navR=document.getElementById('main-nav');
+  if(_nbPortalR&&_nbPPR&&_navR) _navR.insertBefore(_nbPortalR, _nbPPR.nextSibling);
   // Hide privileged ranking sub-items on logout
   ['ham-rank-performance','ham-rank-hcp','ham-rank-expanded','ham-rank-advanced'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
