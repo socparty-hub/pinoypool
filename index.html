@@ -5952,8 +5952,12 @@ function ptab(tab){
       :`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt||'9-Ball'}</span>`;
     // ── Helper: match type badge ──
     const _typeBadge=(type)=>type?`<span class="tag tgd">${type}</span>`:'';
+    // ── Gold badge SVG (verified/approved icon) ──
+    const _badge=`<svg width="18" height="18" viewBox="0 0 24 24" fill="#D4AF37" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.47 1.89-3.2 3.61-.82-.34-3.69L23 12zm-12.91 4.72L6.43 13.06l1.42-1.42 2.24 2.24 4.94-4.94 1.42 1.41-6.36 6.37z"/></svg>`;
+    const _badgeEmpty=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;opacity:0;"><path d="M1 1"/></svg>`; // invisible spacer
     // ── Helper: render new-design match card ──
-    const _mvCard=(m,approveFn,rejectFn,extraStatus)=>{
+    // p1ok / p2ok: whether each player has submitted/confirmed
+    const _mvCard=(m,approveFn,rejectFn,extraStatus,p1ok,p2ok)=>{
       const sc=(m.sc||m.score||'0-0').split(/[-–]/).map(x=>x.trim());
       const s1=sc[0]||'0'; const s2=sc[1]||'0';
       const r1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0;
@@ -5980,7 +5984,7 @@ function ptab(tab){
                 <div style="font-family:'Epilogue',sans-serif;font-weight:800;font-size:.82rem;line-height:1.25;color:#fff;">${_pName(m.p1)}</div>
                 <div style="margin-top:.15rem;display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;">${_tierBadge(t1)}${_hcpLabel(r1,b1)}</div>
               </div>
-              <span style="color:var(--gold2);font-size:.9rem;margin-left:.3rem;">✓</span>
+              <div style="margin-left:.4rem;">${p1ok?_badge:_badgeEmpty}</div>
             </div>
             <div style="text-align:center;padding:0 .25rem;">
               <div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:var(--gold);display:flex;gap:.35rem;align-items:center;line-height:1;">
@@ -5988,7 +5992,7 @@ function ptab(tab){
               </div>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;">
-              <span style="color:var(--gold2);font-size:.9rem;margin-right:.3rem;">✓</span>
+              <div style="margin-right:.4rem;">${p2ok?_badge:_badgeEmpty}</div>
               <div style="text-align:right;">
                 <div style="font-family:'Epilogue',sans-serif;font-weight:800;font-size:.82rem;line-height:1.25;color:#fff;text-align:right;">${_pName(m.p2)}</div>
                 <div style="margin-top:.15rem;display:flex;align-items:center;justify-content:flex-end;gap:.3rem;flex-wrap:wrap;">${_hcpLabel(r2,b2)}${_tierBadge(t2)}</div>
@@ -6037,7 +6041,7 @@ function ptab(tab){
             return _mvCard(m,
               `ownerValidateMatch('${m.id}')`,
               `cancelOwnerMatch('${m.id}')`,
-              statusRow);
+              statusRow, !!m.p1accept, !!m.p2accept);
           }).join('')}
           ${_playerSetMatches.map(m=>{
             const oppConfirmed=!!m.p2ok;
@@ -6045,10 +6049,11 @@ function ptab(tab){
               <span style="font-size:.6rem;padding:2px 7px;border-radius:4px;background:rgba(31,140,78,.2);border:1px solid rgba(31,140,78,.5);color:var(--grn3);">✓ ${(m.p1||'').split(' ')[0]} Submitted</span>
               <span style="font-size:.6rem;padding:2px 7px;border-radius:4px;background:${oppConfirmed?'rgba(31,140,78,.2)':'rgba(200,168,75,.08)'};border:1px solid ${oppConfirmed?'rgba(31,140,78,.5)':'rgba(200,168,75,.2)'};color:${oppConfirmed?'var(--grn3)':'#d0c5af'};">${oppConfirmed?'✓':'⏳'} ${(m.p2||'').split(' ')[0]} ${oppConfirmed?'Confirmed':'Pending'}</span>
             </div>`;
+            // p1 always submitted (they created it); p2ok = opponent confirmed
             return _mvCard(m,
               `ownerApproveVenueMatch('${m.id}')`,
               `ownerRejectPlayerMatch('${m.id}')`,
-              statusRow);
+              statusRow, true, oppConfirmed);
           }).join('')}`
       }
       ${_venueSpotlight}
