@@ -419,6 +419,12 @@ textarea{resize:vertical;min-height:75px;}
 .tier-amateur{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:var(--chalk);}
 .tier-inline{font-size:.65rem;padding:2px 8px;border-radius:4px;background:rgba(200,168,75,.15);color:var(--gold2);border:1px solid rgba(200,168,75,.4);white-space:nowrap;vertical-align:middle;margin:0 2px;}
 .hcp-tag{font-size:.75rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;letter-spacing:0;}
+/* Score swipe tile */
+.score-swipe-row{display:flex;align-items:center;justify-content:center;gap:1.2rem;}
+.score-adj-btn{width:52px;height:52px;border-radius:13px;background:rgba(4,9,3,.65);border:1px solid var(--border);color:var(--chalk);font-size:1.6rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,transform .1s;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+.score-adj-btn:active{transform:scale(.92);background:rgba(53,94,59,.35);}
+.score-adj-btn-plus{background:var(--grn2);border-color:rgba(31,140,78,.5);color:var(--grn3);}
+.score-adj-btn-plus:active{background:rgba(31,140,78,.5);}
 /* Admin Portal */
 .adm-hdr{background:linear-gradient(135deg,rgba(90,20,10,.5),rgba(8,14,6,.95));border:1px solid rgba(184,50,40,.4);border-radius:12px;padding:1.4rem;margin-bottom:1.4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
 .adm-tabs{display:flex;gap:0;border:1px solid rgba(184,50,40,.3);border-radius:10px;overflow:hidden;margin-bottom:1.4rem;}
@@ -974,15 +980,6 @@ textarea{resize:vertical;min-height:75px;}
         </div>
       </div>
 
-      <!-- Race To (slider) -->
-      <div class="fg">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
-          <label style="margin-bottom:0;">Race To</label>
-          <span id="race-to-val" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);line-height:1;">5</span>
-        </div>
-        <div id="race-row"></div>
-      </div>
-
       <!-- Match Type -->
       <div class="fg">
         <label>Match Type</label>
@@ -1027,14 +1024,23 @@ textarea{resize:vertical;min-height:75px;}
         </div>
       </div>
 
-      <!-- P1 Score Counter -->
-      <div style="display:flex;align-items:center;justify-content:center;gap:1.4rem;padding:.8rem 0;">
-        <button style="width:50px;height:50px;border-radius:12px;background:rgba(4,9,3,.65);border:1px solid var(--border);color:var(--chalk);font-size:1.5rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;" onclick="csAdj(1,-1)">−</button>
-        <div style="text-align:center;min-width:80px;">
-          <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);opacity:.75;margin-bottom:4px;">MY SCORE</div>
-          <div id="cs-s1" style="font-family:'Bebas Neue',sans-serif;font-size:3.8rem;line-height:1;color:var(--gold);">0</div>
+      <!-- P1 Score — swipe or tap -->
+      <div style="padding:.6rem 0 .2rem;">
+        <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);opacity:.75;margin-bottom:.5rem;text-align:center;">MY SCORE</div>
+        <div class="score-swipe-row" id="score-swipe-1"
+          ontouchstart="scoreSwipeStart(event,1)" ontouchmove="scoreSwipeMove(event,1)" ontouchend="scoreSwipeEnd(event,1)"
+          onmousedown="scoreSwipeStart(event,1)">
+          <button class="score-adj-btn" onclick="csAdj(1,-1)">−</button>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:90px;user-select:none;">
+            <div id="cs-s1" style="font-family:'Bebas Neue',sans-serif;font-size:4.2rem;line-height:1;color:var(--gold);cursor:grab;touch-action:pan-y;transition:color .15s;">0</div>
+            <div style="display:flex;align-items:center;gap:4px;opacity:.35;">
+              <span style="font-size:.75rem;color:var(--chalk);">‹</span>
+              <span style="font-size:.55rem;letter-spacing:1.5px;color:var(--chalk);font-family:'Space Grotesk',sans-serif;text-transform:uppercase;">swipe</span>
+              <span style="font-size:.75rem;color:var(--chalk);">›</span>
+            </div>
+          </div>
+          <button id="cs-p1-plus" class="score-adj-btn score-adj-btn-plus" onclick="csAdj(1,1)">+</button>
         </div>
-        <button id="cs-p1-plus" style="width:50px;height:50px;border-radius:12px;background:var(--grn2);border:1px solid rgba(31,140,78,.5);color:var(--grn3);font-size:1.5rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;" onclick="csAdj(1,1)">+</button>
       </div>
 
       <!-- P1 Handicap -->
@@ -1085,14 +1091,23 @@ textarea{resize:vertical;min-height:75px;}
         </div>
       </div>
 
-      <!-- P2 Score Counter -->
-      <div style="display:flex;align-items:center;justify-content:center;gap:1.4rem;padding:.8rem 0;">
-        <button style="width:50px;height:50px;border-radius:12px;background:rgba(4,9,3,.65);border:1px solid var(--border);color:var(--chalk);font-size:1.5rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;" onclick="csAdj(2,-1)">−</button>
-        <div style="text-align:center;min-width:80px;">
-          <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);opacity:.75;margin-bottom:4px;">OPPONENT SCORE</div>
-          <div id="cs-s2" style="font-family:'Bebas Neue',sans-serif;font-size:3.8rem;line-height:1;color:var(--gold);">0</div>
+      <!-- P2 Score — swipe or tap -->
+      <div style="padding:.6rem 0 .2rem;">
+        <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);opacity:.75;margin-bottom:.5rem;text-align:center;">OPPONENT SCORE</div>
+        <div class="score-swipe-row" id="score-swipe-2"
+          ontouchstart="scoreSwipeStart(event,2)" ontouchmove="scoreSwipeMove(event,2)" ontouchend="scoreSwipeEnd(event,2)"
+          onmousedown="scoreSwipeStart(event,2)">
+          <button class="score-adj-btn" onclick="csAdj(2,-1)">−</button>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:90px;user-select:none;">
+            <div id="cs-s2" style="font-family:'Bebas Neue',sans-serif;font-size:4.2rem;line-height:1;color:var(--gold);cursor:grab;touch-action:pan-y;transition:color .15s;">0</div>
+            <div style="display:flex;align-items:center;gap:4px;opacity:.35;">
+              <span style="font-size:.75rem;color:var(--chalk);">‹</span>
+              <span style="font-size:.55rem;letter-spacing:1.5px;color:var(--chalk);font-family:'Space Grotesk',sans-serif;text-transform:uppercase;">swipe</span>
+              <span style="font-size:.75rem;color:var(--chalk);">›</span>
+            </div>
+          </div>
+          <button id="cs-p2-plus" class="score-adj-btn score-adj-btn-plus" onclick="csAdj(2,1)">+</button>
         </div>
-        <button id="cs-p2-plus" style="width:50px;height:50px;border-radius:12px;background:var(--grn2);border:1px solid rgba(31,140,78,.5);color:var(--grn3);font-size:1.5rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;" onclick="csAdj(2,1)">+</button>
       </div>
 
       <!-- P2 Handicap -->
@@ -2713,54 +2728,72 @@ function proceedToConfirm(){
 function csAdj(p,delta){
   const hcp=(hcpState?.rack?.[p-1])||0;
   if(!app.csScores) app.csScores=[hcpState?.rack?.[0]||0, hcpState?.rack?.[1]||0];
-  const other=p===1?2:1;
-  const otherScore=app.csScores[other-1]??0;
-  // If the other player has already won (reached raceTo), cap this player at raceTo-1
-  const maxScore=otherScore>=app.raceTo ? app.raceTo-1 : app.raceTo;
   const minScore=hcp;
+  const maxScore=50;
   app.csScores[p-1]=Math.max(minScore,Math.min(maxScore,(app.csScores[p-1]??minScore)+delta));
+  // Race To is now automatic — always equals the current winning score
+  app.raceTo=Math.max(app.csScores[0]??0, app.csScores[1]??0, 1);
   const el=document.getElementById(`cs-s${p}`);
-  el.textContent=app.csScores[p-1];
-  el.style.color=app.csScores[p-1]===app.raceTo?'var(--grn3)':'var(--gold)';
+  if(el){ el.textContent=app.csScores[p-1]; el.style.color='var(--gold)'; }
   const cpEl=document.getElementById(`cp-s${p}`);
-  if(cpEl){ cpEl.textContent=app.csScores[p-1]; cpEl.style.color=app.csScores[p-1]===app.raceTo?'var(--grn3)':'var(--gold)'; }
+  if(cpEl){ cpEl.textContent=app.csScores[p-1]; }
   updateCsWinnerPreview();
-  updateCsPlusBtns();
 }
-function updateCsPlusBtns(){
-  const s1=app.csScores?.[0]??0, s2=app.csScores?.[1]??0, rt=app.raceTo||5;
-  const p1Max=s2>=rt?rt-1:rt, p2Max=s1>=rt?rt-1:rt;
-  ['cs-p1-plus','cs-p1-plus2'].forEach(id=>{const b=document.getElementById(id);if(b){b.disabled=s1>=p1Max;b.style.opacity=s1>=p1Max?'0.3':'';}});
-  ['cs-p2-plus','cs-p2-plus2'].forEach(id=>{const b=document.getElementById(id);if(b){b.disabled=s2>=p2Max;b.style.opacity=s2>=p2Max?'0.3':'';}});
+function updateCsPlusBtns(){ /* no-op: race-to is now auto */ }
+
+/* ── Score swipe gesture ── */
+const _sw={p:0,x:0,lastX:0,active:false,accum:0};
+const _SW_PX=14; // pixels per +1 step
+function scoreSwipeStart(e,p){
+  const x=e.touches?e.touches[0].clientX:e.clientX;
+  _sw.p=p;_sw.x=x;_sw.lastX=x;_sw.active=true;_sw.accum=0;
+  const el=document.getElementById('cs-s'+p);if(el) el.style.cursor='grabbing';
+  if(!e.touches){
+    document.addEventListener('mousemove',_swMouseMove,{passive:true});
+    document.addEventListener('mouseup',_swMouseUp);
+  }
+  e.preventDefault&&e.preventDefault();
+}
+function _swMouseMove(e){if(_sw.active)scoreSwipeMove(e,_sw.p);}
+function _swMouseUp(e){scoreSwipeEnd(e,_sw.p);document.removeEventListener('mousemove',_swMouseMove);document.removeEventListener('mouseup',_swMouseUp);}
+function scoreSwipeMove(e,p){
+  if(!_sw.active) return;
+  const x=e.touches?e.touches[0].clientX:e.clientX;
+  _sw.accum+=(x-_sw.lastX);
+  _sw.lastX=x;
+  const steps=Math.trunc(_sw.accum/_SW_PX);
+  if(steps!==0){csAdj(p,steps);_sw.accum-=steps*_SW_PX;}
+}
+function scoreSwipeEnd(e,p){
+  _sw.active=false;
+  const el=document.getElementById('cs-s'+p);if(el) el.style.cursor='grab';
 }
 
 function updateCsWinnerPreview(){
   const hcp1=(hcpState?.rack?.[0])||0, hcp2=(hcpState?.rack?.[1])||0;
   const s1=app.csScores?.[0]??hcp1, s2=app.csScores?.[1]??hcp2;
   const el=document.getElementById('cs-winner-preview');
-  // Only show once someone has actually played (scores exceed their starting handicap)
   if(s1===hcp1&&s2===hcp2){el.style.display='none';return;}
   if(s1===s2){
     el.style.display='block';
     el.style.background='rgba(184,50,40,.08)';el.style.borderColor='rgba(184,50,40,.3)';el.style.color='#e55';
-    el.textContent=`⚠ Tied score (${s1}–${s2}) — not allowed. One player must win Race to ${app.raceTo}.`;
+    el.textContent=`⚠ Tied score (${s1}–${s2}) — not allowed. One player must win.`;
     return;
   }
   const wn=s1>s2?app.p1:app.p2;
   const maxS=Math.max(s1,s2), minS=Math.min(s1,s2);
-  const isRaceWin=maxS===app.raceTo;
   el.style.display='block';
   el.style.background='rgba(31,140,78,.08)';el.style.borderColor='rgba(31,140,78,.25)';el.style.color='var(--grn3)';
-  el.innerHTML=`🏆 <strong>${wn.split(' ')[0]}</strong> wins ${maxS}–${minS}${isRaceWin?' · Reached Race to '+app.raceTo:''}`;
+  el.innerHTML=`🏆 <strong>${wn.split(' ')[0]}</strong> wins ${maxS}–${minS}`;
 }
 
 function submitFinalScore(){
   const hcp1=(hcpState?.rack?.[0])||0, hcp2=(hcpState?.rack?.[1])||0;
   const s1=app.csScores?.[0]??hcp1, s2=app.csScores?.[1]??hcp2;
   if(s1===hcp1&&s2===hcp2){toast('⚠️ Enter the final score before confirming.');return;}
-  if(s1===s2){toast(`⚠️ Tied scores not allowed. Race to ${app.raceTo} — one player must win.`);return;}
-  if(Math.max(s1,s2)>app.raceTo){toast(`⚠️ Max score is ${app.raceTo} (Race to ${app.raceTo}).`);return;}
-  if(Math.max(s1,s2)<app.raceTo){toast(`⚠️ Winner must reach ${app.raceTo} racks (Race to ${app.raceTo}). Adjust the score.`);return;}
+  if(s1===s2){toast('⚠️ Tied scores not allowed — one player must win.');return;}
+  // Auto-set race to = winning score
+  app.raceTo=Math.max(s1,s2);
   app.scores=[s1,s2];
   // Owner flow: push to portal pending and return to setup
   if(app.user?.role==='owner'){
