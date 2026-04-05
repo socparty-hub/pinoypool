@@ -1320,10 +1320,15 @@ textarea{resize:vertical;min-height:75px;}
       <div id="portal-hloc" style="font-size:.7rem;color:var(--chalk);">—</div>
     </div>
   </div>
-  <div class="pa-grid">
-    <div class="pa-tile" onclick="ptab('matches')"><div class="ic">⚡</div><div class="lb">Match Validation</div><div class="dc">Confirm matches at your venue</div></div>
-    <div class="pa-tile" onclick="ptab('tournaments')"><div class="ic">🏆</div><div class="lb">Tournaments</div><div class="dc">Register &amp; manage tournaments</div></div>
-    <div class="pa-tile" onclick="ptab('history')"><div class="ic">📋</div><div class="lb">Match History</div><div class="dc">Verified matches at your venue</div></div>
+  <div class="pa-grid" style="grid-template-columns:1fr 1fr;">
+    <div class="pa-tile" onclick="ptab('matches')" style="grid-column:1/-1;display:flex;flex-direction:row;align-items:center;gap:1rem;text-align:left;padding:1rem 1.2rem;">
+      <div class="ic" style="font-size:1.8rem;flex-shrink:0;">⚡</div>
+      <div><div class="lb">Match Validation</div><div class="dc">Confirm matches at your venue</div></div>
+    </div>
+    <div class="pa-tile" onclick="ptab('history')" style="grid-column:1/-1;display:flex;flex-direction:row;align-items:center;gap:1rem;text-align:left;padding:1rem 1.2rem;">
+      <div class="ic" style="font-size:1.8rem;flex-shrink:0;">📋</div>
+      <div><div class="lb">Match History</div><div class="dc">Verified matches at your venue</div></div>
+    </div>
   </div>
   <div id="portal-content"></div>
 </div>
@@ -5903,7 +5908,7 @@ function ptab(tab){
   if(_paGrid) _paGrid.style.display=(tab==='profile'||tab==='tournaments')?'none':'';
   // Highlight active tile
   document.querySelectorAll('.pa-tile').forEach((t,i)=>{
-    const tabs=['matches','tournaments','history','profile'];
+    const tabs=['matches','history'];
     t.style.borderColor=tabs[i]===tab?'var(--gold)':'var(--border)';
     t.style.background=tabs[i]===tab?'rgba(200,168,75,.08)':'';
   });
