@@ -785,6 +785,12 @@ textarea{resize:vertical;min-height:75px;}
   <!-- ── Pending Area ── -->
   <div id="pend-area"></div>
 
+  <!-- ── Owner Dashboard (shown only when owner is logged in) ── -->
+  <div id="owner-dashboard-content" style="display:none;"></div>
+
+  <!-- ── Public Dashboard Content ── -->
+  <div id="dash-public-content">
+
   <!-- ── Hero Section ── -->
   <section class="dash-hero">
     <div class="dash-hero-eyebrow">
@@ -847,6 +853,8 @@ textarea{resize:vertical;min-height:75px;}
     </table>
   </div>
   <button class="dash-leaderboard-btn" onclick="sv('rankings',document.querySelectorAll('.nb')[3])" style="margin-top:.5rem;">View Full Leaderboard</button>
+
+  </div><!-- /#dash-public-content -->
 
 </div>
 
@@ -1567,7 +1575,324 @@ function applyMatchStepUI(){
   }
 }
 /* ══════════════════ DASHBOARD ══════════════════ */
+function _buildOwnerDashboard(){
+  const u=app.user;
+  if(!u) return;
+  const c=document.getElementById('owner-dashboard-content');
+  if(!c) return;
+
+  const hallEntry=typeof adminHalls!=='undefined'?adminHalls.find(h=>h.email===u.email||h.username===u.username||h.owner===u.name):null;
+  const hallName=u.hall||hallEntry?.name||'Your Hall';
+  const hallCity=hallEntry?.city||u.region||'—';
+  const isApproved=hallEntry?.status==='active';
+
+  // Owner header bar
+  const headerHtml=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;padding:.9rem 1rem;background:rgba(200,100,20,.08);border:1px solid rgba(200,100,20,.22);border-radius:12px;">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--gold);line-height:1;">${hallName}</div>
+        <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;">${hallCity} &nbsp;·&nbsp; <span style="color:${isApproved?'var(--grn3)':'#f5a623'};">● ${isApproved?'Active':'Pending Approval'}</span></div>
+      </div>
+      <button class="btn btn-sm" onclick="sv('portal',document.getElementById('nb-portal'));setTimeout(()=>ptab('profile'),300);" style="font-size:.68rem;padding:5px 12px;border-color:rgba(200,100,20,.35);color:#e8a040;">⚙ Settings</button>
+    </div>`;
+
+  if(!isApproved){
+    c.innerHTML=headerHtml+`
+      <div class="card" style="text-align:center;padding:2rem 1.4rem;">
+        <div style="font-size:2rem;margin-bottom:.8rem;">⏳</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:var(--gold);margin-bottom:.5rem;">Hall Registration Pending</div>
+        <div style="font-size:.82rem;color:var(--chalk);max-width:380px;margin:0 auto 1.2rem;line-height:1.7;">
+          Your hall <strong style="color:var(--ivory);">${hallName}</strong> has been submitted and is awaiting approval by the Master Admin.
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:.6rem;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);border-radius:20px;padding:.5rem 1.4rem;">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);"></div>
+          <span style="font-size:.78rem;color:var(--gold);font-weight:600;">Awaiting Admin Approval</span>
+        </div>
+        <div style="margin-top:1.4rem;font-size:.75rem;color:var(--chalk2);">Registration submitted: ${hallEntry?.submitted||new Date().toISOString().slice(0,10)}</div>
+      </div>`;
+    return;
+  }
+
+  // Pending matches for this venue
+  const _playerSetMatches=typeof adminMatches!=='undefined'?adminMatches.filter(m=>
+    (m.status==='pending-opponent'||m.status==='player-pending')&&hallName&&m.venue&&m.venue.includes(hallName)
+  ):[];
+  const _ownedPending=typeof manualPending!=='undefined'?manualPending.filter(m=>!hallName||!m.venue||m.venue===hallName):[];
+  const _totalActions=_ownedPending.length+_playerSetMatches.length+pendVal.length;
+
+  // Nav sub-tabs
+  const _navTabs=`
+    <div style="display:flex;gap:.5rem;margin-bottom:1.1rem;overflow-x:auto;padding-bottom:2px;">
+      <button class="od-tab od-tab-act" id="od-tab-validation" onclick="odTab('validation',this)" style="flex:none;background:rgba(200,168,75,.12);border:1px solid rgba(200,168,75,.35);color:var(--gold);font-family:'Space Grotesk',sans-serif;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;">
+        ⚡ Match Validation${_totalActions>0?` <span style="background:rgba(229,85,85,.8);color:#fff;border-radius:10px;padding:1px 6px;font-size:.6rem;margin-left:4px;">${_totalActions}</span>`:''}
+      </button>
+      <button class="od-tab" id="od-tab-history" onclick="odTab('history',this)" style="flex:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--chalk);font-family:'Space Grotesk',sans-serif;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;">📋 History</button>
+      <button class="od-tab" id="od-tab-tournaments" onclick="odTab('tournaments',this)" style="flex:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--chalk);font-family:'Space Grotesk',sans-serif;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;">🏆 Tournaments</button>
+    </div>`;
+
+  c.innerHTML=headerHtml+_navTabs+`<div id="od-content"></div>`;
+  odTab('validation', document.getElementById('od-tab-validation'));
+}
+
+function odTab(tab, btn){
+  // Highlight active tab
+  document.querySelectorAll('.od-tab').forEach(b=>{
+    b.style.background=b===btn?'rgba(200,168,75,.12)':'rgba(255,255,255,.04)';
+    b.style.borderColor=b===btn?'rgba(200,168,75,.35)':'rgba(255,255,255,.1)';
+    b.style.color=b===btn?'var(--gold)':'var(--chalk)';
+  });
+  const c=document.getElementById('od-content');
+  if(!c) return;
+  const u=app.user;
+  const hallEntry=typeof adminHalls!=='undefined'?adminHalls.find(h=>h.email===u?.email||h.username===u?.username||h.owner===u?.name):null;
+  const hallName=u?.hall||hallEntry?.name||'';
+
+  if(tab==='validation'){
+    const _playerSetMatches=typeof adminMatches!=='undefined'?adminMatches.filter(m=>
+      (m.status==='pending-opponent'||m.status==='player-pending')&&hallName&&m.venue&&m.venue.includes(hallName)
+    ):[];
+    const _ownedPending=typeof manualPending!=='undefined'?manualPending.filter(m=>!hallName||!m.venue||m.venue===hallName):[];
+    const _totalActions=_ownedPending.length+_playerSetMatches.length+pendVal.length;
+    const _scO='font-family:\'DM Mono\',monospace;font-weight:700;font-size:1rem;';
+    const _fBO=f=>f==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
+    c.innerHTML=`
+    <div class="card" style="margin-bottom:1.1rem;">
+      <div class="ct">⚡ Pending Match Actions
+        ${_totalActions>0?`<span style="background:rgba(200,168,75,.2);color:var(--gold);border-radius:10px;padding:2px 8px;font-size:.63rem;margin-left:6px;">${_totalActions}</span>`:''}
+      </div>
+      ${_totalActions===0?`<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No pending actions — all clear ✓</div>`:`
+      <p style="font-size:.78rem;color:var(--chalk);margin-bottom:1.1rem;">Matches recorded at your hall awaiting confirmation or validation.</p>
+      ${_ownedPending.map(m=>{
+        const realIdx=manualPending.indexOf(m);
+        const _pts=(m.sc||m.score||'0-0').split(/[-–]/).map(x=>x.trim());
+        const _s1O=_pts[0]||''; const _s2O=_pts[1]||'';
+        const _win1=parseInt(_s1O)>parseInt(_s2O);
+        const _p1T=(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
+        const _p2T=(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+        const _p1L=`${fmtPlayerName(m.p1)}${_p1T?` <span class="tier-inline">${_p1T}</span>`:''}`;
+        const _p2L=`${fmtPlayerName(m.p2)}${_p2T?` <span class="tier-inline">${_p2T}</span>`:''}`;
+        return `<div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;margin-bottom:.8rem;overflow:hidden;">
+          <div style="padding:clamp(7px,2.5vw,11px);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+              <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_fBO(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}</div>
+              <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.ts||m.date)}</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p1L}</div>
+              <span style="${_scO}color:${_win1?'var(--gold)':'var(--chalk2)'};">${_s1O}</span>
+            </div>
+            <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p2L}</div>
+              <span style="${_scO}color:${!_win1?'var(--gold)':'var(--chalk2)'};">${_s2O}</span>
+            </div>
+            <div style="font-size:.65rem;color:var(--chalk2);margin-top:.35rem;">📍 ${m.venue||'—'}</div>
+          </div>
+          <div style="padding:.4rem clamp(7px,2.5vw,11px) .4rem;border-top:1px solid rgba(255,255,255,.05);">
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem;">
+              <button class="btn btn-sm" onclick="ownerConfirmOD(${realIdx},1)" ${m.p1accept?'disabled':''} style="flex:1;min-width:90px;background:${m.p1accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.1)'};border-color:${m.p1accept?'rgba(31,140,78,.5)':'var(--border)'};color:${m.p1accept?'var(--grn3)':'var(--chalk)'};cursor:${m.p1accept?'default':'pointer'};">${m.p1accept?`✓ ${m.p1.split(' ')[0]}`:`✋ ${m.p1.split(' ')[0]}`}</button>
+              <button class="btn btn-sm" onclick="ownerConfirmOD(${realIdx},2)" ${m.p2accept?'disabled':''} style="flex:1;min-width:90px;background:${m.p2accept?'rgba(31,140,78,.2)':'rgba(200,168,75,.1)'};border-color:${m.p2accept?'rgba(31,140,78,.5)':'var(--border)'};color:${m.p2accept?'var(--grn3)':'var(--chalk)'};cursor:${m.p2accept?'default':'pointer'};">${m.p2accept?`✓ ${m.p2.split(' ')[0]}`:`✋ ${m.p2.split(' ')[0]}`}</button>
+              <button class="btn btn-sm" onclick="cancelOwnerMatchOD('${m.id}')" style="min-width:60px;flex:none;background:rgba(229,85,85,.1);border-color:rgba(229,85,85,.3);color:#e55;">✗</button>
+            </div>
+            <button class="btn btn-s btn-sm" style="width:100%;" onclick="ownerValidateMatchOD('${m.id}')">✓ Validate &amp; Notify Players</button>
+          </div>
+        </div>`;}).join('')}
+      ${_playerSetMatches.map(m=>{
+        const oppConfirmed=!!m.p2ok;
+        const _pts=(m.score||'0-0').split(/[-–]/).map(x=>x.trim());
+        const _s1O=_pts[0]||''; const _s2O=_pts[1]||'';
+        const _win1=parseInt(_s1O)>parseInt(_s2O);
+        const _p1T=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
+        const _p2T=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+        const _mr1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0; const _mr2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
+        const _mb1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
+        const _mb2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
+        const _h1=fmtHcpTag(_mr1,_mb1); const _h2=fmtHcpTag(_mr2,_mb2);
+        const _p1L=`${fmtPlayerName(m.p1)}${_p1T?` <span class="tier-inline">${_p1T}</span>`:''}${_h1?` <span class="hcp-tag">${_h1}</span>`:''}`;
+        const _p2L=`${fmtPlayerName(m.p2)}${_p2T?` <span class="tier-inline">${_p2T}</span>`:''}${_h2?` <span class="hcp-tag">${_h2}</span>`:''}`;
+        return `<div style="background:rgba(255,255,255,.03);border:1px solid rgba(245,166,35,.2);border-radius:10px;margin-bottom:.8rem;overflow:hidden;">
+          <div style="padding:clamp(7px,2.5vw,11px);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+              <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_fBO(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}</div>
+              <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p1L}</div>
+              <span style="${_scO}color:var(--chalk);">${_s1O}</span>
+            </div>
+            <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p2L}</div>
+              <span style="${_scO}color:var(--chalk);">${_s2O}</span>
+            </div>
+            <div style="font-size:.65rem;color:var(--chalk2);margin-top:.35rem;">📍 ${m.venue||'—'}</div>
+          </div>
+          <div style="padding:.4rem clamp(7px,2.5vw,11px) .75rem;border-top:1px solid rgba(255,255,255,.05);">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.5rem;font-size:.7rem;">
+              <span style="padding:2px 8px;border-radius:6px;border:1px solid var(--grn3);color:var(--grn3);">✓ ${m.p1.split(' ')[0]} Submitted</span>
+              <span style="padding:2px 8px;border-radius:6px;border:1px solid ${oppConfirmed?'var(--grn3)':'rgba(245,166,35,.4)'};color:${oppConfirmed?'var(--grn3)':'#f5a623'};">${oppConfirmed?`✓ ${m.p2.split(' ')[0]} Confirmed`:`⏳ ${m.p2.split(' ')[0]} Pending`}</span>
+            </div>
+            <div style="display:flex;gap:.5rem;">
+              <button class="btn btn-s btn-sm" style="flex:1;" onclick="ownerApproveVenueMatchOD('${m.id}')">✓ Approve</button>
+              <button class="btn btn-d btn-sm" style="flex:1;" onclick="ownerRejectPlayerMatchOD('${m.id}')">✗ Reject</button>
+            </div>
+          </div>
+        </div>`}).join('')}
+      `}
+    </div>`;
+
+  } else if(tab==='history'){
+    c.innerHTML=`
+    <div class="card">
+      <div class="ct">📋 Match History — Your Venue</div>
+      <div style="display:flex;gap:6px;margin-bottom:1.3rem;flex-wrap:wrap;">
+        <button class="tb act" style="flex:none;min-width:80px;" onclick="filterHistoryOD(this,'all')">All</button>
+        <button class="tb" style="flex:none;min-width:80px;" onclick="filterHistoryOD(this,'day')">Today</button>
+        <button class="tb" style="flex:none;min-width:100px;" onclick="filterHistoryOD(this,'month')">This Month</button>
+        <button class="tb" style="flex:none;min-width:80px;" onclick="filterHistoryOD(this,'year')">This Year</button>
+      </div>
+      <div id="od-history-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1.2rem;"></div>
+      <div id="od-history-cards"></div>
+    </div>`;
+    filterHistoryOD(null,'all');
+
+  } else if(tab==='tournaments'){
+    const _ownerHall=typeof adminHalls!=='undefined'?adminHalls.find(h=>h.email===u?.email||h.username===u?.username||h.owner===u?.name):null;
+    const _ownerHallName=_ownerHall?.name||u?.hall||'';
+    const myTournaments=typeof adminTournaments!=='undefined'?adminTournaments.filter(t=>t.ownerEmail===u?.email||t.ownerName===u?.name||(_ownerHallName&&t.venue&&t.venue===_ownerHallName)):[];
+    c.innerHTML=`
+    <div class="card" style="margin-bottom:1.1rem;">
+      <div class="ct">🏆 Register a Tournament</div>
+      <p style="font-size:.76rem;color:var(--chalk2);margin-bottom:1.1rem;">Tournaments must be approved by the admin before they appear in match records.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem .9rem;margin-bottom:1rem;">
+        <div class="fg" style="grid-column:1/-1;"><label>Tournament Name *</label><input type="text" id="rt-name-od" placeholder="e.g. PinoyPool Open 2026"></div>
+        <div class="fg" style="grid-column:1/-1;"><label>Format</label>
+          <select id="rt-fmt-od"><option value="9-Ball">9-Ball</option><option value="10-Ball">10-Ball</option></select>
+        </div>
+        <div class="fg"><label>Start Date *</label><input type="date" id="rt-date-od"></div>
+        <div class="fg"><label>End Date</label><input type="date" id="rt-edate-od"></div>
+        <div class="fg" style="grid-column:1/-1;"><label>Notes / Description</label><input type="text" id="rt-notes-od" placeholder="Optional details"></div>
+      </div>
+      <button class="btn btn-p" style="width:100%;" onclick="submitTournamentOD()">📨 Submit for Admin Approval</button>
+    </div>
+    <div class="card">
+      <div class="ct">My Tournaments</div>
+      ${myTournaments.length===0
+        ?'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No tournaments submitted yet.</div>'
+        :myTournaments.map(t=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-weight:600;font-size:.88rem;">${t.name}</div>
+              <div style="font-size:.72rem;color:var(--chalk);margin-top:2px;">${t.fmt} · ${fmtDate(t.date)}</div>
+              <div style="font-size:.7rem;color:var(--chalk2);margin-top:2px;">📍 ${t.venue}</div>
+            </div>
+            <span class="status-pill ${t.status==='active'?'sp-active':t.status==='rejected'?'sp-rejected':'sp-pending'}">● ${t.status}</span>
+          </div>`).join('')}
+    </div>`;
+  }
+}
+
+// Owner Dashboard proxy actions — delegate to portal functions then refresh dashboard
+function ownerConfirmOD(idx,p){ownerConfirm(idx,p);setTimeout(()=>_buildOwnerDashboard(),300);}
+function cancelOwnerMatchOD(id){cancelOwnerMatch(id);setTimeout(()=>_buildOwnerDashboard(),300);}
+function ownerValidateMatchOD(id){ownerValidateMatch(id);setTimeout(()=>_buildOwnerDashboard(),300);}
+function ownerApproveVenueMatchOD(id){ownerApproveVenueMatch(id);setTimeout(()=>_buildOwnerDashboard(),300);}
+function ownerRejectPlayerMatchOD(id){ownerRejectPlayerMatch(id);setTimeout(()=>_buildOwnerDashboard(),300);}
+function submitTournamentOD(){
+  // redirect to portal for tournament submit
+  const odName=document.getElementById('rt-name-od');
+  const odFmt=document.getElementById('rt-fmt-od');
+  const odDate=document.getElementById('rt-date-od');
+  const odEdate=document.getElementById('rt-edate-od');
+  const odNotes=document.getElementById('rt-notes-od');
+  sv('portal',document.getElementById('nb-portal'));
+  setTimeout(()=>{
+    ptab('tournaments');
+    if(odName&&document.getElementById('rt-name')) document.getElementById('rt-name').value=odName.value;
+    if(odFmt&&document.getElementById('rt-fmt')) document.getElementById('rt-fmt').value=odFmt.value;
+    if(odDate&&document.getElementById('rt-date')) document.getElementById('rt-date').value=odDate.value;
+    if(odEdate&&document.getElementById('rt-edate')) document.getElementById('rt-edate').value=odEdate.value;
+    if(odNotes&&document.getElementById('rt-notes')) document.getElementById('rt-notes').value=odNotes.value;
+  },300);
+}
+function filterHistoryOD(btn, period){
+  if(btn){document.querySelectorAll('#od-content .tb').forEach(b=>b.classList.remove('act'));btn.classList.add('act');}
+  const _now=new Date();
+  const today=_now.toISOString().slice(0,10);
+  const thisMonth=today.slice(0,7);
+  const thisYear=today.slice(0,4);
+  const _u=app.user;
+  const _hallEntry=typeof adminHalls!=='undefined'?adminHalls.find(h=>h.email===_u?.email||h.username===_u?.username||h.owner===_u?.name):null;
+  const _venueName=_hallEntry?.name||_u?.hall||'';
+  let data=typeof adminMatches!=='undefined'?adminMatches.filter(m=>m.status==='approved'&&_venueName&&m.venue&&(m.venue===_venueName||m.venue.startsWith(_venueName))):[];
+  if(period==='day') data=data.filter(m=>m.date===today);
+  else if(period==='month') data=data.filter(m=>m.date&&m.date.startsWith(thisMonth));
+  else if(period==='year') data=data.filter(m=>m.date&&m.date.startsWith(thisYear));
+  data=[...data].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const p9=data.filter(m=>m.fmt==='9-Ball').length;
+  const p10=data.filter(m=>m.fmt==='10-Ball').length;
+  const uniquePlayers=new Set(data.flatMap(m=>[m.p1,m.p2].filter(Boolean))).size;
+  const sumEl=document.getElementById('od-history-summary');
+  const cardsEl=document.getElementById('od-history-cards');
+  if(sumEl) sumEl.innerHTML=`
+    <div style="background:rgba(200,168,75,.06);border:1px solid var(--border);border-radius:8px;padding:.8rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;">
+        <span style="font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--chalk);">Total</span>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--gold);">${data.length}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.3rem;">
+        ${fmtBallTag('9-Ball')}<span style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--ivory);">${p9}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.3rem;">
+        ${fmtBallTag('10-Ball')}<span style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--ivory);">${p10}</span>
+      </div>
+    </div>
+    <div style="background:rgba(52,130,219,.06);border:1px solid rgba(52,130,219,.18);border-radius:8px;padding:.8rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.25rem;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#f5c842;">${uniquePlayers}</div>
+      <div style="font-size:.63rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Players</div>
+    </div>
+    <div style="background:rgba(31,140,78,.06);border:1px solid rgba(31,140,78,.2);border-radius:8px;padding:.8rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.25rem;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--grn3);">${data.length}</div>
+      <div style="font-size:.63rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Matches</div>
+    </div>`;
+  if(cardsEl) cardsEl.innerHTML=data.length===0
+    ?'<div style="text-align:center;color:var(--chalk2);font-size:.82rem;padding:1.5rem 0;">No matches for this period.</div>'
+    :data.map(m=>{
+      const sc=m.score||m.sc||'';
+      const pts=sc.split(/[-–]/).map(x=>parseInt(x.trim()));
+      const s1=isNaN(pts[0])?'—':pts[0]; const s2=isNaN(pts[1])?'—':pts[1];
+      const win1=pts.length===2&&pts[0]>pts[1];
+      return `<div style="background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:8px;padding:.7rem .9rem;margin-bottom:.6rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem;">
+          <div style="display:flex;gap:4px;">${m.fmt==='10-Ball'?'<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;font-size:.6rem;">10-Ball</span>':'<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;font-size:.6rem;">9-Ball</span>'}${m.type?`<span class="tag tgd" style="font-size:.6rem;">${m.type}</span>`:''}</div>
+          <span style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:.82rem;font-weight:${win1?700:500};color:${win1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p1)}</span>
+          <span style="font-family:'DM Mono',monospace;font-weight:700;font-size:.95rem;color:${win1?'var(--gold)':'var(--chalk2)'};">${s1}</span>
+        </div>
+        <div style="font-size:.6rem;color:var(--chalk2);margin:.1rem 0;">vs</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:.82rem;font-weight:${!win1?700:500};color:${!win1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p2)}</span>
+          <span style="font-family:'DM Mono',monospace;font-weight:700;font-size:.95rem;color:${!win1?'var(--gold)':'var(--chalk2)'};">${s2}</span>
+        </div>
+      </div>`;}).join('');
+}
+
 function buildDashboard(){
+  // ── Owner mode: replace public dashboard with match validation ──
+  const _ownerContent=document.getElementById('owner-dashboard-content');
+  const _publicContent=document.getElementById('dash-public-content');
+  if(app.user?.role==='owner'){
+    if(_ownerContent) _ownerContent.style.display='block';
+    if(_publicContent) _publicContent.style.display='none';
+    _buildOwnerDashboard();
+    return;
+  } else {
+    if(_ownerContent){_ownerContent.style.display='none';_ownerContent.innerHTML='';}
+    if(_publicContent) _publicContent.style.display='block';
+  }
+
   // — Hero CTA: swap based on logged-in role —
   const _cta=document.getElementById('hero-cta');
   if(_cta){
@@ -2039,7 +2364,7 @@ function doLogin(){
     closeM('m-auth');
     const fn=ru.name.split(' ')[0];
     if(ru.role==='admin'){toast('🔐 Welcome, <strong>Admin</strong>. Full system access granted.');setTimeout(()=>sv('admin',document.getElementById('nb-admin')),600);}
-    else if(ru.role==='owner'){toast(`✅ Welcome back, <strong>${fn}</strong>!`);setTimeout(()=>sv('portal',document.getElementById('nb-portal')),600);}
+    else if(ru.role==='owner'){toast(`✅ Welcome back, <strong>${fn}</strong>!`);setTimeout(()=>sv('dashboard',document.getElementById('nb-dashboard')),600);}
     else if(ru.role==='player'){toast(`✅ Welcome back, <strong>${fn}</strong>!`);setTimeout(()=>sv('player-portal',document.getElementById('nb-player-portal')),600);}
     else{toast(`✅ Welcome back, <strong>${fn}</strong>!`);}
     return;
@@ -2055,7 +2380,7 @@ function doLogin(){
       setTimeout(()=>sv('admin',document.getElementById('nb-admin')),600);
     } else if(ta.role==='owner'){
       toast(`✅ Welcome back, <strong>${ta.name.split(' ')[0]}</strong>!`);
-      setTimeout(()=>sv('portal',document.getElementById('nb-portal')),600);
+      setTimeout(()=>sv('dashboard',document.getElementById('nb-dashboard')),600);
     } else if(ta.role==='player'){
       toast(`✅ Welcome back, <strong>${ta.name.split(' ')[0]}</strong>!`);
       setTimeout(()=>sv('player-portal',document.getElementById('nb-player-portal')),600);
@@ -2127,7 +2452,7 @@ function doRegister(){
     }
     closeM('m-auth');
     toast(`🎉 Welcome, <strong>@${un}</strong>! ${role==='player'?'Your account is pending admin verification.':`Your hall registration is pending admin approval.`}`);
-    if(role==='owner') setTimeout(()=>sv('portal',document.getElementById('nb-portal')),600);
+    if(role==='owner') setTimeout(()=>sv('dashboard',document.getElementById('nb-dashboard')),600);
   };
   fetch('/api/register',{
     method:'POST',
@@ -7378,7 +7703,9 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
     const u=JSON.parse(s);
     if(!u||!u.role) return;
     setUser(u);
-    const sec=localStorage.getItem('pp_last_section')||'dashboard';
+    let sec=localStorage.getItem('pp_last_section')||'dashboard';
+    // Owner's primary landing is always the dashboard (which shows match validation)
+    if(u.role==='owner' && sec==='portal') sec='dashboard';
     const nbMap={'player-portal':'nb-player-portal','portal':'nb-portal','admin':'nb-admin','match':'nb-match'};
     const btnEl=nbMap[sec]?document.getElementById(nbMap[sec]):null;
     sv(sec,btnEl);
