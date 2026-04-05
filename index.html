@@ -1003,7 +1003,10 @@ textarea{resize:vertical;min-height:75px;}
       <!-- Venue -->
       <div class="fg" style="margin-bottom:0;">
         <label>Venue</label>
-        <select id="sel-venue"><option value="">Select venue...</option></select>
+        <div class="ac-wrap">
+          <div class="iw"><span class="ii">📍</span><input type="text" id="sel-venue" placeholder="Search venue..." oninput="venueSearch()" autocomplete="off"></div>
+          <div class="ac-list" id="venue-ac-list"></div>
+        </div>
       </div>
     </div>
 
@@ -1980,13 +1983,28 @@ function _refreshTournamentSelect(){
   if(cur) sel.value=cur;
 }
 function _refreshVenueSelect(){
-  const sel=document.getElementById('sel-venue');
-  if(!sel) return;
-  const cur=sel.value;
-  sel.innerHTML='<option value="">Select venue...</option>'+
-    HALLS.map(h=>`<option value="${h.n}${h.c?' – '+h.c:''}">${h.n}${h.c?' – '+h.c:''}</option>`).join('');
-  // Restore previously selected value if still available
-  if(cur) sel.value=cur;
+  // Build venue list from HALLS + adminHalls for search autocomplete
+  const adminActive=(typeof adminHalls!=='undefined'?adminHalls:[]).filter(h=>h.status==='active').map(h=>h.name).filter(Boolean);
+  const hallsArr=HALLS.map(h=>`${h.n}${h.c?' – '+h.c:''}`);
+  app._venueList=[...new Set([...hallsArr,...adminActive])].sort();
+}
+function venueSearch(){
+  const inp=document.getElementById('sel-venue');
+  const list=document.getElementById('venue-ac-list');
+  if(!inp||!list) return;
+  const q=inp.value.trim().toLowerCase();
+  if(!q){list.classList.remove('open');return;}
+  const venues=app._venueList||[];
+  const matches=venues.filter(v=>v.toLowerCase().includes(q)).slice(0,8);
+  if(!matches.length){list.classList.remove('open');return;}
+  list.innerHTML=matches.map(v=>`<div class="ac-item" onclick="selectVenue('${v.replace(/'/g,"\\'")}'); this.parentElement.classList.remove('open');">${v}</div>`).join('');
+  list.classList.add('open');
+}
+function selectVenue(name){
+  const inp=document.getElementById('sel-venue');
+  if(inp) inp.value=name;
+  const list=document.getElementById('venue-ac-list');
+  if(list) list.classList.remove('open');
 }
 
 function validateUsername(uname){
@@ -2223,12 +2241,11 @@ function setUser(u){
     const _p1inp=document.getElementById('p1-inp');if(_p1inp){_p1inp.value='';_p1inp.readOnly=false;_p1inp.style.color='';_p1inp.style.cursor='';}
     app.p1=''; app.p1id='';
     const venSel=document.getElementById('sel-venue');
-    if(u.hall){
-      let found=false;
-      for(let opt of venSel.options){if(opt.text.startsWith(u.hall)){opt.selected=true;found=true;break;}}
-      if(!found){const o=new Option(u.hall+' – (Your Hall)',u.hall,true,true);venSel.prepend(o);}
-      venSel.disabled=true;
+    if(u.hall&&venSel){
+      venSel.value=u.hall;
+      venSel.readOnly=true;
       venSel.style.color='var(--gold)';
+      venSel.style.cursor='default';
     }
   }
 
@@ -2317,7 +2334,7 @@ function logout(){
   inp.value='';inp.readOnly=false;inp.style.color='';inp.style.cursor='';
   app.p1='';app.p1id=null;
   const venSel=document.getElementById('sel-venue');
-  venSel.disabled=false;venSel.style.color='';venSel.selectedIndex=0;
+  if(venSel){venSel.value='';venSel.readOnly=false;venSel.style.color='';venSel.style.cursor='';}
   sv('dashboard',document.querySelector('.nb'));
   toast('👋 Logged out.');
 }
@@ -2401,10 +2418,14 @@ function buildBallGrid(p) {
   // Number balls 3–maxBall
   for (let b = 3; b <= maxBall; b++) {
     const btn = document.createElement('button');
+    const isGameBall = b === maxBall;
+    const isAutoSelected = isGameBall && hcpState.balls[p-1].has(b);
     btn.className = 'ball-btn' + (hcpState.balls[p-1].has(b) ? ' sel' : '');
     btn.dataset.ball = b;
     btn.innerHTML = `<span class="ball-num">${b}</span>`;
-    btn.title = `Ball ${b}`;
+    btn.title = isGameBall ? `Ball ${b} — auto-added with other balls` : `Ball ${b}`;
+    if (isGameBall) btn.style.cssText='opacity:.45;cursor:default;pointer-events:none;';
+    if (isAutoSelected) btn.style.cssText='opacity:.7;cursor:default;pointer-events:none;';
     btn.onclick = () => toggleBall(btn, p, b);
     grid.appendChild(btn);
   }
@@ -2427,10 +2448,12 @@ function toggleBall(btn, p, ball) {
     // If no balls left, also deselect game ball if it was auto-added
     if (s.size === 0 || (s.size === 1 && s.has(maxBall))) s.clear();
   } else {
+    // Block selecting the game ball (9 or 10) alone — must have other balls selected with it
+    if (ball === maxBall) return;
     s.add(ball);
     btn.classList.add('sel');
-    // Auto-select game ball (9 or 10) whenever any other ball is picked
-    if (ball !== maxBall) s.add(maxBall);
+    // Auto-select game ball alongside any other ball selected
+    s.add(maxBall);
   }
   buildBallGrid(p); // Rebuild to reflect None/game-ball state
   updateHcpMutex();
@@ -2469,8 +2492,7 @@ function updateHcpDisplay(p) {
   }
   let rows = '';
   if (rv > 0) {
-    rows += `<div class="hcp-row"><span class="hcp-key">Rack Handicap</span><span class="hcp-val">Starts at ${rv} — ${rv} racks pre-credited</span></div>`;
-    rows += `<div class="hcp-row"><span class="hcp-key">Race Target</span><span class="hcp-val">Still race to ${app.raceTo} (unchanged)</span></div>`;
+    rows += `<div class="hcp-row"><span class="hcp-key">Rack Handicap</span><span class="hcp-val">+${rv} racks given</span></div>`;
   }
   if (bv.size > 0) {
     const sorted = [...bv].sort((a,b)=>a-b);
@@ -2582,7 +2604,7 @@ function applyMatchTypeUI(type){
     // Only unlock venue for non-owners; owner venue is always locked to their hall
     if(!isOwner){
       const venSel=document.getElementById('sel-venue');
-      if(venSel){venSel.disabled=false;venSel.style.color='';venSel.style.cursor='';venSel.style.opacity='';}
+      if(venSel){venSel.readOnly=false;venSel.style.color='';venSel.style.cursor='';venSel.style.opacity='';}
     }
   }
 }
@@ -2592,7 +2614,7 @@ function onTournamentSelect(sel){
   const isOwner=app.user?.role==='owner';
   if(!sel.value){
     app.tournament=null; app.tournamentId=null;
-    if(!isOwner){venSel.disabled=false;venSel.style.color='';venSel.style.cursor='';venSel.style.opacity='';}
+    if(!isOwner){venSel.readOnly=false;venSel.style.color='';venSel.style.cursor='';venSel.style.opacity='';}
     return;
   }
   const tourn=TOURNAMENTS.find(t=>t.id===sel.value||t.name===sel.value);
@@ -2611,15 +2633,11 @@ function onTournamentSelect(sel){
     });
     buildBallGrid(1); buildBallGrid(2);
   }
-  // Auto-select venue from tournament's assigned hall
-  for(let opt of venSel.options){
-    const hallName=tourn.venue||'';
-    if(opt.value===hallName||opt.text===hallName||opt.text.startsWith(hallName.split('–')[0].trim())||opt.value.startsWith(hallName)){
-      opt.selected=true; break;
-    }
-  }
+  // Auto-set venue from tournament's assigned hall
+  const hallName=tourn.venue||'';
+  if(hallName&&venSel) venSel.value=hallName;
   // Lock venue
-  venSel.disabled=true;
+  venSel.readOnly=true;
   venSel.style.color='var(--gold)';
   venSel.style.cursor='not-allowed';
   venSel.style.opacity='0.75';
@@ -2709,9 +2727,8 @@ function proceedToConfirm(){
 }
 
 function csAdj(p,delta){
-  const hcp=(hcpState?.rack?.[p-1])||0;
-  if(!app.csScores) app.csScores=[hcpState?.rack?.[0]||0, hcpState?.rack?.[1]||0];
-  const minScore=hcp;
+  if(!app.csScores) app.csScores=[0,0];
+  const minScore=0;
   const maxScore=30;
   app.csScores[p-1]=Math.max(minScore,Math.min(maxScore,(app.csScores[p-1]??minScore)+delta));
   app.raceTo=Math.max(app.csScores[0]??0, app.csScores[1]??0, 1);
@@ -2728,8 +2745,7 @@ function updateCsPlusBtns(){ /* no-op: race-to is now auto */ }
 /* ── Score range slider ── */
 function scoreRangeInput(p,val){
   const v=parseInt(val)||0;
-  const hcp=(hcpState?.rack?.[p-1])||0;
-  const clamped=Math.max(hcp,v);
+  const clamped=Math.max(0,v);
   if(!app.csScores) app.csScores=[hcpState?.rack?.[0]||0, hcpState?.rack?.[1]||0];
   app.csScores[p-1]=clamped;
   // Sync display number
