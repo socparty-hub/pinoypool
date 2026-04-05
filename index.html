@@ -419,12 +419,14 @@ textarea{resize:vertical;min-height:75px;}
 .tier-amateur{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:var(--chalk);}
 .tier-inline{font-size:.65rem;padding:2px 8px;border-radius:4px;background:rgba(200,168,75,.15);color:var(--gold2);border:1px solid rgba(200,168,75,.4);white-space:nowrap;vertical-align:middle;margin:0 2px;}
 .hcp-tag{font-size:.75rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;letter-spacing:0;}
-/* Score swipe tile */
-.score-swipe-row{display:flex;align-items:center;justify-content:center;gap:1.2rem;}
-.score-adj-btn{width:52px;height:52px;border-radius:13px;background:rgba(4,9,3,.65);border:1px solid var(--border);color:var(--chalk);font-size:1.6rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,transform .1s;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
-.score-adj-btn:active{transform:scale(.92);background:rgba(53,94,59,.35);}
-.score-adj-btn-plus{background:var(--grn2);border-color:rgba(31,140,78,.5);color:var(--grn3);}
-.score-adj-btn-plus:active{background:rgba(31,140,78,.5);}
+/* Score slider */
+.score-slider-wrap{padding:.4rem 0 .6rem;}
+.score-slider-num{font-family:'Bebas Neue',sans-serif;font-size:4.8rem;line-height:1;color:var(--gold);text-align:center;transition:color .12s;letter-spacing:2px;}
+.score-slider-lbl{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:.6rem;}
+.score-range{width:100%;height:6px;border-radius:3px;outline:none;border:none;cursor:pointer;-webkit-appearance:none;appearance:none;background:var(--border);}
+.score-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;background:var(--gold2);border:3px solid #0a120e;box-shadow:0 0 0 2px rgba(200,168,75,.35);cursor:pointer;}
+.score-range::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--gold2);border:3px solid #0a120e;box-shadow:0 0 0 2px rgba(200,168,75,.35);cursor:pointer;}
+.score-range-labels{display:flex;justify-content:space-between;margin-top:5px;font-size:.58rem;color:var(--chalk2);letter-spacing:1px;font-family:'DM Mono',monospace;}
 /* Admin Portal */
 .adm-hdr{background:linear-gradient(135deg,rgba(90,20,10,.5),rgba(8,14,6,.95));border:1px solid rgba(184,50,40,.4);border-radius:12px;padding:1.4rem;margin-bottom:1.4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
 .adm-tabs{display:flex;gap:0;border:1px solid rgba(184,50,40,.3);border-radius:10px;overflow:hidden;margin-bottom:1.4rem;}
@@ -1024,23 +1026,13 @@ textarea{resize:vertical;min-height:75px;}
         </div>
       </div>
 
-      <!-- P1 Score — swipe or tap -->
-      <div style="padding:.6rem 0 .2rem;">
-        <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);opacity:.75;margin-bottom:.5rem;text-align:center;">MY SCORE</div>
-        <div class="score-swipe-row" id="score-swipe-1"
-          ontouchstart="scoreSwipeStart(event,1)" ontouchmove="scoreSwipeMove(event,1)" ontouchend="scoreSwipeEnd(event,1)"
-          onmousedown="scoreSwipeStart(event,1)">
-          <button class="score-adj-btn" onclick="csAdj(1,-1)">−</button>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:90px;user-select:none;">
-            <div id="cs-s1" style="font-family:'Bebas Neue',sans-serif;font-size:4.2rem;line-height:1;color:var(--gold);cursor:grab;touch-action:pan-y;transition:color .15s;">0</div>
-            <div style="display:flex;align-items:center;gap:4px;opacity:.35;">
-              <span style="font-size:.75rem;color:var(--chalk);">‹</span>
-              <span style="font-size:.55rem;letter-spacing:1.5px;color:var(--chalk);font-family:'Space Grotesk',sans-serif;text-transform:uppercase;">swipe</span>
-              <span style="font-size:.75rem;color:var(--chalk);">›</span>
-            </div>
-          </div>
-          <button id="cs-p1-plus" class="score-adj-btn score-adj-btn-plus" onclick="csAdj(1,1)">+</button>
-        </div>
+      <!-- P1 Score — slider -->
+      <div class="score-slider-wrap">
+        <div class="score-slider-lbl" style="color:var(--gold);opacity:.75;">MY SCORE</div>
+        <div id="cs-s1" class="score-slider-num">0</div>
+        <input type="range" id="score-range-1" class="score-range" min="0" max="30" value="0"
+          oninput="scoreRangeInput(1,this.value)" style="accent-color:var(--gold2);">
+        <div class="score-range-labels"><span>0</span><span>30</span></div>
       </div>
 
       <!-- P1 Handicap -->
@@ -1091,23 +1083,13 @@ textarea{resize:vertical;min-height:75px;}
         </div>
       </div>
 
-      <!-- P2 Score — swipe or tap -->
-      <div style="padding:.6rem 0 .2rem;">
-        <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);opacity:.75;margin-bottom:.5rem;text-align:center;">OPPONENT SCORE</div>
-        <div class="score-swipe-row" id="score-swipe-2"
-          ontouchstart="scoreSwipeStart(event,2)" ontouchmove="scoreSwipeMove(event,2)" ontouchend="scoreSwipeEnd(event,2)"
-          onmousedown="scoreSwipeStart(event,2)">
-          <button class="score-adj-btn" onclick="csAdj(2,-1)">−</button>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:90px;user-select:none;">
-            <div id="cs-s2" style="font-family:'Bebas Neue',sans-serif;font-size:4.2rem;line-height:1;color:var(--gold);cursor:grab;touch-action:pan-y;transition:color .15s;">0</div>
-            <div style="display:flex;align-items:center;gap:4px;opacity:.35;">
-              <span style="font-size:.75rem;color:var(--chalk);">‹</span>
-              <span style="font-size:.55rem;letter-spacing:1.5px;color:var(--chalk);font-family:'Space Grotesk',sans-serif;text-transform:uppercase;">swipe</span>
-              <span style="font-size:.75rem;color:var(--chalk);">›</span>
-            </div>
-          </div>
-          <button id="cs-p2-plus" class="score-adj-btn score-adj-btn-plus" onclick="csAdj(2,1)">+</button>
-        </div>
+      <!-- P2 Score — slider -->
+      <div class="score-slider-wrap">
+        <div class="score-slider-lbl" style="color:var(--chalk2);opacity:.75;">OPPONENT SCORE</div>
+        <div id="cs-s2" class="score-slider-num">0</div>
+        <input type="range" id="score-range-2" class="score-range" min="0" max="30" value="0"
+          oninput="scoreRangeInput(2,this.value)" style="accent-color:var(--gold2);">
+        <div class="score-range-labels"><span>0</span><span>30</span></div>
       </div>
 
       <!-- P2 Handicap -->
@@ -2686,11 +2668,12 @@ function proceedToConfirm(){
   app.csScores=[_hcp1, _hcp2];
   document.getElementById('cs-p1-name').textContent=p1n;
   document.getElementById('cs-p2-name').textContent=p2n;
-  document.getElementById('cs-raceto').innerHTML=`<strong style="color:var(--gold);">Race to ${app.raceTo}</strong><br><span style="font-size:.58rem;color:var(--chalk2);">Max ${app.raceTo} racks</span>`;
+  document.getElementById('cs-raceto').innerHTML=`<strong style="color:var(--gold);">Enter Final Score</strong><br><span style="font-size:.58rem;color:var(--chalk2);">Use sliders to set scores</span>`;
   document.getElementById('cs-s1').textContent=_hcp1||0;
   document.getElementById('cs-s2').textContent=_hcp2||0;
-  document.getElementById('cs-s1').style.color='var(--gold)';
-  document.getElementById('cs-s2').style.color='var(--gold)';
+  const r1=document.getElementById('score-range-1'),r2=document.getElementById('score-range-2');
+  if(r1) r1.value=_hcp1||0;
+  if(r2) r2.value=_hcp2||0;
   const _cp1=document.getElementById('cp-s1'),_cp2=document.getElementById('cp-s2');
   if(_cp1) _cp1.textContent=app.csScores[0]||0;
   if(_cp2) _cp2.textContent=app.csScores[1]||0;
@@ -2729,44 +2712,38 @@ function csAdj(p,delta){
   const hcp=(hcpState?.rack?.[p-1])||0;
   if(!app.csScores) app.csScores=[hcpState?.rack?.[0]||0, hcpState?.rack?.[1]||0];
   const minScore=hcp;
-  const maxScore=50;
+  const maxScore=30;
   app.csScores[p-1]=Math.max(minScore,Math.min(maxScore,(app.csScores[p-1]??minScore)+delta));
-  // Race To is now automatic — always equals the current winning score
   app.raceTo=Math.max(app.csScores[0]??0, app.csScores[1]??0, 1);
-  const el=document.getElementById(`cs-s${p}`);
-  if(el){ el.textContent=app.csScores[p-1]; el.style.color='var(--gold)'; }
-  const cpEl=document.getElementById(`cp-s${p}`);
-  if(cpEl){ cpEl.textContent=app.csScores[p-1]; }
+  const el=document.getElementById('cs-s'+p);
+  if(el) el.textContent=app.csScores[p-1];
+  const rangeEl=document.getElementById('score-range-'+p);
+  if(rangeEl) rangeEl.value=app.csScores[p-1];
+  const cpEl=document.getElementById('cp-s'+p);
+  if(cpEl) cpEl.textContent=app.csScores[p-1];
   updateCsWinnerPreview();
 }
 function updateCsPlusBtns(){ /* no-op: race-to is now auto */ }
 
-/* ── Score swipe gesture ── */
-const _sw={p:0,x:0,lastX:0,active:false,accum:0};
-const _SW_PX=14; // pixels per +1 step
-function scoreSwipeStart(e,p){
-  const x=e.touches?e.touches[0].clientX:e.clientX;
-  _sw.p=p;_sw.x=x;_sw.lastX=x;_sw.active=true;_sw.accum=0;
-  const el=document.getElementById('cs-s'+p);if(el) el.style.cursor='grabbing';
-  if(!e.touches){
-    document.addEventListener('mousemove',_swMouseMove,{passive:true});
-    document.addEventListener('mouseup',_swMouseUp);
-  }
-  e.preventDefault&&e.preventDefault();
-}
-function _swMouseMove(e){if(_sw.active)scoreSwipeMove(e,_sw.p);}
-function _swMouseUp(e){scoreSwipeEnd(e,_sw.p);document.removeEventListener('mousemove',_swMouseMove);document.removeEventListener('mouseup',_swMouseUp);}
-function scoreSwipeMove(e,p){
-  if(!_sw.active) return;
-  const x=e.touches?e.touches[0].clientX:e.clientX;
-  _sw.accum+=(x-_sw.lastX);
-  _sw.lastX=x;
-  const steps=Math.trunc(_sw.accum/_SW_PX);
-  if(steps!==0){csAdj(p,steps);_sw.accum-=steps*_SW_PX;}
-}
-function scoreSwipeEnd(e,p){
-  _sw.active=false;
-  const el=document.getElementById('cs-s'+p);if(el) el.style.cursor='grab';
+/* ── Score range slider ── */
+function scoreRangeInput(p,val){
+  const v=parseInt(val)||0;
+  const hcp=(hcpState?.rack?.[p-1])||0;
+  const clamped=Math.max(hcp,v);
+  if(!app.csScores) app.csScores=[hcpState?.rack?.[0]||0, hcpState?.rack?.[1]||0];
+  app.csScores[p-1]=clamped;
+  // Sync display number
+  const numEl=document.getElementById('cs-s'+p);
+  if(numEl) numEl.textContent=clamped;
+  // Sync slider thumb if clamped
+  const rangeEl=document.getElementById('score-range-'+p);
+  if(rangeEl&&clamped!==v) rangeEl.value=clamped;
+  // Auto race-to = winning score
+  app.raceTo=Math.max(app.csScores[0]??0, app.csScores[1]??0, 1);
+  // Sync confirm panel scores
+  const cpEl=document.getElementById('cp-s'+p);
+  if(cpEl) cpEl.textContent=clamped;
+  updateCsWinnerPreview();
 }
 
 function updateCsWinnerPreview(){
@@ -3099,6 +3076,10 @@ function finalizeMatch(){
 
 function resetMatch(){
   app.scores=[0,0];app.matchOn=false;app.rackLog=[];app.csScores=[0,0];
+  [1,2].forEach(p=>{
+    const numEl=document.getElementById('cs-s'+p);if(numEl) numEl.textContent='0';
+    const rangeEl=document.getElementById('score-range-'+p);if(rangeEl) rangeEl.value=0;
+  });
   if(!app.user||app.user.role!=='player'){app.p1='';app.p1id=null;}
   app.p2='';app.p2id=null;
   hcpState.rack=[0,0];hcpState.balls=[new Set(),new Set()];
