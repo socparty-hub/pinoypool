@@ -2671,9 +2671,9 @@ function proceedToConfirm(){
   document.getElementById('cs-raceto').innerHTML=`<strong style="color:var(--gold);">Enter Final Score</strong><br><span style="font-size:.58rem;color:var(--chalk2);">Use sliders to set scores</span>`;
   document.getElementById('cs-s1').textContent=_hcp1||0;
   document.getElementById('cs-s2').textContent=_hcp2||0;
-  const r1=document.getElementById('score-range-1'),r2=document.getElementById('score-range-2');
-  if(r1) r1.value=_hcp1||0;
-  if(r2) r2.value=_hcp2||0;
+  const _sr1=document.getElementById('score-range-1'),_sr2=document.getElementById('score-range-2');
+  if(_sr1) _sr1.value=_hcp1||0;
+  if(_sr2) _sr2.value=_hcp2||0;
   const _cp1=document.getElementById('cp-s1'),_cp2=document.getElementById('cp-s2');
   if(_cp1) _cp1.textContent=app.csScores[0]||0;
   if(_cp2) _cp2.textContent=app.csScores[1]||0;
