@@ -5927,12 +5927,12 @@ function ptab(tab){
     const _ownedPending=manualPending.filter(m=>!_ownerHallName||!m.venue||m.venue===_ownerHallName);
     const _totalActions=_ownedPending.length+_playerSetMatches.length+pendVal.length;
 
-    // ── Helper: format hcp label ──
+    // ── Helper: format hcp label — matches app's existing format ──
     const _hcpLabel=(rack,balls)=>{
-      const parts=[];
-      if(rack>0) parts.push(`+${rack} Rack${rack>1?'s':''}`);
-      if(balls&&balls.length>0) parts.push(`Last ${balls.join(', ')}`);
-      return parts.length?'Hcp: '+parts.join(' · '):'Hcp: Scratch';
+      let s='';
+      if(rack>0) s+=`(+${rack})`;
+      if(balls&&balls.length>0) s+=`(${[...balls].sort((a,b)=>a-b).join(',')})`;
+      return s?`<span style="font-size:.68rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;letter-spacing:0;">${s}</span>`:'';
     };
     // ── Helper: split player name for 2-line display ──
     const _pName=(name)=>{
@@ -5946,10 +5946,12 @@ function ptab(tab){
       const t=careerTier(0,0,status);
       return `<span style="font-size:.55rem;font-weight:800;padding:1px 6px;border-radius:3px;background:${t.bg};color:${t.color};border:1px solid ${t.border};font-family:'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:.5px;">${t.label}</span>`;
     };
-    // ── Helper: format badge ──
+    // ── Helper: format badge — uses app's existing tag styles ──
     const _fmtBadge=(fmt)=>fmt==='9-Ball'
-      ?`<span style="font-size:.6rem;font-weight:800;font-family:'Space Grotesk',sans-serif;color:var(--gold);padding:2px 8px;border-radius:4px;background:rgba(242,202,80,.1);border:1px solid rgba(242,202,80,.25);">9-BALL</span>`
-      :`<span style="font-size:.6rem;font-weight:800;font-family:'Space Grotesk',sans-serif;color:#60a5fa;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);">10-BALL</span>`;
+      ?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt}</span>`
+      :`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt||'9-Ball'}</span>`;
+    // ── Helper: match type badge ──
+    const _typeBadge=(type)=>type?`<span class="tag tgd">${type}</span>`:'';
     // ── Helper: render new-design match card ──
     const _mvCard=(m,approveFn,rejectFn,extraStatus)=>{
       const sc=(m.sc||m.score||'0-0').split(/[-–]/).map(x=>x.trim());
@@ -5965,7 +5967,7 @@ function ptab(tab){
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <div style="display:flex;gap:.4rem;align-items:center;">
               ${_fmtBadge(m.fmt||'9-Ball')}
-              <span style="font-size:.6rem;color:#d0c5af;font-family:'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:.5px;">${m.type||''}</span>
+              ${_typeBadge(m.type)}
             </div>
             <span style="font-size:.6rem;color:#d0c5af;">${fmtDate(m.date||m.ts)}</span>
           </div>
@@ -5976,8 +5978,7 @@ function ptab(tab){
             <div style="display:flex;align-items:center;justify-content:space-between;">
               <div>
                 <div style="font-family:'Epilogue',sans-serif;font-weight:800;font-size:.82rem;line-height:1.25;color:#fff;">${_pName(m.p1)}</div>
-                <div style="margin-top:.25rem;">${_tierBadge(t1)}</div>
-                <div style="font-size:.58rem;color:#d0c5af;margin-top:.2rem;text-transform:uppercase;letter-spacing:.3px;">${_hcpLabel(r1,b1)}</div>
+                <div style="margin-top:.15rem;display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;">${_tierBadge(t1)}${_hcpLabel(r1,b1)}</div>
               </div>
               <span style="color:var(--gold2);font-size:.9rem;margin-left:.3rem;">✓</span>
             </div>
@@ -5990,8 +5991,7 @@ function ptab(tab){
               <span style="color:var(--gold2);font-size:.9rem;margin-right:.3rem;">✓</span>
               <div style="text-align:right;">
                 <div style="font-family:'Epilogue',sans-serif;font-weight:800;font-size:.82rem;line-height:1.25;color:#fff;text-align:right;">${_pName(m.p2)}</div>
-                <div style="margin-top:.25rem;text-align:right;">${_tierBadge(t2)}</div>
-                <div style="font-size:.58rem;color:#d0c5af;margin-top:.2rem;text-transform:uppercase;letter-spacing:.3px;text-align:right;">${_hcpLabel(r2,b2)}</div>
+                <div style="margin-top:.15rem;display:flex;align-items:center;justify-content:flex-end;gap:.3rem;flex-wrap:wrap;">${_hcpLabel(r2,b2)}${_tierBadge(t2)}</div>
               </div>
             </div>
           </div>
