@@ -765,7 +765,6 @@ textarea{resize:vertical;min-height:75px;}
             <div class="av-dd-role" id="av-dd-role"></div>
           </div>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('player-portal',null)" id="av-dd-portal" style="display:none;">My Portal</button>
-          <button class="av-dd-item" onclick="toggleAvDropdown();sv('portal',null)" id="av-dd-hall" style="display:none;">Hall Portal</button>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('portal',null);setTimeout(()=>ptab('profile'),300)" id="av-dd-hall-profile" style="display:none;">Hall Profile</button>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('admin',null)" id="av-dd-admin" style="display:none;">Admin</button>
           <button class="av-dd-item logout" onclick="toggleAvDropdown();logout()">Logout</button>
@@ -2508,11 +2507,9 @@ function setUser(u){
   if(avDdName) avDdName.textContent=fmtPlayerName(u.name);
   if(avDdRole) avDdRole.textContent=roleLabels[u.role]||u.role;
   const avDdPortal=document.getElementById('av-dd-portal');
-  const avDdHall=document.getElementById('av-dd-hall');
   const avDdHallProfile=document.getElementById('av-dd-hall-profile');
   const avDdAdmin=document.getElementById('av-dd-admin');
   if(avDdPortal) avDdPortal.style.display=u.role==='player'?'flex':'none';
-  if(avDdHall) avDdHall.style.display=u.role==='owner'?'flex':'none';
   if(avDdHallProfile) avDdHallProfile.style.display=u.role==='owner'?'flex':'none';
   if(avDdAdmin) avDdAdmin.style.display=u.role==='admin'?'flex':'none';
 
