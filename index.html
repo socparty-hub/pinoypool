@@ -2919,27 +2919,17 @@ function submitFinalScore(){
     initiatedBy:'player'
   });
   saveAdminMatches();
-  // Show confirm panel as read-only status view
-  const _p1n=app.p1.split(' ')[0]||'Player 1', _p2n=app.p2.split(' ')[0]||'Player 2';
-  document.getElementById('match-setup-panel').style.display='none';
-  document.getElementById('match-confirm-panel').style.display='block';
-  document.getElementById('cs-p1-name').textContent=_p1n;
-  document.getElementById('cs-p2-name').textContent=_p2n;
-  document.getElementById('cs-raceto').innerHTML=`<strong style="color:var(--gold);">Race to ${app.raceTo}</strong><br><span style="font-size:.58rem;color:var(--chalk2);">Max ${app.raceTo} racks</span>`;
-  const _cp1=document.getElementById('cp-s1'),_cp2=document.getElementById('cp-s2');
-  if(_cp1){_cp1.textContent=s1;_cp1.style.color=s1===app.raceTo?'var(--grn3)':'var(--gold)';}
-  if(_cp2){_cp2.textContent=s2;_cp2.style.color=s2===app.raceTo?'var(--grn3)':'var(--gold)';}
-  document.getElementById('cs-chain').style.display='block';
-  document.getElementById('cs-owner-note').style.display='none';
-  document.getElementById('cs-actions').style.display='none';
-  document.getElementById('cs-waiting').style.display='block';
-  setChain(1,'done','Submitted');
-  setChain(2,'pending','Awaiting');
-  setChain(3,'pending','Awaiting');
-  setChain(4,'pending','Awaiting');
   buildDashboard();
   updateNavBadges();
   toast('📨 Match submitted! Awaiting <strong>opponent</strong> and <strong>venue</strong> confirmation before rankings update.');
+  resetMatch();
+  // Redirect player straight to Match Validation in their portal
+  const _ppBtn=document.getElementById('nb-player-portal');
+  sv('player-portal', _ppBtn);
+  setTimeout(()=>{
+    const _valBtn=document.querySelector('.pp-tab');
+    if(_valBtn) ppTab(_valBtn,'validation');
+  }, 100);
 }
 
 function setChain(n,state,label){
