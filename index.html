@@ -731,6 +731,7 @@ textarea{resize:vertical;min-height:75px;}
   </a>
   <nav id="main-nav">
     <button class="nb act" id="nb-dashboard" onclick="sv('dashboard',this)">Dashboard</button>
+    <button class="nb" id="nb-matches" onclick="sv('matches',this)">Matches</button>
     <button class="nb" id="nb-match" onclick="sv('match',this)" style="display:none">Record Match</button>
     <button class="nb" id="nb-live" onclick="sv('live',this)">Watch Now</button>
     <button class="nb" id="nb-rankings" onclick="toggleHamRankSubs(this)">Rankings</button>
@@ -819,7 +820,7 @@ textarea{resize:vertical;min-height:75px;}
     <span style="font-size:1.1rem;">🔥</span>
     <h2 class="dash-section-title">Recent Verified Matches</h2>
     <div class="dash-section-line"></div>
-    <button class="dash-view-all" onclick="sv('rankings',document.querySelectorAll('.nb')[3])">View All</button>
+    <button class="dash-view-all" onclick="sv('matches',document.getElementById('nb-matches'))">View All</button>
   </div>
   <div id="dash-log">
     <div style="text-align:center;padding:1.5rem;color:var(--chalk2);font-size:.82rem;">No verified matches yet.</div>
@@ -839,6 +840,107 @@ textarea{resize:vertical;min-height:75px;}
   </div>
   <button class="dash-leaderboard-btn" onclick="sv('rankings',document.querySelectorAll('.nb')[3])" style="margin-top:.5rem;">View Full Leaderboard</button>
 
+</div>
+
+<!-- ══════════════════════════════════════════
+     MATCHES
+══════════════════════════════════════════ -->
+<div id="view-matches" class="view">
+  <div style="padding:0 0 2rem;">
+
+    <!-- Page header -->
+    <div style="margin-bottom:1.2rem;">
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem;">
+        <span style="font-size:1.1rem;">✅</span>
+        <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;color:#fff;margin:0;">Verified Matches</h2>
+        <span id="matches-count" style="font-family:'Space Grotesk',sans-serif;font-size:.7rem;color:var(--chalk2);font-weight:600;margin-left:.3rem;"></span>
+      </div>
+      <div style="height:1px;background:rgba(212,175,55,.15);margin-top:.5rem;"></div>
+    </div>
+
+    <!-- Search + Filter bar -->
+    <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:1.2rem;">
+      <input type="text" id="matches-search"
+        placeholder="🔍 Search player..."
+        oninput="filterMatchesPage()"
+        style="flex:1;min-width:0;background:#0d1a10;border:1px solid rgba(53,94,59,.4);border-radius:9px;padding:.6rem .9rem;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:.78rem;outline:none;">
+      <button onclick="openMatchFilters()"
+        style="display:flex;align-items:center;gap:.35rem;padding:.6rem .9rem;background:#0d1a10;border:1px solid rgba(53,94,59,.4);border-radius:9px;color:var(--gold2);font-family:'Space Grotesk',sans-serif;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:pointer;white-space:nowrap;">
+        <span>⚙</span><span>Filters</span><span id="matches-filter-badge" style="display:none;background:var(--gold2);color:#0a120e;border-radius:50%;width:16px;height:16px;font-size:.6rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;"></span>
+      </button>
+    </div>
+
+    <!-- Filter overlay (bottom sheet) -->
+    <div id="match-filter-overlay" onclick="closeMatchFilters()"
+      style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.65);align-items:flex-end;justify-content:center;">
+      <div onclick="event.stopPropagation()"
+        style="width:100%;max-width:520px;background:#0d1f15;border-radius:20px 20px 0 0;padding:1.4rem 1.3rem 2.2rem;border-top:1px solid rgba(53,94,59,.4);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;padding-bottom:.9rem;border-bottom:1px solid rgba(53,94,59,.25);">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:#fff;letter-spacing:2px;">Filters</span>
+          <button onclick="closeMatchFilters()" style="background:transparent;border:none;cursor:pointer;display:flex;align-items:center;gap:.3rem;">
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:700;color:var(--chalk2);text-transform:uppercase;letter-spacing:1px;">Close</span>
+            <span style="color:var(--gold2);font-size:.9rem;">‹</span>
+          </button>
+        </div>
+        <!-- Date -->
+        <div style="margin-bottom:1.2rem;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--chalk2);margin-bottom:.5rem;">Date</div>
+          <select id="mf-date" style="width:100%;background:#0a1810;color:#fff;border:1px solid rgba(53,94,59,.35);border-radius:9px;padding:.75rem 1rem;font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;">
+            <option value="all">All Time</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+          </select>
+        </div>
+        <!-- Career Status -->
+        <div style="margin-bottom:1.2rem;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--chalk2);margin-bottom:.5rem;">Career Status</div>
+          <select id="mf-tier" style="width:100%;background:#0a1810;color:#fff;border:1px solid rgba(53,94,59,.35);border-radius:9px;padding:.75rem 1rem;font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;">
+            <option value="">All Players</option>
+            <option value="Elite">Elite</option>
+            <option value="Pro">Pro</option>
+            <option value="Semi-Pro">Semi-Pro</option>
+            <option value="Skilled">Skilled</option>
+            <option value="Amateur">Amateur</option>
+          </select>
+        </div>
+        <!-- Match Format -->
+        <div style="margin-bottom:1.2rem;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--chalk2);margin-bottom:.5rem;">Match Format</div>
+          <select id="mf-fmt" style="width:100%;background:#0a1810;color:#fff;border:1px solid rgba(53,94,59,.35);border-radius:9px;padding:.75rem 1rem;font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;">
+            <option value="">All Formats</option>
+            <option value="9-Ball">9-Ball</option>
+            <option value="10-Ball">10-Ball</option>
+          </select>
+        </div>
+        <!-- Match Type -->
+        <div style="margin-bottom:1.2rem;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--chalk2);margin-bottom:.5rem;">Match Type</div>
+          <select id="mf-type" style="width:100%;background:#0a1810;color:#fff;border:1px solid rgba(53,94,59,.35);border-radius:9px;padding:.75rem 1rem;font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;">
+            <option value="">All Types</option>
+            <option value="Tournament">Tournament</option>
+            <option value="Money Game">Money Game</option>
+            <option value="Exhibition">Exhibition</option>
+          </select>
+        </div>
+        <!-- Venue -->
+        <div style="margin-bottom:1.6rem;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--chalk2);margin-bottom:.5rem;">Venue</div>
+          <select id="mf-venue" style="width:100%;background:#0a1810;color:#fff;border:1px solid rgba(53,94,59,.35);border-radius:9px;padding:.75rem 1rem;font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;">
+            <option value="">All Venues</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:.7rem;">
+          <button onclick="resetMatchFilters()" style="flex:1;padding:.9rem;border-radius:10px;background:transparent;border:1px solid rgba(53,94,59,.4);color:var(--chalk2);font-family:'Space Grotesk',sans-serif;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;cursor:pointer;">Reset</button>
+          <button onclick="applyMatchFilters()" style="flex:2;padding:.9rem;border-radius:10px;background:var(--gold2);color:#0a120e;font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;cursor:pointer;border:none;">Apply Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards list -->
+    <div id="matches-list"></div>
+
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -1614,6 +1716,7 @@ function sv(id, btn){
   if(v) v.classList.add('act');
   if(btn && btn.classList) btn.classList.add('act');
   if(id==='dashboard') buildDashboard();
+  if(id==='matches') buildMatchesPage();
   if(id==='rankings') buildRankings();
   if(id==='halls') buildHalls();
   if(id==='portal') buildPortal();
@@ -3151,6 +3254,191 @@ function applyPprFilters(){
   closePprFilters();
   renderLbTab('global');
 }
+
+/* ══════════════════════════════════════════
+   MATCHES PAGE
+══════════════════════════════════════════ */
+app._matchFilters={date:'all',tier:'',fmt:'',type:'',venue:''};
+
+function buildMatchesPage(){
+  const list=document.getElementById('matches-list');
+  if(!list) return;
+
+  // Populate venue dropdown dynamically
+  const venSel=document.getElementById('mf-venue');
+  if(venSel){
+    const venues=[...new Set(
+      (typeof adminMatches!=='undefined'?adminMatches:[])
+        .filter(m=>m.status==='approved'&&m.venue&&m.venue!=='—')
+        .map(m=>m.venue)
+    )].sort();
+    const curVenue=venSel.value;
+    venSel.innerHTML=`<option value="">All Venues</option>`+venues.map(v=>`<option value="${v}"${v===curVenue?' selected':''}>${v}</option>`).join('');
+  }
+
+  // Restore filter selects from state
+  const f=app._matchFilters;
+  ['date','tier','fmt','type','venue'].forEach(k=>{
+    const el=document.getElementById('mf-'+k);
+    if(el&&f[k]) el.value=f[k];
+  });
+
+  renderMatchesPage();
+}
+
+function renderMatchesPage(){
+  const list=document.getElementById('matches-list');
+  const countEl=document.getElementById('matches-count');
+  if(!list) return;
+
+  const f=app._matchFilters;
+  const q=(document.getElementById('matches-search')?.value||'').toLowerCase().trim();
+  const now=new Date();
+
+  let matches=(typeof adminMatches!=='undefined'?adminMatches:[])
+    .filter(m=>m.status==='approved')
+    .sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+
+  // Date filter
+  if(f.date!=='all'){
+    matches=matches.filter(m=>{
+      const d=new Date(m.date);
+      if(f.date==='week'){const w=new Date(now);w.setDate(w.getDate()-7);return d>=w;}
+      if(f.date==='month'){return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}
+      if(f.date==='year'){return d.getFullYear()===now.getFullYear();}
+      return true;
+    });
+  }
+
+  // Career status filter — match if either player has the tier
+  if(f.tier){
+    matches=matches.filter(m=>{
+      const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)?.status||'');
+      const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
+      return t1===f.tier||t2===f.tier;
+    });
+  }
+
+  // Format filter
+  if(f.fmt) matches=matches.filter(m=>m.fmt===f.fmt);
+
+  // Type filter
+  if(f.type) matches=matches.filter(m=>(m.type||'').toLowerCase()===f.type.toLowerCase());
+
+  // Venue filter
+  if(f.venue) matches=matches.filter(m=>m.venue===f.venue);
+
+  // Search
+  if(q) matches=matches.filter(m=>
+    (m.p1||'').toLowerCase().includes(q)||(m.p2||'').toLowerCase().includes(q)
+  );
+
+  // Update count
+  if(countEl) countEl.textContent=matches.length+' record'+(matches.length!==1?'s':'');
+
+  // Update filter badge
+  const badge=document.getElementById('matches-filter-badge');
+  const activeCount=['tier','fmt','type','venue'].filter(k=>f[k]).length+(f.date!=='all'?1:0);
+  if(badge){
+    if(activeCount>0){badge.textContent=activeCount;badge.style.display='inline-flex';}
+    else{badge.style.display='none';}
+  }
+
+  if(!matches.length){
+    list.innerHTML=`<div style="text-align:center;padding:2.5rem 1rem;color:var(--chalk2);font-size:.82rem;">No matches found.</div>`;
+    return;
+  }
+
+  list.innerHTML=matches.map(m=>{
+    const sc=m.score||m.sc||'';
+    const scParts=sc.split(/[-–]/).map(x=>parseInt(x.trim()));
+    const s1=isNaN(scParts[0])?'—':scParts[0];
+    const s2=isNaN(scParts[1])?'—':scParts[1];
+    const isWin=scParts.length===2&&scParts[0]>scParts[1];
+
+    const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)?.status||'');
+    const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
+    const tier1=t1?careerTier(0,0,t1):null;
+    const tier2=t2?careerTier(0,0,t2):null;
+    const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:'';
+    const tb2=tier2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier2.bg};color:${tier2.color};border:1px solid ${tier2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier2.label}</span>`:'';
+
+    const hcpR=m.hcpRack||[0,0];
+    const hcpB1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
+    const hcpB2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
+    function hcpTag(rack,balls){
+      const parts=[];
+      if(rack>0) parts.push(`+${rack}`);
+      if(balls.length>0) parts.push(balls.join(','));
+      if(!parts.length) return '';
+      return `<span style="font-size:.75rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;">(${parts.join(' · ')})</span>`;
+    }
+    const hcpTag1=hcpTag(hcpR[0],hcpB1);
+    const hcpTag2=hcpTag(hcpR[1],hcpB2);
+
+    const fmtBadge=m.fmt==='9-Ball'
+      ?`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
+      :`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">10-Ball</span>`;
+    const typeBadge=m.type?`<span style="padding:2px 8px;background:rgba(53,94,59,.4);border:1px solid rgba(53,94,59,.3);color:var(--gold2);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.type}</span>`:'';
+
+    return `<div class="dash-match-card"><div class="dash-match-card-inner">
+      <div class="dash-match-card-head">
+        <div class="dash-match-card-badges">${fmtBadge}${typeBadge}</div>
+        <span class="dash-match-card-date">${fmtDate(m.date)}</span>
+      </div>
+      <div class="dash-match-card-body">
+        <div class="dash-match-players-col">
+          <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:${isWin?'800':'500'};color:${isWin?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p1)}</span>${tb1}${hcpTag1}</div>
+          <div class="dash-match-vs">vs</div>
+          <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:${!isWin?'800':'500'};color:${!isWin?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p2)}</span>${tb2}${hcpTag2}</div>
+        </div>
+        <div class="dash-match-scores-col">
+          <span class="${isWin?'dash-match-score-win':'dash-match-score-lose'}">${s1}</span>
+          <span style="font-size:.6rem;color:transparent;user-select:none;">vs</span>
+          <span class="${!isWin?'dash-match-score-win':'dash-match-score-lose'}">${s2}</span>
+        </div>
+      </div>
+      ${m.venue&&m.venue!=='—'?`<div style="margin-top:.5rem;font-size:.62rem;color:var(--chalk2);font-family:'Space Grotesk',sans-serif;">📍 ${m.venue}</div>`:''}
+    </div></div>`;
+  }).join('');
+}
+
+function filterMatchesPage(){
+  renderMatchesPage();
+}
+
+function openMatchFilters(){
+  const ov=document.getElementById('match-filter-overlay');
+  if(ov){ov.style.display='flex';document.body.style.overflow='hidden';}
+}
+
+function closeMatchFilters(){
+  const ov=document.getElementById('match-filter-overlay');
+  if(ov){ov.style.display='none';document.body.style.overflow='';}
+}
+
+function applyMatchFilters(){
+  app._matchFilters={
+    date:document.getElementById('mf-date')?.value||'all',
+    tier:document.getElementById('mf-tier')?.value||'',
+    fmt:document.getElementById('mf-fmt')?.value||'',
+    type:document.getElementById('mf-type')?.value||'',
+    venue:document.getElementById('mf-venue')?.value||''
+  };
+  closeMatchFilters();
+  renderMatchesPage();
+}
+
+function resetMatchFilters(){
+  app._matchFilters={date:'all',tier:'',fmt:'',type:'',venue:''};
+  ['mf-date','mf-tier','mf-fmt','mf-type','mf-venue'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value=id==='mf-date'?'all':'';
+  });
+  closeMatchFilters();
+  renderMatchesPage();
+}
+
 function setPprPeriod(btn,period){
   document.querySelectorAll('.ppr-flt').forEach(b=>b.classList.remove('act'));
   btn.classList.add('act');
