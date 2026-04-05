@@ -1507,6 +1507,10 @@ function buildDashboard(){
           ?`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
           :`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">10-Ball</span>`;
         const typeBadge=m.type?`<span style="padding:2px 8px;background:rgba(53,94,59,.4);border:1px solid rgba(53,94,59,.3);color:var(--gold2);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.type}</span>`:'';
+        const hcpR=m.hcpRack||[0,0];
+        const hasHcp=(hcpR[0]>0||hcpR[1]>0)||(m.hcp&&m.hcp!=='None'&&m.hcp!=='none');
+        const hcpLabel=hcpR[0]>0||hcpR[1]>0?`+${hcpR[0]}/${hcpR[1]}`:(m.hcp&&m.hcp!=='None'?m.hcp:'');
+        const hcpBadge=hasHcp?`<span style="padding:2px 8px;background:rgba(184,50,40,.15);border:1px solid rgba(184,50,40,.35);color:#e8a040;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">HCP ${hcpLabel}</span>`:'';
         const sc=m.sc||'';
         const scParts=sc.split(/[-–]/).map(x=>parseInt(x.trim()));
         const s1=isNaN(scParts[0])?'—':scParts[0];
@@ -1520,7 +1524,7 @@ function buildDashboard(){
         const tb2=tier2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier2.bg};color:${tier2.color};border:1px solid ${tier2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier2.label}</span>`:'';
         return `<div class="dash-match-card"><div class="dash-match-card-inner">
           <div class="dash-match-card-head">
-            <div class="dash-match-card-badges">${fmtBadge}${typeBadge}</div>
+            <div class="dash-match-card-badges">${fmtBadge}${typeBadge}${hcpBadge}</div>
             <span class="dash-match-card-date">${fmtDate(m.ts||m.date)}</span>
           </div>
           <div class="dash-match-card-body">
