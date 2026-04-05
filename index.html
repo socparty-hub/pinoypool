@@ -2357,6 +2357,10 @@ function logout(){
 function acSearch(inpId, listId){
   const val=document.getElementById(inpId).value.trim().toLowerCase();
   const list=document.getElementById(listId);
+  // Clear tier tag as soon as user edits the input (player no longer confirmed)
+  const _pNum=inpId==='p1-inp'?'1':'2';
+  const _tt=document.getElementById('p'+_pNum+'-tier-tag');
+  if(_tt) _tt.innerHTML='';
   if(val.length<2){list.classList.remove('open');return;}
   const other=inpId==='p1-inp'?app.p2:app.p1;
   // Build pool: active adminPlayers (primary, works before/after initFromBackend) + PLAYERS (deduped)
