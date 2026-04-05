@@ -1023,11 +1023,13 @@ textarea{resize:vertical;min-height:75px;}
         </div>
       </div>
       <div class="fg" style="margin-bottom:.8rem;">
-        <div class="ac-wrap">
-          <div class="iw"><span class="ii">🔍</span><input type="text" id="p1-inp" placeholder="Type name to search..." oninput="acSearch('p1-inp','p1-list','p1-hcp-sel')" autocomplete="off"></div>
-          <div class="ac-list" id="p1-list"></div>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div class="ac-wrap" style="flex:1;min-width:0;">
+            <div class="iw"><span class="ii">🔍</span><input type="text" id="p1-inp" placeholder="Type name to search..." oninput="acSearch('p1-inp','p1-list','p1-hcp-sel')" autocomplete="off"></div>
+            <div class="ac-list" id="p1-list"></div>
+          </div>
+          <div id="p1-tier-tag" style="flex-shrink:0;"></div>
         </div>
-        <div id="p1-tier-tag" style="margin-top:.45rem;min-height:18px;"></div>
       </div>
 
       <!-- P1 Score — slider -->
@@ -1081,11 +1083,13 @@ textarea{resize:vertical;min-height:75px;}
       </div>
       <div class="fg" style="margin-bottom:.8rem;">
         <label>Find Opponent</label>
-        <div class="ac-wrap">
-          <div class="iw"><span class="ii">🔍</span><input type="text" id="p2-inp" placeholder="Enter name or Player ID..." oninput="acSearch('p2-inp','p2-list','p2-hcp-sel')" autocomplete="off"></div>
-          <div class="ac-list" id="p2-list"></div>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div class="ac-wrap" style="flex:1;min-width:0;">
+            <div class="iw"><span class="ii">🔍</span><input type="text" id="p2-inp" placeholder="Enter name or Player ID..." oninput="acSearch('p2-inp','p2-list','p2-hcp-sel')" autocomplete="off"></div>
+            <div class="ac-list" id="p2-list"></div>
+          </div>
+          <div id="p2-tier-tag" style="flex-shrink:0;"></div>
         </div>
-        <div id="p2-tier-tag" style="margin-top:.45rem;min-height:18px;"></div>
       </div>
 
       <!-- P2 Score — slider -->
