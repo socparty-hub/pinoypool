@@ -5450,7 +5450,11 @@ function ppTab(btn,tab){
     // Apply format filter
     if(sort==='fmt'&&fmtF) _hMatches=_hMatches.filter(m=>m.fmt===fmtF);
     // Always sort recent → oldest regardless of view mode
-    _hMatches.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    _hMatches.sort((a,b)=>{
+      const _da=new Date(a.date||a.ts||a.submittedAt||0);
+      const _db=new Date(b.date||b.ts||b.submittedAt||0);
+      return _db-_da;
+    });
     const _scStyle=`font-family:'DM Mono',monospace;font-weight:700;font-size:1.05rem;`;
     const _fmtBadgeFn=f=>f==='9-Ball'
       ?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${f}</span>`
