@@ -5509,7 +5509,6 @@ function ppTab(btn,tab){
         :_hMatches.map(m=>{
           const _ip1=m.p1===_pName;
           const _opp=_ip1?m.p2:m.p1;
-          const _oppRank=(PLAYERS.find(p=>p.name===_opp)||{}).rank||'?';
           const _pts=(m.score||'0-0').split(/[-–]/).map(Number);
           const _myS=_ip1?_pts[0]:_pts[1]; const _opS=_ip1?_pts[1]:_pts[0];
           const _win=_myS>_opS;
@@ -5520,26 +5519,36 @@ function ppTab(btn,tab){
           const _mb=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[_ip1?0:1])?m.hcpBalls[_ip1?0:1]:[];
           const _ob=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[_ip1?1:0])?m.hcpBalls[_ip1?1:0]:[];
           const _mh=fmtHcpTag(_mr,_mb); const _oh=fmtHcpTag(_or,_ob);
-          const _myLbl=`${fmtPlayerName(_pName)}${_myTier?` <span class="tier-inline">${_myTier}</span>`:''}${_mh?` <span class="hcp-tag">${_mh}</span>`:''}`;
-          const _opLbl=`${fmtPlayerName(_opp)}${_opTier?` <span class="tier-inline">${_opTier}</span>`:''}${_oh?` <span class="hcp-tag">${_oh}</span>`:''}`;
-          const _topLeft=sort==='venue'
-            ?`<span style="font-size:.73rem;color:var(--chalk);">📍 ${m.venue||'—'}</span>`
-            :`${_fmtBadgeFn(m.fmt||'9-Ball')}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}`;
-          return `<div class="le ${_win?'lw':'ll'}" style="flex-direction:column;align-items:stretch;gap:0;margin-bottom:4px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
-              <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_topLeft}</div>
-              <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
+          const _myTierObj=_myTier?careerTier(0,0,_myTier):null;
+          const _opTierObj=_opTier?careerTier(0,0,_opTier):null;
+          const _tbMe=_myTierObj?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${_myTierObj.bg};color:${_myTierObj.color};border:1px solid ${_myTierObj.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${_myTierObj.label}</span>`:'';
+          const _tbOp=_opTierObj?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${_opTierObj.bg};color:${_opTierObj.color};border:1px solid ${_opTierObj.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${_opTierObj.label}</span>`:'';
+          const _hMe=_mh?`<span style="font-size:.72rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;">${_mh}</span>`:'';
+          const _hOp=_oh?`<span style="font-size:.72rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;">${_oh}</span>`:'';
+          const _fmtBadge=m.fmt==='9-Ball'
+            ?`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
+            :`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.fmt||'9-Ball'}</span>`;
+          const _typeBadge=m.type?`<span style="padding:2px 8px;background:rgba(53,94,59,.4);border:1px solid rgba(53,94,59,.3);color:var(--gold2);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.type}</span>`:'';
+          const _venueLine=sort==='venue'?`<div style="font-size:.6rem;color:rgba(224,224,224,.4);font-family:'Space Grotesk',sans-serif;margin-top:.35rem;">📍 ${m.venue||'—'}</div>`:'';
+          return `<div class="dash-match-card"><div class="dash-match-card-inner">
+            <div class="dash-match-card-head">
+              <div class="dash-match-card-badges">${_fmtBadge}${_typeBadge}</div>
+              <span class="dash-match-card-date">${fmtDate(m.date)}</span>
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_myLbl}</div>
-              <span style="${_scStyle}color:${_win?'var(--gold)':'var(--chalk2)'};">${_myS}</span>
+            <div class="dash-match-card-body">
+              <div class="dash-match-players-col">
+                <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:${_win?'800':'500'};color:${_win?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(_pName)}</span>${_tbMe}${_hMe}</div>
+                <div class="dash-match-vs">vs</div>
+                <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:${!_win?'800':'500'};color:${!_win?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(_opp)}</span>${_tbOp}${_hOp}</div>
+              </div>
+              <div class="dash-match-scores-col">
+                <span class="${_win?'dash-match-score-win':'dash-match-score-lose'}">${_myS}</span>
+                <span style="font-size:.6rem;color:transparent;user-select:none;">vs</span>
+                <span class="${!_win?'dash-match-score-win':'dash-match-score-lose'}">${_opS}</span>
+              </div>
             </div>
-            <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_opLbl}</div>
-              <span style="${_scStyle}color:${!_win?'var(--gold)':'var(--chalk2)'};">${_opS}</span>
-            </div>
-          </div>`;
+            ${_venueLine}
+          </div></div>`;
         }).join('')}
     </div>`;
 
