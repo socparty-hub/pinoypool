@@ -6174,7 +6174,7 @@ function filterHistory(btn, period){
   else if(period==='month') data=data.filter(m=>m.date&&m.date.startsWith(thisMonth));
   else if(period==='year') data=data.filter(m=>m.date&&m.date.startsWith(thisYear));
   // Sort newest first
-  data=[...data].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  data=[...data].sort((a,b)=>new Date(b.date||b.ts||0)-new Date(a.date||a.ts||0));
 
   // Summary stats
   const p9=data.filter(m=>m.fmt==='9-Ball').length;
@@ -6208,37 +6208,44 @@ function filterHistory(btn, period){
   const cardsEl=document.getElementById('history-cards');
   if(!cardsEl) return;
   if(!data.length){cardsEl.innerHTML=`<div style="text-align:center;color:var(--chalk2);padding:2rem;font-size:.82rem;">No matches found for this period</div>`;return;}
-  const _scH=`font-family:'DM Mono',monospace;font-weight:700;font-size:1.05rem;`;
-  const _fBH=f=>f==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
   cardsEl.innerHTML=data.map(m=>{
     const sc=m.score||m.sc||'0-0';
     const pts=sc.split(/[-–]/).map(x=>parseInt(x.trim()));
-    const s1=isNaN(pts[0])?'':pts[0]; const s2=isNaN(pts[1])?'':pts[1];
-    const win1=typeof s1==='number'&&typeof s2==='number'&&s1>s2;
+    const s1=isNaN(pts[0])?0:pts[0]; const s2=isNaN(pts[1])?0:pts[1];
+    const win1=s1>s2;
     const _p1T=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
     const _p2T=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
     const _mr1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0; const _mr2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
     const _mb1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
     const _mb2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
     const _h1=fmtHcpTag(_mr1,_mb1); const _h2=fmtHcpTag(_mr2,_mb2);
-    const _p1L=`${fmtPlayerName(m.p1)}${_p1T?` <span class="tier-inline">${_p1T}</span>`:''}${_h1?` <span class="hcp-tag">${_h1}</span>`:''}`;
-    const _p2L=`${fmtPlayerName(m.p2)}${_p2T?` <span class="tier-inline">${_p2T}</span>`:''}${_h2?` <span class="hcp-tag">${_h2}</span>`:''}`;
-    const _stat=m.status==='approved'?'sp-active':m.status==='rejected'?'sp-suspended':'sp-pending';
-    return `<div class="le ${win1?'lw':'ll'}" style="flex-direction:column;align-items:stretch;gap:0;margin-bottom:4px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
-        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_fBH(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}<span class="status-pill ${_stat}" style="font-size:.52rem;margin-left:2px;">● ${m.status}</span></div>
-        <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
+    const _t1=_p1T?careerTier(0,0,_p1T):null; const _t2=_p2T?careerTier(0,0,_p2T):null;
+    const _tb1=_t1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${_t1.bg};color:${_t1.color};border:1px solid ${_t1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${_t1.label}</span>`:'';
+    const _tb2=_t2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${_t2.bg};color:${_t2.color};border:1px solid ${_t2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${_t2.label}</span>`:'';
+    const _hTag1=_h1?`<span style="font-size:.72rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;">${_h1}</span>`:'';
+    const _hTag2=_h2?`<span style="font-size:.72rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;">${_h2}</span>`:'';
+    const _fmtBadge=m.fmt==='9-Ball'
+      ?`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
+      :`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.fmt||'9-Ball'}</span>`;
+    const _typeBadge=m.type?`<span style="padding:2px 8px;background:rgba(53,94,59,.4);border:1px solid rgba(53,94,59,.3);color:var(--gold2);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.type}</span>`:'';
+    return `<div class="dash-match-card"><div class="dash-match-card-inner">
+      <div class="dash-match-card-head">
+        <div class="dash-match-card-badges">${_fmtBadge}${_typeBadge}</div>
+        <span class="dash-match-card-date">${fmtDate(m.date)}</span>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p1L}</div>
-        <span style="${_scH}color:${win1?'var(--gold)':'var(--chalk2)'};">${s1}</span>
+      <div class="dash-match-card-body">
+        <div class="dash-match-players-col">
+          <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:${win1?'800':'500'};color:${win1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p1)}</span>${_tb1}${_hTag1}</div>
+          <div class="dash-match-vs">vs</div>
+          <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:${!win1?'800':'500'};color:${!win1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p2)}</span>${_tb2}${_hTag2}</div>
+        </div>
+        <div class="dash-match-scores-col">
+          <span class="${win1?'dash-match-score-win':'dash-match-score-lose'}">${s1}</span>
+          <span style="font-size:.6rem;color:transparent;user-select:none;">vs</span>
+          <span class="${!win1?'dash-match-score-win':'dash-match-score-lose'}">${s2}</span>
+        </div>
       </div>
-      <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p2L}</div>
-        <span style="${_scH}color:${!win1?'var(--gold)':'var(--chalk2)'};">${s2}</span>
-      </div>
-    </div>`;
+    </div></div>`;
   }).join('');
 }
 
