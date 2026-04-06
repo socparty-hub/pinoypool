@@ -5459,13 +5459,8 @@ function ppTab(btn,tab){
     ${_mySubmitted.length?`
       <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gold);margin-bottom:.6rem;">📨 Submitted by You <span style="font-family:'DM Mono',monospace;font-size:.6rem;font-weight:400;letter-spacing:0;color:var(--chalk2);margin-left:4px;">${_mySubmitted.length} pending</span></div>
       ${_mySubmitted.map(m=>{
-        const oppDone=!!m.p2ok; const venueDone=!!m.venueOk;
-        const actionHtml=`<div style="display:flex;gap:6px;flex-wrap:wrap;font-size:.68rem;">
-          <span style="padding:2px 8px;border-radius:6px;border:1px solid #2e7d46;color:var(--grn3);background:rgba(31,140,78,.1);">✓ You Submitted</span>
-          <span style="padding:2px 8px;border-radius:6px;background:${oppDone?'rgba(31,140,78,.1)':'rgba(200,168,75,.06)'};border:1px solid ${oppDone?'#2e7d46':'rgba(200,168,75,.25)'};color:${oppDone?'var(--grn3)':'#c9a84c'};">${oppDone?'✓ Opponent Confirmed':'Awaiting Opponent'}</span>
-          <span style="padding:2px 8px;border-radius:6px;background:${venueDone?'rgba(31,140,78,.1)':'rgba(200,168,75,.06)'};border:1px solid ${venueDone?'#2e7d46':'rgba(200,168,75,.25)'};color:${venueDone?'var(--grn3)':'#c9a84c'};">${venueDone?'✓ Venue Confirmed':'Awaiting Venue'}</span>
-        </div>`;
-        return _ppCard(m,true,oppDone,actionHtml);
+        const oppDone=!!m.p2ok;
+        return _ppCard(m,true,oppDone,'');
       }).join('')}
       <div style="border-top:1px solid #2e3732;margin:1rem 0 1.2rem;"></div>`:''}
     <div class="card">
