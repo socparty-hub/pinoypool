@@ -5320,36 +5320,17 @@ function ppTab(btn,tab){
     }
   }catch{}
 
-  if(tab==='validation'){
-    const _myName=app.user?.name||'';
-    // ── Section A: Matches I submitted (I am p1) awaiting opponent/venue ──
-    const _mySubmitted=adminMatches.filter(m=>
-      (m.status==='pending-opponent')&&m.p1===_myName&&!m.editPending
-    );
-    // ── Section B: Matches where I am opponent (p2) needing my response ──
-    const _needMyResponse=adminMatches.filter(m=>
-      (m.status==='pending-opponent'||m.status==='player-pending')&&m.p2===_myName&&!m.p2ok&&!m.editPending
-    );
-    // ── Section C: Score edit proposed by opponent — I (p1) need to respond ──
-    const _editProposed=adminMatches.filter(m=>m.p1===_myName&&m.editPending);
-    // ── Section D: Owner-recorded matches not yet validated ──
-    const _ownerRecorded=adminMatches.filter(m=>
-      (m.status==='owner-recorded'||m.status==='owner-pending')&&(m.p1===_myName||m.p2===_myName)
-    );
-    // ── Section E: Awaiting admin final ──
-    const _awaitAdmin=adminMatches.filter(m=>
-      (m.status==='pending-admin'||m.status==='pending')&&(m.p1===_myName||m.p2===_myName)
-    );
-
-    // ── Card helpers — mirror owner validation design ──
-    const _ppBadge=`<svg width="18" height="18" viewBox="0 0 24 24" fill="#D4AF37" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.47 1.89-3.2 3.61-.82-.34-3.69L23 12zm-12.91 4.72L6.43 13.06l1.42-1.42 2.24 2.24 4.94-4.94 1.42 1.41-6.36 6.37z"/></svg>`;
-    const _ppBadgeEmpty=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;opacity:0;"><path d="M1 1"/></svg>`;
-    const _ppHcp=(rack,balls)=>{let s='';if(rack>0)s+=`(+${rack})`;if(balls&&balls.length>0)s+=`(${[...balls].sort((a,b)=>a-b).join(',')})`;return s?`<span style="font-size:.68rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;letter-spacing:0;">${s}</span>`:''};
-    const _ppName=(name)=>{const p=name.trim().split(' ');return p.length===1?`<span style="text-transform:uppercase;letter-spacing:.5px;">${p[0]}</span>`:`${p[0]}<br><span style="text-transform:uppercase;letter-spacing:.5px;">${p.slice(1).join(' ')}</span>`};
-    const _ppTier=(status)=>{if(!status)return '';const t=careerTier(0,0,status);return `<span style="font-size:.55rem;font-weight:800;padding:1px 6px;border-radius:3px;background:${t.bg};color:${t.color};border:1px solid ${t.border};font-family:'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:.5px;">${t.label}</span>`};
-    const _ppFmt=(fmt)=>fmt==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt||'9-Ball'}</span>`;
-    const _ppType=(type)=>type?`<span class="tag tgd">${type}</span>`:'';
-    const _ppCard=(m,p1ok,p2ok,actionHtml,extraInfo='')=>{
+  // ── Shared player name + helpers (available to both validation and history tabs) ──
+  const _myName=app.user?.name||'';
+  const _mySubmitted=adminMatches.filter(m=>(m.status==='pending-opponent')&&m.p1===_myName&&!m.editPending);
+  const _ppBadge=`<svg width="18" height="18" viewBox="0 0 24 24" fill="#D4AF37" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.47 1.89-3.2 3.61-.82-.34-3.69L23 12zm-12.91 4.72L6.43 13.06l1.42-1.42 2.24 2.24 4.94-4.94 1.42 1.41-6.36 6.37z"/></svg>`;
+  const _ppBadgeEmpty=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;opacity:0;"><path d="M1 1"/></svg>`;
+  const _ppHcp=(rack,balls)=>{let s='';if(rack>0)s+=`(+${rack})`;if(balls&&balls.length>0)s+=`(${[...balls].sort((a,b)=>a-b).join(',')})`;return s?`<span style="font-size:.68rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;letter-spacing:0;">${s}</span>`:''};
+  const _ppName=(name)=>{const p=name.trim().split(' ');return p.length===1?`<span style="text-transform:uppercase;letter-spacing:.5px;">${p[0]}</span>`:`${p[0]}<br><span style="text-transform:uppercase;letter-spacing:.5px;">${p.slice(1).join(' ')}</span>`};
+  const _ppTier=(status)=>{if(!status)return '';const t=careerTier(0,0,status);return `<span style="font-size:.55rem;font-weight:800;padding:1px 6px;border-radius:3px;background:${t.bg};color:${t.color};border:1px solid ${t.border};font-family:'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:.5px;">${t.label}</span>`};
+  const _ppFmt=(fmt)=>fmt==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt||'9-Ball'}</span>`;
+  const _ppType=(type)=>type?`<span class="tag tgd">${type}</span>`:'';
+  const _ppCard=(m,p1ok,p2ok,actionHtml,extraInfo='')=>{
       const sc=(m.score||m.sc||'0-0').split(/[-–]/).map(x=>x.trim());
       const s1=sc[0]||'0'; const s2=sc[1]||'0';
       const win1=parseInt(s1)>parseInt(s2);
@@ -5393,7 +5374,23 @@ function ppTab(btn,tab){
         </div>
         ${actionHtml?`<div style="padding:.75rem 1rem 1rem;border-top:1px solid #2e3732;">${actionHtml}</div>`:''}
       </div>`;
-    };
+  };
+
+  if(tab==='validation'){
+    // ── Section B: Matches where I am opponent (p2) needing my response ──
+    const _needMyResponse=adminMatches.filter(m=>
+      (m.status==='pending-opponent'||m.status==='player-pending')&&m.p2===_myName&&!m.p2ok&&!m.editPending
+    );
+    // ── Section C: Score edit proposed by opponent — I (p1) need to respond ──
+    const _editProposed=adminMatches.filter(m=>m.p1===_myName&&m.editPending);
+    // ── Section D: Owner-recorded matches not yet validated ──
+    const _ownerRecorded=adminMatches.filter(m=>
+      (m.status==='owner-recorded'||m.status==='owner-pending')&&(m.p1===_myName||m.p2===_myName)
+    );
+    // ── Section E: Awaiting admin final ──
+    const _awaitAdmin=adminMatches.filter(m=>
+      (m.status==='pending-admin'||m.status==='pending')&&(m.p1===_myName||m.p2===_myName)
+    );
 
     c.innerHTML=`
     ${_editProposed.length?`
@@ -5421,26 +5418,17 @@ function ppTab(btn,tab){
         return _ppCard(m,true,false,actionHtml);
       }).join('')}`:''}
 
-    ${_mySubmitted.length?`
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gold);margin-bottom:.6rem;">📨 Submitted by You</div>
-      ${_mySubmitted.map(m=>{
-        const oppDone=!!m.p2ok; const venueDone=!!m.venueOk;
-        const actionHtml=`<div style="display:flex;gap:6px;flex-wrap:wrap;font-size:.68rem;">
-          <span style="padding:2px 8px;border-radius:6px;border:1px solid #2e7d46;color:var(--grn3);background:rgba(31,140,78,.1);">✓ You Submitted</span>
-          <span style="padding:2px 8px;border-radius:6px;background:${oppDone?'rgba(31,140,78,.1)':'rgba(200,168,75,.06)'};border:1px solid ${oppDone?'#2e7d46':'rgba(200,168,75,.25)'};color:${oppDone?'var(--grn3)':'#c9a84c'};">${oppDone?'✓ Opponent Confirmed':'Awaiting Opponent'}</span>
-          <span style="padding:2px 8px;border-radius:6px;background:${venueDone?'rgba(31,140,78,.1)':'rgba(200,168,75,.06)'};border:1px solid ${venueDone?'#2e7d46':'rgba(200,168,75,.25)'};color:${venueDone?'var(--grn3)':'#c9a84c'};">${venueDone?'✓ Venue Confirmed':'Awaiting Venue'}</span>
-        </div>`;
-        return _ppCard(m,true,oppDone,actionHtml);
-      }).join('')}`:''}
-
     ${_ownerRecorded.length?`
       <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:#4a9eff;margin-bottom:.6rem;">🏢 Owner Recorded <span style="background:rgba(229,85,85,.15);border:1px solid rgba(229,85,85,.4);color:#e55;border-radius:10px;padding:1px 8px;font-size:.6rem;margin-left:4px;">${_ownerRecorded.length}</span></div>
       ${_ownerRecorded.map(m=>{
         const isP1=m.p1===_myName;
         const myOk=isP1?!!m.p1ok:!!m.p2ok;
-        const actionHtml=`<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
-          ${!myOk?`<button class="btn btn-s btn-sm" onclick="playerConfirmOwnerMatch('${m.id}')">✓ Confirm Result</button>`:'<span style="font-size:.7rem;color:var(--grn3);">✓ You Confirmed</span>'}
-        </div>`;
+        const actionHtml=!myOk
+          ?`<div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+              <button class="btn btn-d btn-sm" style="flex:1;" onclick="playerRejectOwnerMatch('${m.id}')">✗ Reject</button>
+              <button class="btn btn-s btn-sm" style="flex:1;" onclick="playerConfirmOwnerMatch('${m.id}')">✓ Confirm Result</button>
+            </div>`
+          :`<span style="font-size:.7rem;color:var(--grn3);">✓ You Confirmed</span>`;
         return _ppCard(m,!!m.p1ok,!!m.p2ok,actionHtml);
       }).join('')}`:''}
 
@@ -5448,7 +5436,7 @@ function ppTab(btn,tab){
       <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:#c9a84c;margin-bottom:.6rem;">⏳ Awaiting Admin Approval</div>
       ${_awaitAdmin.map(m=>_ppCard(m,true,true,'')).join('')}`:''}
 
-    ${!_editProposed.length&&!_needMyResponse.length&&!_mySubmitted.length&&!_ownerRecorded.length&&!_awaitAdmin.length?`
+    ${!_editProposed.length&&!_needMyResponse.length&&!_ownerRecorded.length&&!_awaitAdmin.length?`
     <div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;padding:2rem;text-align:center;color:#d0c5af;font-size:.82rem;">🎉 No pending validations — all clear ✓</div>`:''}
     `;
 
@@ -5468,6 +5456,18 @@ function ppTab(btn,tab){
       ?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${f}</span>`
       :`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${f}</span>`;
     c.innerHTML=`
+    ${_mySubmitted.length?`
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gold);margin-bottom:.6rem;">📨 Submitted by You <span style="font-family:'DM Mono',monospace;font-size:.6rem;font-weight:400;letter-spacing:0;color:var(--chalk2);margin-left:4px;">${_mySubmitted.length} pending</span></div>
+      ${_mySubmitted.map(m=>{
+        const oppDone=!!m.p2ok; const venueDone=!!m.venueOk;
+        const actionHtml=`<div style="display:flex;gap:6px;flex-wrap:wrap;font-size:.68rem;">
+          <span style="padding:2px 8px;border-radius:6px;border:1px solid #2e7d46;color:var(--grn3);background:rgba(31,140,78,.1);">✓ You Submitted</span>
+          <span style="padding:2px 8px;border-radius:6px;background:${oppDone?'rgba(31,140,78,.1)':'rgba(200,168,75,.06)'};border:1px solid ${oppDone?'#2e7d46':'rgba(200,168,75,.25)'};color:${oppDone?'var(--grn3)':'#c9a84c'};">${oppDone?'✓ Opponent Confirmed':'Awaiting Opponent'}</span>
+          <span style="padding:2px 8px;border-radius:6px;background:${venueDone?'rgba(31,140,78,.1)':'rgba(200,168,75,.06)'};border:1px solid ${venueDone?'#2e7d46':'rgba(200,168,75,.25)'};color:${venueDone?'var(--grn3)':'#c9a84c'};">${venueDone?'✓ Venue Confirmed':'Awaiting Venue'}</span>
+        </div>`;
+        return _ppCard(m,true,oppDone,actionHtml);
+      }).join('')}
+      <div style="border-top:1px solid #2e3732;margin:1rem 0 1.2rem;"></div>`:''}
     <div class="card">
       <div class="ct">📋 My Match History</div>
       <div style="display:flex;gap:7px;align-items:center;margin-bottom:.7rem;flex-wrap:wrap;">
@@ -6549,6 +6549,23 @@ function playerConfirmOwnerMatch(id){
   updateNavBadges();
   const opp=m.p1===myName?m.p2:m.p1;
   toast(`✅ Result confirmed. Waiting for ${opp.split(' ')[0]} and owner validation.`);
+}
+
+/* ── Player rejects an owner-recorded match ── */
+function playerRejectOwnerMatch(id){
+  const m=adminMatches.find(x=>x.id===id);
+  if(!m||(m.status!=='owner-recorded'&&m.status!=='owner-pending')) return;
+  m.status='rejected';
+  m.rejectedBy=app.user?.name||'Player';
+  m.rejectedAt=new Date().toISOString();
+  // Remove from manualPending so owner sees it's been rejected
+  const mpIdx=manualPending.findIndex(x=>x.id===id);
+  if(mpIdx>=0) manualPending.splice(mpIdx,1);
+  saveManualPending();
+  saveAdminMatches();
+  ppTab(document.querySelector('.pp-tab.act'),'validation');
+  updateNavBadges();
+  toast('❌ Match rejected. The hall owner has been notified.');
 }
 
 function cancelPendVal(i){
