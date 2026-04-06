@@ -1831,7 +1831,7 @@ function filterHistoryOD(btn, period){
   if(period==='day') data=data.filter(m=>m.date===today);
   else if(period==='month') data=data.filter(m=>m.date&&m.date.startsWith(thisMonth));
   else if(period==='year') data=data.filter(m=>m.date&&m.date.startsWith(thisYear));
-  data=[...data].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  data=[...data].sort((a,b)=>new Date(b.date||b.ts||0)-new Date(a.date||a.ts||0));
   const p9=data.filter(m=>m.fmt==='9-Ball').length;
   const p10=data.filter(m=>m.fmt==='10-Ball').length;
   const uniquePlayers=new Set(data.flatMap(m=>[m.p1,m.p2].filter(Boolean))).size;
@@ -1865,21 +1865,26 @@ function filterHistoryOD(btn, period){
       const pts=sc.split(/[-–]/).map(x=>parseInt(x.trim()));
       const s1=isNaN(pts[0])?'—':pts[0]; const s2=isNaN(pts[1])?'—':pts[1];
       const win1=pts.length===2&&pts[0]>pts[1];
-      return `<div style="background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:8px;padding:.7rem .9rem;margin-bottom:.6rem;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem;">
-          <div style="display:flex;gap:4px;">${m.fmt==='10-Ball'?'<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;font-size:.6rem;">10-Ball</span>':'<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;font-size:.6rem;">9-Ball</span>'}${m.type?`<span class="tag tgd" style="font-size:.6rem;">${m.type}</span>`:''}</div>
-          <span style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</span>
+      const _fmtBadge=m.fmt==='10-Ball'?`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;font-size:.6rem;">10-Ball</span>`:`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;font-size:.6rem;">9-Ball</span>`;
+      const _typeBadge=m.type?`<span class="tag tgd" style="font-size:.6rem;">${m.type}</span>`:'';
+      return `<div class="dash-match-card"><div class="dash-match-card-inner">
+        <div class="dash-match-card-head">
+          <div class="dash-match-card-badges">${_fmtBadge}${_typeBadge}</div>
+          <span class="dash-match-card-date">${fmtDate(m.date)}</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:.82rem;font-weight:${win1?700:500};color:${win1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p1)}</span>
-          <span style="font-family:'DM Mono',monospace;font-weight:700;font-size:.95rem;color:${win1?'var(--gold)':'var(--chalk2)'};">${s1}</span>
+        <div class="dash-match-card-body">
+          <div class="dash-match-players-col">
+            <div class="dash-match-player-row"><span style="font-weight:${win1?'800':'500'};color:${win1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p1)}</span></div>
+            <div class="dash-match-vs">vs</div>
+            <div class="dash-match-player-row"><span style="font-weight:${!win1?'800':'500'};color:${!win1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p2)}</span></div>
+          </div>
+          <div class="dash-match-scores-col">
+            <span class="${win1?'dash-match-score-win':'dash-match-score-lose'}">${s1}</span>
+            <span style="color:transparent;">vs</span>
+            <span class="${!win1?'dash-match-score-win':'dash-match-score-lose'}">${s2}</span>
+          </div>
         </div>
-        <div style="font-size:.6rem;color:var(--chalk2);margin:.1rem 0;">vs</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:.82rem;font-weight:${!win1?700:500};color:${!win1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p2)}</span>
-          <span style="font-family:'DM Mono',monospace;font-weight:700;font-size:.95rem;color:${!win1?'var(--gold)':'var(--chalk2)'};">${s2}</span>
-        </div>
-      </div>`;}).join('');
+      </div></div>`;}).join('');
 }
 
 function buildDashboard(){
@@ -7061,50 +7066,56 @@ function admTab(btn,tab){
         ${count>0?`<span style="background:${color||'var(--chalk)'};color:#111;border-radius:8px;padding:1px 7px;font-family:'DM Mono',monospace;font-size:.6rem;font-weight:700;">${count}</span>`:''}
         <div style="flex:1;height:1px;background:linear-gradient(90deg,${color||'rgba(255,255,255,.08)'} 0%,transparent 100%);opacity:.35;"></div>
       </div>`;
-    // ── 4-step progress tracker helper: [{label,done},...] ──
-    const _prog=(steps)=>`
-      <div style="display:flex;align-items:center;gap:0;margin-top:8px;">
-        ${steps.map((s,i,arr)=>`
-          <div style="display:flex;flex-direction:column;align-items:center;">
-            <div style="width:22px;height:22px;border-radius:50%;background:${s.done?'rgba(31,140,78,.25)':'rgba(245,166,35,.1)'};border:1.5px solid ${s.done?'var(--grn3)':'rgba(245,166,35,.45)'};display:flex;align-items:center;justify-content:center;font-size:.6rem;color:${s.done?'var(--grn3)':'#f5a623'};">${s.done?'✓':'⏳'}</div>
-            <div style="font-size:.5rem;color:var(--chalk2);margin-top:2px;white-space:nowrap;letter-spacing:.3px;max-width:38px;overflow:hidden;text-overflow:ellipsis;text-align:center;">${s.label}</div>
-          </div>
-          ${i<arr.length-1?`<div style="flex:1;height:1px;background:${s.done?'var(--grn3)':'rgba(255,255,255,.12)'};min-width:10px;margin-bottom:14px;opacity:.55;"></div>`:''}`
-        ).join('')}
-      </div>`;
-    // ── Helper: renders a single match row with dashboard card layout + progress tracker ──
+    // ── Admin match card helpers ──
     const _admFmtB=f=>f==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
-    const _matchRow=(m,progSteps,statusLabel,btnHtml)=>{
+    const _admBadge=`<svg width="18" height="18" viewBox="0 0 24 24" fill="#D4AF37" style="flex-shrink:0;"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z"/></svg>`;
+    const _admBadgeEmpty=`<svg width="18" height="18" viewBox="0 0 24 24" fill="#D4AF37" style="flex-shrink:0;opacity:0;"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z"/></svg>`;
+    const _admTier=(t)=>t?`<span style="font-family:'Space Grotesk',sans-serif;font-size:.52rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:1px 5px;border-radius:4px;background:rgba(212,175,55,.15);color:var(--gold);border:1px solid rgba(212,175,55,.3);">${t}</span>`:'';
+    // ── Helper: renders a single admin match card with _mvCard-style layout + gold badge state ──
+    const _matchRow=(m,p1ok,p2ok,btnHtml)=>{
       const _pts=(m.score||'0-0').split(/[-–]/).map(x=>parseInt(x.trim()));
-      const _s1=isNaN(_pts[0])?'':_pts[0]; const _s2=isNaN(_pts[1])?'':_pts[1];
-      const _w1=typeof _s1==='number'&&typeof _s2==='number'&&_s1>_s2;
-      const _scA=`font-family:'DM Mono',monospace;font-weight:700;font-size:1rem;`;
+      const _s1=isNaN(_pts[0])?'0':_pts[0]; const _s2=isNaN(_pts[1])?'0':_pts[1];
       const _p1T=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
       const _p2T=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
       const _mr1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0; const _mr2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
       const _mb1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
       const _mb2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
       const _h1=fmtHcpTag(_mr1,_mb1); const _h2=fmtHcpTag(_mr2,_mb2);
-      const _p1L=`${fmtPlayerName(m.p1)}${_p1T?` <span class="tier-inline">${_p1T}</span>`:''}${_h1?` <span class="hcp-tag">${_h1}</span>`:''}`;
-      const _p2L=`${fmtPlayerName(m.p2)}${_p2T?` <span class="tier-inline">${_p2T}</span>`:''}${_h2?` <span class="hcp-tag">${_h2}</span>`:''}`;
-      return `<div style="background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;margin-bottom:.65rem;overflow:hidden;">
-        <div style="padding:clamp(7px,2.5vw,11px);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
-            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_admFmtB(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}<span style="font-size:.63rem;color:var(--chalk);white-space:nowrap;">📍 ${m.venue||'—'}</span></div>
-            <div style="font-size:.62rem;color:var(--chalk2);flex-shrink:0;margin-left:6px;">${fmtDate(m.date)}</div>
-          </div>
+      return `<div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;overflow:hidden;margin-bottom:.75rem;box-shadow:0 4px 16px rgba(0,0,0,.35);">
+        <div style="background:rgba(0,0,0,.25);padding:.55rem 1rem;border-bottom:1px solid #2e3732;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p1L}</div>
-            <span style="${_scA}color:var(--chalk);">${_s1}</span>
+            <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;">
+              ${_admFmtB(m.fmt||'9-Ball')}
+              ${m.type?`<span class="tag tgd" style="font-size:.6rem;">${m.type}</span>`:''}
+              ${m.venue?`<span style="font-size:.58rem;color:#d0c5af;">📍 ${m.venue}</span>`:''}
+            </div>
+            <span style="font-size:.6rem;color:#d0c5af;flex-shrink:0;margin-left:6px;">${fmtDate(m.date)}</span>
           </div>
-          <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_p2L}</div>
-            <span style="${_scA}color:var(--chalk);">${_s2}</span>
-          </div>
-          ${_prog(progSteps)}
         </div>
-        <div style="padding:.4rem clamp(7px,2.5vw,11px) .75rem;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:6px;flex-wrap:wrap;">${btnHtml}</div>
+        <div style="padding:.9rem 1rem 0;">
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.6rem;margin-bottom:.85rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="font-family:'Epilogue',sans-serif;font-weight:800;font-size:.82rem;line-height:1.25;color:#fff;">${fmtPlayerName(m.p1)}</div>
+                <div style="margin-top:.15rem;display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;">${_admTier(_p1T)}${_h1?`<span style="font-family:'DM Mono',monospace;font-size:.55rem;color:#b0a080;">${_h1}</span>`:''}</div>
+              </div>
+              <div style="margin-left:.4rem;">${p1ok?_admBadge:_admBadgeEmpty}</div>
+            </div>
+            <div style="text-align:center;padding:0 .25rem;">
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:var(--gold);display:flex;gap:.35rem;align-items:center;line-height:1;">
+                <span>${_s1}</span><span style="color:#374151;font-size:1.3rem;">-</span><span>${_s2}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="margin-right:.4rem;">${p2ok?_admBadge:_admBadgeEmpty}</div>
+              <div style="text-align:right;">
+                <div style="font-family:'Epilogue',sans-serif;font-weight:800;font-size:.82rem;line-height:1.25;color:#fff;text-align:right;">${fmtPlayerName(m.p2)}</div>
+                <div style="margin-top:.15rem;display:flex;align-items:center;justify-content:flex-end;gap:.3rem;flex-wrap:wrap;">${_h2?`<span style="font-family:'DM Mono',monospace;font-size:.55rem;color:#b0a080;">${_h2}</span>`:''}${_admTier(_p2T)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:.4rem 1rem .75rem;display:flex;gap:6px;flex-wrap:wrap;">${btnHtml}</div>
       </div>`;
     };
     c.innerHTML=`
@@ -7120,8 +7131,8 @@ function admTab(btn,tab){
       ${_ownerPending.length?`
         ${_secDiv('🏢 Owner-Recorded — Awaiting Players',_ownerPending.length,'#e55')}
         ${_ownerPending.map(m=>_matchRow(m,
-          [{label:'VENUE',done:true},{label:m.p1.split(' ')[0],done:!!m.p1ok},{label:m.p2.split(' ')[0],done:!!m.p2ok},{label:'ADMIN',done:false}],
-          'owner recorded',
+          !!m.p1ok,
+          !!m.p2ok,
           `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:nowrap;text-align:center;align-self:stretch;" onclick="admApproveMatch('${m.id}')">✓ Approve</button>
            <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:nowrap;text-align:center;align-self:stretch;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
@@ -7130,8 +7141,8 @@ function admTab(btn,tab){
       ${_playerPending.length?`
         ${_secDiv('🎱 Player-Submitted — Awaiting Opponent / Venue',_playerPending.length,'#f5a623')}
         ${_playerPending.map(m=>_matchRow(m,
-          [{label:m.p1.split(' ')[0],done:!!m.p1ok},{label:m.p2.split(' ')[0],done:!!m.p2ok},{label:'VENUE',done:!!m.venueOk},{label:'ADMIN',done:false}],
-          'awaiting validation',
+          true,
+          !!m.p2ok||!!m.venueOk,
           `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:nowrap;text-align:center;align-self:stretch;" onclick="admApproveMatch('${m.id}')">✓ Approve</button>
            <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:nowrap;text-align:center;align-self:stretch;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
@@ -7140,8 +7151,8 @@ function admTab(btn,tab){
       ${_pendingBoth.length?`
         ${_secDiv('✅ Venue Confirmed — Awaiting Admin Approval',_pendingBoth.length,'var(--grn3)')}
         ${_pendingBoth.map(m=>_matchRow(m,
-          [{label:m.p1.split(' ')[0],done:!!m.p1ok},{label:m.p2.split(' ')[0],done:!!m.p2ok},{label:'VENUE',done:true},{label:'ADMIN',done:false}],
-          'ready to approve',
+          true,
+          true,
           `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admApproveMatch('${m.id}')">✓ Approve &amp; Update Rankings</button>
            <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
@@ -7156,37 +7167,29 @@ function admTab(btn,tab){
       ${_processed.length===0
         ?`<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No verified match records yet</div>`
         :_processed.map(m=>{
-          const _isApproved=m.status==='approved';
-          const _isRejected=m.status==='rejected';
-          const _statCls=_isApproved?'sp-active':_isRejected?'sp-suspended':'sp-pending';
           const _vPts=(m.score||'0-0').split(/[-–]/).map(x=>parseInt(x.trim()));
-          const _vs1=isNaN(_vPts[0])?'':_vPts[0]; const _vs2=isNaN(_vPts[1])?'':_vPts[1];
-          const _vw1=typeof _vs1==='number'&&typeof _vs2==='number'&&_vs1>_vs2;
-          const _vScS=`font-family:'DM Mono',monospace;font-weight:700;font-size:1.05rem;`;
-          const _vFB=f=>f==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
-          const _vp1T=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
-          const _vp2T=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
-          const _vmr1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0; const _vmr2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
-          const _vmb1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
-          const _vmb2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
-          const _vh1=fmtHcpTag(_vmr1,_vmb1); const _vh2=fmtHcpTag(_vmr2,_vmb2);
-          const _vp1L=`${fmtPlayerName(m.p1)}${_vp1T?` <span class="tier-inline">${_vp1T}</span>`:''}${_vh1?` <span class="hcp-tag">${_vh1}</span>`:''}`;
-          const _vp2L=`${fmtPlayerName(m.p2)}${_vp2T?` <span class="tier-inline">${_vp2T}</span>`:''}${_vh2?` <span class="hcp-tag">${_vh2}</span>`:''}`;
-          return `<div class="le ${_vw1?'lw':'ll'}" style="flex-direction:column;align-items:stretch;gap:0;margin-bottom:4px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
-              <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_vFB(m.fmt)}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}<span class="status-pill ${_statCls}" style="font-size:.52rem;margin-left:2px;">● ${m.status}</span></div>
-              <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date)}</div>
+          const _vs1=isNaN(_vPts[0])?'—':_vPts[0]; const _vs2=isNaN(_vPts[1])?'—':_vPts[1];
+          const _vw1=_vPts.length===2&&_vPts[0]>_vPts[1];
+          const _vFmtB=m.fmt==='10-Ball'?`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;font-size:.6rem;">10-Ball</span>`:`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;font-size:.6rem;">9-Ball</span>`;
+          const _vTypeB=m.type?`<span class="tag tgd" style="font-size:.6rem;">${m.type}</span>`:'';
+          return `<div class="dash-match-card"><div class="dash-match-card-inner">
+            <div class="dash-match-card-head">
+              <div class="dash-match-card-badges">${_vFmtB}${_vTypeB}</div>
+              <span class="dash-match-card-date">${fmtDate(m.date)}</span>
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_vp1L}</div>
-              <span style="${_vScS}color:${_vw1?'var(--gold)':'var(--chalk2)'};">${_vs1}</span>
+            <div class="dash-match-card-body">
+              <div class="dash-match-players-col">
+                <div class="dash-match-player-row"><span style="font-weight:${_vw1?'800':'500'};color:${_vw1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p1)}</span></div>
+                <div class="dash-match-vs">vs</div>
+                <div class="dash-match-player-row"><span style="font-weight:${!_vw1?'800':'500'};color:${!_vw1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p2)}</span></div>
+              </div>
+              <div class="dash-match-scores-col">
+                <span class="${_vw1?'dash-match-score-win':'dash-match-score-lose'}">${_vs1}</span>
+                <span style="color:transparent;">vs</span>
+                <span class="${!_vw1?'dash-match-score-win':'dash-match-score-lose'}">${_vs2}</span>
+              </div>
             </div>
-            <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_vp2L}</div>
-              <span style="${_vScS}color:${!_vw1?'var(--gold)':'var(--chalk2)'};">${_vs2}</span>
-            </div>
-          </div>`;
+          </div></div>`;
         }).join('')}
     </div>`;
 
