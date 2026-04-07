@@ -7201,8 +7201,8 @@ function admTab(btn,tab){
       ${_ownerPending.length?`
         ${_secDiv('🏢 Owner-Recorded — Awaiting Players',_ownerPending.length,'#e55')}
         ${_ownerPending.map(m=>_matchRow(m,
-          !!m.p1ok,
-          !!m.p2ok,
+          true,
+          true,
           `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:nowrap;text-align:center;align-self:stretch;" onclick="admApproveMatch('${m.id}')">✓ Approve</button>
            <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:nowrap;text-align:center;align-self:stretch;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
