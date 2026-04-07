@@ -764,7 +764,7 @@ textarea{resize:vertical;min-height:75px;}
             <div class="av-dd-name" id="av-dd-name">—</div>
             <div class="av-dd-role" id="av-dd-role"></div>
           </div>
-          <button class="av-dd-item" onclick="toggleAvDropdown();sv('player-portal',null);setTimeout(()=>{const _b=document.getElementById('pp-tab-profile');if(_b)ppTab(_b,'profile');},300)" id="av-dd-player-profile" style="display:none;">Player Profile</button>
+          <button class="av-dd-item" onclick="toggleAvDropdown();sv('player-profile',null)" id="av-dd-player-profile" style="display:none;">Player Profile</button>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('portal',null);setTimeout(()=>ptab('profile'),300)" id="av-dd-hall-profile" style="display:none;">Hall Profile</button>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('admin',null)" id="av-dd-admin" style="display:none;">Admin</button>
           <button class="av-dd-item logout" onclick="toggleAvDropdown();logout()">Logout</button>
@@ -1294,7 +1294,6 @@ textarea{resize:vertical;min-height:75px;}
   <div class="pp-tabs">
     <button class="pp-tab act" onclick="ppTab(this,'validation')">⚡ Match Validation</button>
     <button class="pp-tab" onclick="ppTab(this,'history')">📋 Match History</button>
-    <button class="pp-tab" id="pp-tab-profile" onclick="ppTab(this,'profile')" style="display:none;">👤 Player Profile</button>
   </div>
   <div id="pp-hdr" class="pp-hdr" style="display:none;">
     <div>
@@ -1304,6 +1303,17 @@ textarea{resize:vertical;min-height:75px;}
     <div id="pp-hdr-stats" style="display:flex;gap:1.2rem;text-align:center;flex-wrap:wrap;"></div>
   </div>
   <div id="pp-content"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PLAYER PROFILE (standalone view)
+══════════════════════════════════════════ -->
+<div id="view-player-profile" class="view">
+  <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.1rem;">
+    <button onclick="history.back?history.back():sv('dashboard',null)" style="background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--chalk);font-size:.75rem;font-family:'Space Grotesk',sans-serif;cursor:pointer;">← Back</button>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;color:var(--gold);">Player Profile</div>
+  </div>
+  <div id="pp-profile-content"></div>
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -2047,6 +2057,7 @@ function toggleHamRankSubs(btn){
 function sv(id, btn){
   if(id==='match' && app.user?.role==='fan'){toast('⚠️ Record Match is not available for Scout/Fan accounts.');return;}
   if(id==='player-portal' && !app.user){toast('⚠️ Please log in to access your Player Portal.');openAuth();return;}
+  if(id==='player-profile' && !app.user){toast('⚠️ Please log in to view your profile.');openAuth();return;}
   closeHamMenu();
   try{localStorage.setItem('pp_last_section',id);}catch{}
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('act'));
@@ -2061,6 +2072,7 @@ function sv(id, btn){
   if(id==='portal') buildPortal();
   if(id==='live') buildLive();
   if(id==='player-portal') buildPlayerPortal();
+  if(id==='player-profile') buildPlayerProfile();
   if(id==='admin') buildAdmin();
   if(id==='match'){applyMatchTypeUI(app.matchType||'Money Game');applyMatchStepUI();}
 }
@@ -5311,7 +5323,7 @@ function ppTab(btn,tab){
   document.querySelectorAll('.pp-tab').forEach(b=>b.classList.remove('act'));
   if(btn) btn.classList.add('act');
   const hdr=document.getElementById('pp-hdr');
-  if(hdr) hdr.style.display=tab==='profile'?'':'none';
+  if(hdr) hdr.style.display='none';
   const c=document.getElementById('pp-content');
   const p=PLAYERS.find(x=>x.name===app.user?.name)||PLAYERS[0]||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||'Amateur',status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
 
@@ -5562,6 +5574,16 @@ function ppTab(btn,tab){
     </div>`;
 
   } else {
+    buildPlayerProfile();
+  }
+}
+
+function buildPlayerProfile(){
+  const c=document.getElementById('pp-profile-content')||document.getElementById('pp-content');
+  if(!c) return;
+  if(!app.user){c.innerHTML='<div style="text-align:center;color:var(--chalk2);padding:2rem;">Please log in to view your profile.</div>';return;}
+  const p=PLAYERS.find(x=>x.name===app.user?.name)||PLAYERS[0]||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||'Amateur',status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
+  {
     // Tier system — use admin-assigned career status first, fall back to win-% derived
     const totalMatches=p.mw+p.ml;
     const winPct=Math.round(p.mw/(totalMatches||1)*100);
