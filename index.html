@@ -6190,7 +6190,18 @@ function buildHallProfile(){
   const hName=u.hall||hEntry?.name||'';
   const hCity=hEntry?.city||u.addr||u.region||'';
   const hPhone=u.phone||hEntry?.contact||'';
-  c.innerHTML=`
+  const isApproved=hEntry?.status==='active';
+  const _heroCard=`<div class="portal-hdr" style="margin-bottom:1.1rem;">
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:var(--gold);">🏢 ${hName||'Hall Owner Portal'}</div>
+      <div style="font-size:.76rem;color:var(--chalk);margin-top:2px;">${u.name||''}${hCity?' · '+hCity:''}</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;">${hName}</div>
+      <div style="font-size:.7rem;color:var(--chalk);">${hCity} · <span class="dot ${isApproved?'dg':'dy'}"></span>${isApproved?'Active':'Pending Approval'}</div>
+    </div>
+  </div>`;
+  c.innerHTML=_heroCard+`
   <div class="card" style="margin-bottom:1rem;">
     <div class="ct">🏢 Hall Profile</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
