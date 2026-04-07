@@ -765,7 +765,7 @@ textarea{resize:vertical;min-height:75px;}
             <div class="av-dd-role" id="av-dd-role"></div>
           </div>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('player-profile',null)" id="av-dd-player-profile" style="display:none;">Player Profile</button>
-          <button class="av-dd-item" onclick="toggleAvDropdown();sv('portal',null);setTimeout(()=>ptab('profile'),300)" id="av-dd-hall-profile" style="display:none;">Hall Profile</button>
+          <button class="av-dd-item" onclick="toggleAvDropdown();sv('hall-profile',null)" id="av-dd-hall-profile" style="display:none;">Hall Profile</button>
           <button class="av-dd-item" onclick="toggleAvDropdown();sv('admin',null)" id="av-dd-admin" style="display:none;">Admin</button>
           <button class="av-dd-item logout" onclick="toggleAvDropdown();logout()">Logout</button>
         </div>
@@ -1340,6 +1340,13 @@ textarea{resize:vertical;min-height:75px;}
 </div>
 
 <!-- ══════════════════════════════════════════
+     HALL PROFILE (standalone view)
+══════════════════════════════════════════ -->
+<div id="view-hall-profile" class="view">
+  <div id="hall-profile-content"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
      ADMIN PORTAL
 ══════════════════════════════════════════ -->
 <div id="view-admin" class="view">
@@ -1603,7 +1610,7 @@ function _buildOwnerDashboard(){
         <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--gold);line-height:1;">${hallName}</div>
         <div style="font-size:.7rem;color:var(--chalk);margin-top:2px;">${hallCity} &nbsp;·&nbsp; <span style="color:${isApproved?'var(--grn3)':'#f5a623'};">● ${isApproved?'Active':'Pending Approval'}</span></div>
       </div>
-      <button class="btn btn-sm" onclick="sv('portal',document.getElementById('nb-portal'));setTimeout(()=>ptab('profile'),300);" style="font-size:.68rem;padding:5px 12px;border-color:rgba(200,100,20,.35);color:#e8a040;">⚙ Settings</button>
+      <button class="btn btn-sm" onclick="sv('hall-profile',null);" style="font-size:.68rem;padding:5px 12px;border-color:rgba(200,100,20,.35);color:#e8a040;">⚙ Settings</button>
     </div>`;
 
   if(!isApproved){
@@ -2054,6 +2061,7 @@ function sv(id, btn){
   if(id==='match' && app.user?.role==='fan'){toast('⚠️ Record Match is not available for Scout/Fan accounts.');return;}
   if(id==='player-portal' && !app.user){toast('⚠️ Please log in to access your Player Portal.');openAuth();return;}
   if(id==='player-profile' && !app.user){toast('⚠️ Please log in to view your profile.');openAuth();return;}
+  if(id==='hall-profile' && !app.user){toast('⚠️ Please log in to view your hall profile.');openAuth();return;}
   closeHamMenu();
   try{localStorage.setItem('pp_last_section',id);}catch{}
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('act'));
@@ -2069,6 +2077,7 @@ function sv(id, btn){
   if(id==='live') buildLive();
   if(id==='player-portal') buildPlayerPortal();
   if(id==='player-profile') buildPlayerProfile();
+  if(id==='hall-profile') buildHallProfile();
   if(id==='admin') buildAdmin();
   if(id==='match'){applyMatchTypeUI(app.matchType||'Money Game');applyMatchStepUI();}
 }
@@ -6168,39 +6177,47 @@ function ptab(tab){
 
   /* ── HALL PROFILE ── */
   } else {
-    const hEntry=adminHalls.find(h=>h.email===u.email||h.username===u.username||h.owner===u.name);
-    const hName=u.hall||hEntry?.name||'';
-    const hCity=hEntry?.city||u.addr||u.region||'';
-    const hPhone=u.phone||hEntry?.contact||'';
-    c.innerHTML=`
-    <div class="card">
-      <div class="ct">🏢 Hall Profile</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
-        <div class="fg"><label>Hall Name</label><input value="${hName}"></div>
-        <div class="fg"><label>City</label><input value="${hCity}"></div>
-      </div>
-      <div class="fg"><label>Full Address</label><input value="${u.addr||hCity}"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
-        <div class="fg"><label>Tables</label><input type="number" value=""></div>
-        <div class="fg"><label>Operating Hours</label><input value=""></div>
-      </div>
-      <div class="fg"><label>Contact Number</label><input value="${hPhone}"></div>
-      <div class="fg"><label>Facebook Page</label><input type="url" value=""></div>
-      <div class="fg"><label>Instagram / TikTok</label><input type="url" value=""></div>
-      <div class="fg"><label>Hall Description</label><textarea></textarea></div>
-      <div style="display:flex;gap:9px;margin-top:.5rem;">
-        <button class="btn btn-p" onclick="toast('✅ Profile updated!')">Save Changes</button>
-        <button class="btn btn-g" onclick="toast('📸 Photo upload — coming soon.')">Upload Photos</button>
-      </div>
-    </div>
-    <div class="card" style="margin-top:1rem;">
-      <div class="ct">🔒 Change Password</div>
-      <div class="fg"><label>Current Password</label><input type="password" id="op-pw-cur" placeholder="Enter current password" autocomplete="current-password"></div>
-      <div class="fg"><label>New Password</label><input type="password" id="op-pw-new" placeholder="Min. 8 characters" autocomplete="new-password"></div>
-      <div class="fg"><label>Confirm New Password</label><input type="password" id="op-pw-cnf" placeholder="Repeat new password" autocomplete="new-password"></div>
-      <button class="btn btn-s" onclick="changePassword('op-pw-cur','op-pw-new','op-pw-cnf')" style="width:100%;">🔑 Update Password</button>
-    </div>`;
+    buildHallProfile();
   }
+}
+
+function buildHallProfile(){
+  const c=document.getElementById('hall-profile-content')||document.getElementById('portal-content');
+  if(!c) return;
+  const u=app.user;
+  if(!u){c.innerHTML='<div style="text-align:center;color:var(--chalk2);padding:2rem;">Please log in to view your hall profile.</div>';return;}
+  const hEntry=adminHalls.find(h=>h.email===u.email||h.username===u.username||h.owner===u.name);
+  const hName=u.hall||hEntry?.name||'';
+  const hCity=hEntry?.city||u.addr||u.region||'';
+  const hPhone=u.phone||hEntry?.contact||'';
+  c.innerHTML=`
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="ct">🏢 Hall Profile</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
+      <div class="fg"><label>Hall Name</label><input value="${hName}"></div>
+      <div class="fg"><label>City</label><input value="${hCity}"></div>
+    </div>
+    <div class="fg"><label>Full Address</label><input value="${u.addr||hCity}"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
+      <div class="fg"><label>Tables</label><input type="number" value=""></div>
+      <div class="fg"><label>Operating Hours</label><input value=""></div>
+    </div>
+    <div class="fg"><label>Contact Number</label><input value="${hPhone}"></div>
+    <div class="fg"><label>Facebook Page</label><input type="url" value=""></div>
+    <div class="fg"><label>Instagram / TikTok</label><input type="url" value=""></div>
+    <div class="fg"><label>Hall Description</label><textarea></textarea></div>
+    <div style="display:flex;gap:9px;margin-top:.5rem;">
+      <button class="btn btn-p" onclick="toast('✅ Profile updated!')">Save Changes</button>
+      <button class="btn btn-g" onclick="toast('📸 Photo upload — coming soon.')">Upload Photos</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">🔒 Change Password</div>
+    <div class="fg"><label>Current Password</label><input type="password" id="hp-pw-cur" placeholder="Enter current password" autocomplete="current-password"></div>
+    <div class="fg"><label>New Password</label><input type="password" id="hp-pw-new" placeholder="Min. 8 characters" autocomplete="new-password"></div>
+    <div class="fg"><label>Confirm New Password</label><input type="password" id="hp-pw-cnf" placeholder="Repeat new password" autocomplete="new-password"></div>
+    <button class="btn btn-s" onclick="changePassword('hp-pw-cur','hp-pw-new','hp-pw-cnf')" style="width:100%;">🔑 Update Password</button>
+  </div>`;
 }
 
 /* ── History filter ── */
