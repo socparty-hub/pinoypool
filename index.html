@@ -7128,8 +7128,7 @@ function admTab(btn,tab){
     const _playerPending=adminMatches.filter(m=>m.status==='pending-opponent'||m.status==='player-pending');
     const _pendingBoth=adminMatches.filter(m=>m.status==='pending-admin'||m.status==='pending');
     const _totalPending=_ownerPending.length+_playerPending.length+_pendingBoth.length;
-    const _processed=[...adminMatches].filter(m=>!['owner-recorded','owner-pending','pending-opponent','player-pending','pending-admin','pending'].includes(m.status)).sort((a,b)=>(b.approvedAt||b.date||'').localeCompare(a.approvedAt||a.date||''));
-    // ── Section divider helper ──
+// ── Section divider helper ──
     const _secDiv=(label,count,color)=>`
       <div style="display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .9rem;">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:2px;color:${color||'var(--chalk)'};">${label}</div>
@@ -7229,40 +7228,7 @@ function admTab(btn,tab){
         )).join('')}`:''}
       `}
     </div>
-
-    <!-- ── TILE 2: VERIFIED MATCH RECORDS ── -->
-    <div class="card">
-      <div class="ct">✅ Verified Matches
-        <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;color:var(--chalk);">${_processed.length} records</span>
-      </div>
-      ${_processed.length===0
-        ?`<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No verified match records yet</div>`
-        :_processed.map(m=>{
-          const _vPts=(m.score||'0-0').split(/[-–]/).map(x=>parseInt(x.trim()));
-          const _vs1=isNaN(_vPts[0])?'—':_vPts[0]; const _vs2=isNaN(_vPts[1])?'—':_vPts[1];
-          const _vw1=_vPts.length===2&&_vPts[0]>_vPts[1];
-          const _vFmtB=m.fmt==='10-Ball'?`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;font-size:.6rem;">10-Ball</span>`:`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;font-size:.6rem;">9-Ball</span>`;
-          const _vTypeB=m.type?`<span class="tag tgd" style="font-size:.6rem;">${m.type}</span>`:'';
-          return `<div class="dash-match-card"><div class="dash-match-card-inner">
-            <div class="dash-match-card-head">
-              <div class="dash-match-card-badges">${_vFmtB}${_vTypeB}</div>
-              <span class="dash-match-card-date">${fmtDate(m.date)}</span>
-            </div>
-            <div class="dash-match-card-body">
-              <div class="dash-match-players-col">
-                <div class="dash-match-player-row"><span style="font-weight:${_vw1?'800':'500'};color:${_vw1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p1)}</span></div>
-                <div class="dash-match-vs">vs</div>
-                <div class="dash-match-player-row"><span style="font-weight:${!_vw1?'800':'500'};color:${!_vw1?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(m.p2)}</span></div>
-              </div>
-              <div class="dash-match-scores-col">
-                <span class="${_vw1?'dash-match-score-win':'dash-match-score-lose'}">${_vs1}</span>
-                <span style="color:transparent;">vs</span>
-                <span class="${!_vw1?'dash-match-score-win':'dash-match-score-lose'}">${_vs2}</span>
-              </div>
-            </div>
-          </div></div>`;
-        }).join('')}
-    </div>`;
+    `;
 
   /* ── TOURNAMENTS ── */
   } else if(tab==='tournaments'){
