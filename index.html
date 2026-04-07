@@ -7154,9 +7154,12 @@ function admTab(btn,tab){
       return `<div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;overflow:hidden;margin-bottom:.75rem;box-shadow:0 4px 16px rgba(0,0,0,.35);">
         <div style="background:rgba(0,0,0,.25);padding:.55rem 1rem;border-bottom:1px solid #2e3732;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;">
-              ${_admFmtB(m.fmt||'9-Ball')}
-              ${m.type?`<span class="tag tgd" style="font-size:.6rem;">${m.type}</span>`:''}
+            <div>
+              <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;margin-bottom:${m.venue?'.3rem':'0'};">
+                ${_admFmtB(m.fmt||'9-Ball')}
+                ${m.type?`<span class="tag tgd" style="font-size:.6rem;">${m.type}</span>`:''}
+              </div>
+              ${m.venue?`<div style="font-size:.58rem;color:#d0c5af;">📍 ${m.venue}</div>`:''}
             </div>
             <span style="font-size:.6rem;color:#d0c5af;flex-shrink:0;margin-left:6px;">${fmtDate(m.date)}</span>
           </div>
@@ -7174,7 +7177,6 @@ function admTab(btn,tab){
               <div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:var(--gold);display:flex;gap:.35rem;align-items:center;line-height:1;">
                 <span>${_s1}</span><span style="color:#374151;font-size:1.3rem;">-</span><span>${_s2}</span>
               </div>
-              ${m.venue?`<div style="font-size:.55rem;color:#d0c5af;margin-top:.3rem;white-space:nowrap;">📍 ${m.venue}</div>`:''}
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;">
               <div style="margin-right:.4rem;">${p2ok?_admBadge:_admBadgeEmpty}</div>
