@@ -5618,7 +5618,31 @@ function buildPlayerProfile(){
     const polyPts=pts.map((pt,i)=>`${padL+i*xStep},${padT+(pt.rank-1)*yScale}`).join(' ');
     const areaPath=`M${padL},${gH-padB} `+pts.map((pt,i)=>`L${padL+i*xStep},${padT+(pt.rank-1)*yScale}`).join(' ')+` L${padL+(pts.length-1)*xStep},${gH-padB} Z`;
 
-    c.innerHTML=`
+    // ── Hero / monicker card ──
+    const _tier2=careerTier(p.mw,p.ml,p.status);
+    const _miSign2=(p.mi||0)>0?'+':'';
+    const _miCol2=(p.mi||0)>3?'var(--grn3)':(p.mi||0)<-3?'#e55':(p.mi||0)>0?'var(--gold)':'var(--chalk2)';
+    const _sorted9b=[...PLAYERS].sort((a,b)=>(b.ppr9||b.ppr)-(a.ppr9||a.ppr));
+    const _sorted10b=[...PLAYERS].sort((a,b)=>(b.ppr10||b.ppr)-(a.ppr10||a.ppr));
+    const _rank9b=(_sorted9b.findIndex(x=>x.name===p.name)+1)||'—';
+    const _rank10b=(_sorted10b.findIndex(x=>x.name===p.name)+1)||'—';
+    const _base2=INITIAL_PPR[p.status]||1300;
+    const _heroCard=`<div class="pp-hdr" style="margin-bottom:1.1rem;">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:var(--gold);">${app.user?.moniker||fmtPlayerName(p.name)}</div>
+        <div style="font-size:.76rem;color:var(--chalk);margin-top:2px;">${fmtPlayerName(p.name)} · ${app.user?.region||p.region||'—'}</div>
+      </div>
+      <div style="display:flex;gap:1.2rem;text-align:center;flex-wrap:wrap;">
+        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);">#${p.rank}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Overall Rank</div></div>
+        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold2);">${p.ppr||_base2}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Overall PPR</div></div>
+        <div><div style="font-size:1rem;font-weight:700;color:${_tier2.color};background:${_tier2.bg};border:1px solid ${_tier2.border};border-radius:6px;padding:3px 10px;margin-top:2px;">${_tier2.label}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);margin-top:3px;">Status</div></div>
+        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#f5c842;">${p.ppr9||_base2}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank9b}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">9-Ball</div></div>
+        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#4a9eff;">${p.ppr10||_base2}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank10b}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">10-Ball</div></div>
+        <div><div style="font-family:'DM Mono',monospace;font-size:1.7rem;font-weight:700;color:${_miCol2};">${_miSign2}${p.mi||0}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Momentum</div></div>
+      </div>
+    </div>`;
+
+    c.innerHTML=_heroCard+`
     <div class="g2" style="margin-bottom:1.1rem;">
       <div>
         <!-- PPR / Career Status card -->
