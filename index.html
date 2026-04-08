@@ -728,6 +728,49 @@ textarea{resize:vertical;min-height:75px;}
 .site-footer-socials{display:flex;gap:.55rem;}
 .site-footer-social-btn{width:30px;height:30px;border-radius:50%;background:#111;border:1px solid #1f1f1f;display:flex;align-items:center;justify-content:center;color:#3a3a3a;cursor:pointer;transition:color .2s,border-color .2s;font-size:.75rem;}
 .site-footer-social-btn:hover{color:#fff;border-color:#444;}
+/* ── PLAYER HISTORY: ClevMoney-style ── */
+.pp-hist-nav{display:flex;align-items:center;margin-bottom:.55rem;border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+.pp-hist-arrow{flex:none;width:40px;height:40px;background:rgba(255,255,255,.04);border:none;color:var(--chalk);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.pp-hist-arrow:hover{background:rgba(255,255,255,.1);}
+.pp-hist-month-lbl{flex:1;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--fg);cursor:pointer;white-space:nowrap;min-width:0;}
+.pp-hist-ppr-lbl{flex:none;padding:0 14px;font-family:'DM Mono',monospace;font-weight:700;font-size:.88rem;color:var(--gold);border-left:1px solid var(--border);white-space:nowrap;height:40px;display:flex;align-items:center;gap:5px;min-width:110px;justify-content:center;}
+.pp-hist-ppr-change{font-size:.68rem;font-weight:600;}
+.pp-hist-filters{display:flex;margin-bottom:.8rem;border:1px solid var(--border);border-radius:10px;overflow:visible;}
+.pp-hist-filter-wrap{flex:1;position:relative;}
+.pp-hist-filter-wrap:not(:last-child){border-right:1px solid var(--border);}
+.pp-hist-filter-btn{width:100%;padding:9px 4px;background:transparent;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:.74rem;font-weight:600;color:var(--chalk);text-align:center;transition:all .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pp-hist-filter-btn.act{background:var(--gold-dim);color:var(--gold);}
+.pp-hist-filter-btn:hover{background:rgba(255,255,255,.05);}
+.pp-hist-drop{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:#1a2820;border:1px solid var(--border);border-radius:8px;overflow:hidden;z-index:30;box-shadow:0 8px 24px rgba(0,0,0,.55);}
+.pp-hist-drop-item{display:block;width:100%;padding:8px 14px;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.05);color:var(--chalk);cursor:pointer;text-align:left;font-size:.78rem;font-family:'Space Grotesk',sans-serif;white-space:nowrap;}
+.pp-hist-drop-item:last-child{border-bottom:none;}
+.pp-hist-drop-item.act,.pp-hist-drop-item:hover{background:rgba(200,168,75,.12);color:var(--gold);}
+/* Date list rows */
+.pp-date-row-wrap{border-bottom:1px solid rgba(255,255,255,.05);}
+.pp-date-row{display:flex;justify-content:space-between;align-items:center;padding:.65rem 1rem;cursor:pointer;transition:background .15s;}
+.pp-date-row:hover{background:rgba(255,255,255,.04);}
+.pp-date-lbl{font-family:'Space Grotesk',sans-serif;font-size:.8rem;font-weight:600;color:var(--fg);}
+.pp-date-wl{font-family:'DM Mono',monospace;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.25);}
+.pp-date-wl.pp-wl-win{color:var(--grn3);}
+.pp-date-wl.pp-wl-loss{color:#e55;}
+.pp-date-wl.pp-wl-even{color:var(--gold);}
+/* Calendar grid */
+.pp-cal-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.pp-cal-header-row,.pp-cal-row{display:grid;grid-template-columns:58px repeat(7,1fr);}
+.pp-cal-header-row{background:rgba(0,0,0,.3);border-bottom:1px solid var(--border);}
+.pp-cal-hdr-cell{text-align:center;padding:7px 2px;font-family:'Space Grotesk',sans-serif;font-size:.65rem;font-weight:700;color:var(--chalk);}
+.pp-cal-hdr-sat{color:#4a9eff;}.pp-cal-hdr-sun{color:#e55;}
+.pp-cal-week-sum{padding:5px 4px;font-size:.6rem;color:var(--chalk2);text-align:center;border-right:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;line-height:1.3;word-break:break-all;}
+.pp-cal-cell{border-right:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);padding:4px 2px;min-height:46px;text-align:center;}
+.pp-cal-empty{background:rgba(0,0,0,.18);}
+.pp-cal-today{outline:2px solid #2f7a3a;outline-offset:-2px;border-radius:2px;}
+.pp-cal-day-num{font-family:'Space Grotesk',sans-serif;font-size:.75rem;font-weight:700;color:var(--fg);margin-bottom:2px;}
+.pp-cal-cell-sat .pp-cal-day-num{color:#4a9eff;}
+.pp-cal-cell-sun .pp-cal-day-num{color:#e55;}
+.pp-cal-wl-txt{font-family:'DM Mono',monospace;font-size:.58rem;font-weight:700;line-height:1.4;}
+.pp-cal-row{border-bottom:1px solid rgba(255,255,255,.04);}
+.pp-cal-stat-row{background:rgba(0,0,0,.2);}
+.pp-cal-stat-val{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--chalk2);line-height:1.4;padding:3px 0;}
 </style>
 </head>
 <body>
@@ -1840,7 +1883,7 @@ function filterHistoryOD(btn, period){
   const _u=app.user;
   const _hallEntry=typeof adminHalls!=='undefined'?adminHalls.find(h=>h.email===_u?.email||h.username===_u?.username||h.owner===_u?.name):null;
   const _venueName=_hallEntry?.name||_u?.hall||'';
-  let data=typeof adminMatches!=='undefined'?adminMatches.filter(m=>m.status==='approved'&&_venueName&&m.venue&&(m.venue===_venueName||m.venue.startsWith(_venueName))):[];
+  let data=typeof adminMatches!=='undefined'?adminMatches.filter(m=>m.status==='approved'&&m.p1ok&&m.p2ok&&m.venueOk&&_venueName&&m.venue&&(m.venue===_venueName||m.venue.startsWith(_venueName))):[];
   if(period==='day') data=data.filter(m=>m.date===today);
   else if(period==='month') data=data.filter(m=>m.date&&m.date.startsWith(thisMonth));
   else if(period==='year') data=data.filter(m=>m.date&&m.date.startsWith(thisYear));
@@ -2341,7 +2384,7 @@ function _refreshTournamentSelect(){
 function _refreshVenueSelect(){
   // Build venue list from HALLS + adminHalls for search autocomplete
   const adminActive=(typeof adminHalls!=='undefined'?adminHalls:[]).filter(h=>h.status==='active').map(h=>h.name).filter(Boolean);
-  const hallsArr=HALLS.map(h=>`${h.n}${h.c?' – '+h.c:''}`);
+  const hallsArr=HALLS.map(h=>h.n).filter(Boolean);
   app._venueList=[...new Set([...hallsArr,...adminActive])].sort();
 }
 function venueSearch(){
@@ -5458,125 +5501,218 @@ function ppTab(btn,tab){
       <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:#c9a84c;margin-bottom:.6rem;">⏳ Awaiting Admin Approval</div>
       ${_awaitAdmin.map(m=>_ppCard(m,true,true,'')).join('')}`:''}
 
-    ${!_editProposed.length&&!_needMyResponse.length&&!_ownerRecorded.length&&!_awaitAdmin.length?`
+    ${_mySubmitted.length?`
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gold);margin-bottom:.6rem;">📨 Submitted by You <span style="font-family:'DM Mono',monospace;font-size:.6rem;font-weight:400;letter-spacing:0;color:var(--chalk2);margin-left:4px;">${_mySubmitted.length} awaiting opponent</span></div>
+      ${_mySubmitted.map(m=>_ppCard(m,true,false,`<span style="font-size:.72rem;color:var(--chalk2);">⏳ Waiting for ${(m.p2||'').split(' ')[0]} to confirm…</span>`)).join('')}`:''}
+
+    ${!_editProposed.length&&!_needMyResponse.length&&!_ownerRecorded.length&&!_awaitAdmin.length&&!_mySubmitted.length?`
     <div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;padding:2rem;text-align:center;color:#d0c5af;font-size:.82rem;">🎉 No pending validations — all clear ✓</div>`:''}
     `;
 
   } else if(tab==='history'){
-    const sort=app.ppSort||'date';
-    const fmtF=app.ppFmtFilter||null;
+    // ── State init ──
+    if(!app.ppHistoryMonth){const _n=new Date();app.ppHistoryMonth=`${_n.getFullYear()}-${String(_n.getMonth()+1).padStart(2,'0')}`;}
+    if(!app.ppHistViewMode) app.ppHistViewMode='list';
     const _pName=app.user?.name;
-    // Raw matches for this player from adminMatches
-    let _hMatches=adminMatches.filter(m=>m.status==='approved'&&(m.p1===_pName||m.p2===_pName));
-    const _totalAll=_hMatches.length;
-    // Apply format filter
-    if(sort==='fmt'&&fmtF) _hMatches=_hMatches.filter(m=>m.fmt===fmtF);
-    // Always sort recent → oldest regardless of view mode
-    _hMatches.sort((a,b)=>{
-      const _da=new Date(a.date||a.ts||a.submittedAt||0);
-      const _db=new Date(b.date||b.ts||b.submittedAt||0);
-      return _db-_da;
-    });
-    const _scStyle=`font-family:'DM Mono',monospace;font-weight:700;font-size:1.05rem;`;
-    const _fmtBadgeFn=f=>f==='9-Ball'
-      ?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${f}</span>`
-      :`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${f}</span>`;
-    c.innerHTML=`
-    ${_mySubmitted.length?`
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gold);margin-bottom:.6rem;">📨 Submitted by You <span style="font-family:'DM Mono',monospace;font-size:.6rem;font-weight:400;letter-spacing:0;color:var(--chalk2);margin-left:4px;">${_mySubmitted.length} pending</span></div>
-      ${_mySubmitted.map(m=>{
-        const _ip1=m.p1===_pName;
-        const _opp=_ip1?m.p2:m.p1;
-        const _pts=(m.score||m.sc||'0-0').split(/[-–]/).map(Number);
-        const _myS=_ip1?_pts[0]:_pts[1]; const _opS=_ip1?_pts[1]:_pts[0];
-        const _win=_myS>_opS;
-        const _myTier=m[_ip1?'p1CareerStatus':'p2CareerStatus']||(PLAYERS.find(p=>p.name===_pName)||{}).status||'';
-        const _opTier=m[_ip1?'p2CareerStatus':'p1CareerStatus']||(PLAYERS.find(p=>p.name===_opp)||{}).status||'';
-        const _mr=Array.isArray(m.hcpRack)?(m.hcpRack[_ip1?0:1]||0):0;
-        const _or=Array.isArray(m.hcpRack)?(m.hcpRack[_ip1?1:0]||0):0;
-        const _mb=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[_ip1?0:1])?m.hcpBalls[_ip1?0:1]:[];
-        const _ob=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[_ip1?1:0])?m.hcpBalls[_ip1?1:0]:[];
-        const _mh=fmtHcpTag(_mr,_mb); const _oh=fmtHcpTag(_or,_ob);
-        const _myLbl=`${fmtPlayerName(_pName)}${_myTier?` <span class="tier-inline">${_myTier}</span>`:''}${_mh?` <span class="hcp-tag">${_mh}</span>`:''}`;
-        const _opLbl=`${fmtPlayerName(_opp)}${_opTier?` <span class="tier-inline">${_opTier}</span>`:''}${_oh?` <span class="hcp-tag">${_oh}</span>`:''}`;
-        return `<div class="le ll" style="flex-direction:column;align-items:stretch;gap:0;margin-bottom:4px;border-color:rgba(200,168,75,.35);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
-            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${_fmtBadgeFn(m.fmt||'9-Ball')}${m.type?` <span class="tag tgd" style="font-size:.65rem;">${m.type}</span>`:''}</div>
-            <div style="font-size:.62rem;color:var(--chalk2);">${fmtDate(m.date||m.ts)}</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_myLbl}</div>
-            <span style="${_scStyle}color:${_win?'var(--gold)':'var(--chalk2)'};">${_myS}</span>
-          </div>
-          <div style="font-size:.65rem;color:var(--chalk2);letter-spacing:.5px;margin:.05rem 0 .05rem .1rem;">vs</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-size:.84rem;font-weight:600;line-height:1.5;">${_opLbl}</div>
-            <span style="${_scStyle}color:${!_win?'var(--gold)':'var(--chalk2)'};">${_opS}</span>
-          </div>
-        </div>`;
-      }).join('')}
-      <div style="border-top:1px solid rgba(212,175,55,.12);margin:1rem 0 1.2rem;"></div>`:''}
-    <div class="card">
-      <div class="ct">📋 My Match History</div>
-      <div style="display:flex;gap:7px;align-items:center;margin-bottom:.7rem;flex-wrap:wrap;">
-        <span style="font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">View:</span>
-        <button class="tb${sort==='date'?' act':''}" style="flex:none;min-width:60px;" onclick="ppSort(this,'date')">Date</button>
-        <button class="tb${sort==='fmt'?' act':''}" style="flex:none;min-width:70px;" onclick="ppSort(this,'fmt')">Format</button>
-        <button class="tb${sort==='venue'?' act':''}" style="flex:none;min-width:60px;" onclick="ppSort(this,'venue')">Venue</button>
-        <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--chalk2);">${_totalAll} verified</div>
-      </div>
-      ${sort==='fmt'?`<div style="display:flex;gap:6px;margin-bottom:1rem;">
-        <button class="tb${!fmtF?' act':''}" style="flex:none;font-size:.7rem;" onclick="ppFmtFilter(null)">All</button>
-        <button class="tb${fmtF==='9-Ball'?' act':''}" style="flex:none;font-size:.7rem;background:${fmtF==='9-Ball'?'rgba(245,200,66,.15)':''};" onclick="ppFmtFilter('9-Ball')">9-Ball</button>
-        <button class="tb${fmtF==='10-Ball'?' act':''}" style="flex:none;font-size:.7rem;background:${fmtF==='10-Ball'?'rgba(74,158,255,.15)':''};" onclick="ppFmtFilter('10-Ball')">10-Ball</button>
-      </div>`:''}
-      ${_hMatches.length===0
-        ?`<div style="text-align:center;padding:2.5rem;color:var(--chalk2);font-size:.82rem;">🎱 No matches found.</div>`
-        :_hMatches.map(m=>{
-          const _ip1=m.p1===_pName;
-          const _opp=_ip1?m.p2:m.p1;
-          const _pts=(m.score||'0-0').split(/[-–]/).map(Number);
-          const _myS=_ip1?_pts[0]:_pts[1]; const _opS=_ip1?_pts[1]:_pts[0];
-          const _win=_myS>_opS;
-          const _myTier=m[_ip1?'p1CareerStatus':'p2CareerStatus']||(PLAYERS.find(p=>p.name===_pName)||{}).status||'';
-          const _opTier=m[_ip1?'p2CareerStatus':'p1CareerStatus']||(PLAYERS.find(p=>p.name===_opp)||{}).status||'';
-          const _mr=Array.isArray(m.hcpRack)?(m.hcpRack[_ip1?0:1]||0):0;
-          const _or=Array.isArray(m.hcpRack)?(m.hcpRack[_ip1?1:0]||0):0;
-          const _mb=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[_ip1?0:1])?m.hcpBalls[_ip1?0:1]:[];
-          const _ob=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[_ip1?1:0])?m.hcpBalls[_ip1?1:0]:[];
-          const _mh=fmtHcpTag(_mr,_mb); const _oh=fmtHcpTag(_or,_ob);
-          const _myTierObj=_myTier?careerTier(0,0,_myTier):null;
-          const _opTierObj=_opTier?careerTier(0,0,_opTier):null;
-          const _tbMe=_myTierObj?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${_myTierObj.bg};color:${_myTierObj.color};border:1px solid ${_myTierObj.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${_myTierObj.label}</span>`:'';
-          const _tbOp=_opTierObj?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${_opTierObj.bg};color:${_opTierObj.color};border:1px solid ${_opTierObj.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${_opTierObj.label}</span>`:'';
-          const _hMe=_mh?`<span style="font-size:.72rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;">${_mh}</span>`:'';
-          const _hOp=_oh?`<span style="font-size:.72rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;">${_oh}</span>`:'';
-          const _fmtBadge=m.fmt==='9-Ball'
-            ?`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
-            :`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.fmt||'9-Ball'}</span>`;
-          const _typeBadge=m.type?`<span style="padding:2px 8px;background:rgba(53,94,59,.4);border:1px solid rgba(53,94,59,.3);color:var(--gold2);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.type}</span>`:'';
-          const _venueLine=sort==='venue'?`<div style="font-size:.6rem;color:rgba(224,224,224,.4);font-family:'Space Grotesk',sans-serif;margin-top:.35rem;">📍 ${m.venue||'—'}</div>`:'';
-          return `<div class="dash-match-card"><div class="dash-match-card-inner">
-            <div class="dash-match-card-head">
-              <div class="dash-match-card-badges">${_fmtBadge}${_typeBadge}</div>
-              <span class="dash-match-card-date">${fmtDate(m.date)}</span>
-            </div>
-            <div class="dash-match-card-body">
-              <div class="dash-match-players-col">
-                <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:${_win?'800':'500'};color:${_win?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(_pName)}</span>${_tbMe}${_hMe}</div>
-                <div class="dash-match-vs">vs</div>
-                <div class="dash-match-player-row"><span style="font-size:.85rem;font-weight:${!_win?'800':'500'};color:${!_win?'#fff':'rgba(224,224,224,.5)'};">${fmtPlayerName(_opp)}</span>${_tbOp}${_hOp}</div>
-              </div>
-              <div class="dash-match-scores-col">
-                <span class="${_win?'dash-match-score-win':'dash-match-score-lose'}">${_myS}</span>
-                <span style="font-size:.6rem;color:transparent;user-select:none;">vs</span>
-                <span class="${!_win?'dash-match-score-win':'dash-match-score-lose'}">${_opS}</span>
-              </div>
-            </div>
-            ${_venueLine}
-          </div></div>`;
-        }).join('')}
+    const fmtF=app.ppFmtFilter||null;
+    const venueF=app.ppVenueFilter||null;
+    const [_hYr,_hMo]=(app.ppHistoryMonth||'2026-01').split('-').map(Number);
+    const _moNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const _monthDisp=`${_moNames[_hMo-1]} ${_hYr}`;
+    // ── All approved matches ──
+    const _allM=adminMatches.filter(m=>m.status==='approved'&&m.p1ok&&m.p2ok&&m.venueOk&&(m.p1===_pName||m.p2===_pName));
+    const _bestDate=(m)=>m.date||m.ts||m.approvedAt||m.submittedAt||'';
+    let _monM=_allM.filter(m=>{const d=new Date(_bestDate(m));return d.getFullYear()===_hYr&&(d.getMonth()+1)===_hMo;});
+    if(fmtF) _monM=_monM.filter(m=>m.fmt===fmtF);
+    if(venueF) _monM=_monM.filter(m=>m.venue===venueF);
+    _monM.sort((a,b)=>new Date(_bestDate(b))-new Date(_bestDate(a)));
+    // ── Helpers ──
+    const _isW=(m)=>{const ip1=m.p1===_pName;const pts=(m.score||'0-0').split(/[-–]/).map(Number);return ip1?pts[0]>pts[1]:pts[1]>pts[0];};
+    const _allVenues=[...new Set(_allM.map(m=>m.venue||'').filter(v=>v&&v!=='—'))].sort();
+    const _pp=PLAYERS.find(x=>x.name===_pName)||{ppr:1300};
+    const _apEntry=approvedPlayers.find(x=>x.name===_pName)||{};
+    // Registration month — calendar should not go earlier than this
+    const _regDate=new Date(_apEntry.approvedAt||_bestDate({approvedAt:_apEntry.approvedAt})||'2026-01-01');
+    const _regYr=_regDate.getFullYear(); const _regMo=_regDate.getMonth()+1;
+    const _beforeReg=(_hYr<_regYr)||(_hYr===_regYr&&_hMo<_regMo);
+    // ── Compute PPR at end of any given month by replaying all matches up to that cutoff ──
+    const _replayPPR=(cutoffYr,cutoffMo)=>{
+      const _cutMs=_allM.filter(m=>{
+        const d=new Date(_bestDate(m));
+        return d.getFullYear()<cutoffYr||(d.getFullYear()===cutoffYr&&(d.getMonth()+1)<=cutoffMo);
+      }).sort((a,b)=>new Date(_bestDate(a))-new Date(_bestDate(b)));
+      if(!_cutMs.length) return null;
+      const _status=_pp.status||_pp.careerStatus||'Amateur';
+      // Use admin-assigned initial PPR if available, else INITIAL_PPR table
+      const _base=_apEntry.initialPpr||(typeof INITIAL_PPR!=='undefined'?(INITIAL_PPR[_status]||1300):1300);
+      let _ppr9=_base,_ppr10=_base,_mw9=0,_ml9=0,_mw10=0,_ml10=0;
+      _cutMs.forEach(m=>{
+        const ip1=m.p1===_pName;
+        const pts=(m.score||'0-0').split(/[-–]/).map(Number);
+        const myS=ip1?pts[0]:pts[1]; const opS=ip1?pts[1]:pts[0];
+        const oppName=ip1?m.p2:m.p1;
+        const oppP=PLAYERS.find(x=>x.name===oppName)||{ppr:_base,ppr9:_base,ppr10:_base,status:'Amateur'};
+        const is9=(m.fmt||'9-Ball')==='9-Ball';
+        const myPpr=is9?_ppr9:_ppr10;
+        const opPpr=is9?(oppP.ppr9||oppP.ppr||_base):(oppP.ppr10||oppP.ppr||_base);
+        const delta=calcMatchPPR(myPpr,opPpr,_status,m.type||'Exhibition',myS,opS,1.0);
+        if(is9){_ppr9=Math.max(100,Math.round(_ppr9+delta));myS>opS?_mw9++:_ml9++;}
+        else{_ppr10=Math.max(100,Math.round(_ppr10+delta));myS>opS?_mw10++:_ml10++;}
+      });
+      const t9=_mw9+_ml9; const t10=_mw10+_ml10; const tot=t9+t10;
+      if(tot===0) return _base;
+      return Math.round((_ppr9*t9+_ppr10*t10)/tot);
+    };
+    const _pprThisMonth=_replayPPR(_hYr,_hMo);
+    // Previous month
+    let _prevYr=_hYr,_prevMo=_hMo-1;if(_prevMo<1){_prevMo=12;_prevYr--;}
+    const _pprPrevMonth=_replayPPR(_prevYr,_prevMo);
+    const _pprDisplay=_pprThisMonth||(_pp.ppr||1300);
+    // For registration month: use initial PPR as baseline instead of (null) previous month
+    const _isRegMonth=(_hYr===_regYr&&_hMo===_regMo);
+    const _initPpr=_apEntry.initialPpr||(typeof INITIAL_PPR!=='undefined'?(INITIAL_PPR[_pp.status||_pp.careerStatus||'Amateur']||1300):1300);
+    const _pprDelta=_pprThisMonth?(_pprPrevMonth?(_pprThisMonth-_pprPrevMonth):(_isRegMonth?(_pprThisMonth-_initPpr):0)):0;
+    const _pprChgHtml=_pprDelta!==0?`<span class="pp-hist-ppr-change" style="color:${_pprDelta>0?'var(--grn3)':'#e55'}">${_pprDelta>0?'+':'-'}${Math.abs(_pprDelta)}</span>`:`<span class="pp-hist-ppr-change" style="color:var(--chalk2);">—</span>`;
+    // ── Career totals ──
+    const _careerW=_allM.filter(_isW).length; const _careerL=_allM.length-_careerW;
+    const _careerLine=`<div style="display:flex;justify-content:space-between;align-items:center;padding:.25rem .25rem .5rem;font-size:.68rem;color:var(--chalk2);">
+      <span>Career: <strong style="color:var(--grn3);">${_careerW}W</strong> / <strong style="color:#e55;">${_careerL}L</strong> · ${_allM.length} verified</span>
+      <span style="font-size:.65rem;color:var(--chalk2);">PPR ${_pprDisplay}</span>
     </div>`;
+    // ── Header nav ──
+    const _navHdr=`<div class="pp-hist-nav">
+      <button class="pp-hist-arrow" onclick="ppHistNav(-1)" ${_beforeReg||(_hYr===_regYr&&_hMo===_regMo)?'disabled style="opacity:.25;cursor:default;"':''}>&#8592;</button>
+      <span class="pp-hist-month-lbl">${_monthDisp}</span>
+      <button class="pp-hist-arrow" onclick="ppHistNav(1)">&#8594;</button>
+      <span class="pp-hist-ppr-lbl">
+        <span style="font-size:.92rem;">${_pprDisplay}</span>&nbsp;${_pprChgHtml}
+      </span>
+    </div>${_careerLine}`;
+    // ── Filter row ──
+    const _fmtLabel=fmtF||'Format';
+    const _venLabel=venueF?(venueF.length>10?venueF.substring(0,10)+'…':venueF):'Venue';
+    const _viewLbl=app.ppHistViewMode==='calendar'?'List':'Calendar';
+    const _fmtDrop=app.ppHistShowFmt?`<div class="pp-hist-drop">
+      <button class="pp-hist-drop-item${!fmtF?' act':''}" onclick="ppHistSetFmt(null)">All Formats</button>
+      <button class="pp-hist-drop-item${fmtF==='9-Ball'?' act':''}" onclick="ppHistSetFmt('9-Ball')">🟡 9-Ball</button>
+      <button class="pp-hist-drop-item${fmtF==='10-Ball'?' act':''}" onclick="ppHistSetFmt('10-Ball')">🔵 10-Ball</button>
+    </div>`:'';
+    const _venueDrop=app.ppHistShowVenue?`<div class="pp-hist-drop">
+      <button class="pp-hist-drop-item${!venueF?' act':''}" onclick="ppHistSetVenue(null)">All Venues</button>
+      ${_allVenues.map(v=>`<button class="pp-hist-drop-item${venueF===v?' act':''}" onclick="ppHistSetVenue(${JSON.stringify(v).replace(/"/g,'&quot;')})">📍 ${v}</button>`).join('')}
+      ${_allVenues.length===0?`<div style="padding:8px 14px;font-size:.75rem;color:var(--chalk2);">No venues found</div>`:''}
+    </div>`:'';
+    const _filterRow=`<div class="pp-hist-filters">
+      <div class="pp-hist-filter-wrap">
+        <button class="pp-hist-filter-btn${fmtF?' act':''}" onclick="ppHistToggleFmt()">${_fmtLabel}</button>
+        ${_fmtDrop}
+      </div>
+      <div class="pp-hist-filter-wrap">
+        <button class="pp-hist-filter-btn${venueF?' act':''}" onclick="ppHistToggleVenue()">${_venLabel}</button>
+        ${_venueDrop}
+      </div>
+      <div class="pp-hist-filter-wrap">
+        <button class="pp-hist-filter-btn${app.ppHistViewMode==='calendar'?' act':''}" onclick="ppHistToggleView()">${_viewLbl}</button>
+      </div>
+    </div>`;
+    if(app.ppHistViewMode==='calendar'){
+      // ── CALENDAR VIEW ──
+      const _dim=new Date(_hYr,_hMo,0).getDate();
+      const _byDate={};
+      _monM.forEach(m=>{const dk=_bestDate(m).substring(0,10);if(!_byDate[dk])_byDate[dk]={w:0,l:0};if(_isW(m))_byDate[dk].w++;else _byDate[dk].l++;});
+      const _today=new Date().toISOString().substring(0,10);
+      const _dayHdrs=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      // Build weeks (Mon-start)
+      const _weeks=[];let _wk=new Array(7).fill(null);
+      for(let d=1;d<=_dim;d++){
+        const _col=(new Date(_hYr,_hMo-1,d).getDay()+6)%7;
+        _wk[_col]=d;
+        if(_col===6||d===_dim){_weeks.push([..._wk]);_wk=new Array(7).fill(null);}
+      }
+      // Column totals
+      const _colT=Array(7).fill(0).map(()=>({w:0,l:0}));
+      _weeks.forEach(wk=>wk.forEach((d,ci)=>{if(d!==null){const dk=`${_hYr}-${String(_hMo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;if(_byDate[dk]){_colT[ci].w+=_byDate[dk].w;_colT[ci].l+=_byDate[dk].l;}}}));
+      const _calRows=_weeks.map(wk=>{
+        const _wt=wk.reduce((a,d)=>{if(d!==null){const dk=`${_hYr}-${String(_hMo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;if(_byDate[dk]){a.w+=_byDate[dk].w;a.l+=_byDate[dk].l;}}return a;},{w:0,l:0});
+        const _wSum=(_wt.w+_wt.l>0)?`W:${_wt.w}<br>L:${_wt.l}`:'-';
+        return `<div class="pp-cal-row">
+          <div class="pp-cal-week-sum">${_wSum}</div>
+          ${wk.map((d,ci)=>{
+            if(d===null)return`<div class="pp-cal-cell pp-cal-empty"></div>`;
+            const dk=`${_hYr}-${String(_hMo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const isT=dk===_today;const dat=_byDate[dk];
+            const isSat=ci===5;const isSun=ci===6;
+            const wlHtml=dat?`<div class="pp-cal-wl-txt" style="color:${dat.w>dat.l?'var(--grn3)':dat.l>dat.w?'#e55':'var(--gold)'}">${dat.w>0?`W${dat.w}`:''}${dat.l>0?`${dat.w>0?' ':''}L${dat.l}`:''}</div>`:'';
+            return`<div class="pp-cal-cell${isT?' pp-cal-today':''}${isSat?' pp-cal-cell-sat':''}${isSun?' pp-cal-cell-sun':''}">
+              <div class="pp-cal-day-num">${d}</div>${wlHtml}
+            </div>`;
+          }).join('')}
+        </div>`;
+      }).join('');
+      const _sumRow=`<div class="pp-cal-row pp-cal-stat-row">
+        <div class="pp-cal-week-sum" style="font-size:.58rem;color:var(--chalk2);font-family:'Space Grotesk',sans-serif;">Sum</div>
+        ${_colT.map((ct,ci)=>`<div class="pp-cal-cell${ci===5?' pp-cal-cell-sat':ci===6?' pp-cal-cell-sun':''}"><div class="pp-cal-stat-val">${(ct.w+ct.l)>0?`W:${ct.w}<br>L:${ct.l}`:'-'}</div></div>`).join('')}
+      </div>`;
+      c.innerHTML=_navHdr+_filterRow+`
+      <div class="pp-cal-wrap">
+        <div class="pp-cal-header-row">
+          <div class="pp-cal-week-sum"></div>
+          ${_dayHdrs.map((d,i)=>`<div class="pp-cal-hdr-cell${i===5?' pp-cal-hdr-sat':i===6?' pp-cal-hdr-sun':''}">${d}</div>`).join('')}
+        </div>
+        ${_calRows}${_sumRow}
+      </div>`;
+
+    } else {
+      // ── LIST VIEW ──
+      const _dim=new Date(_hYr,_hMo,0).getDate();
+      const _dGroups={};const _dOrder=[];
+      for(let d=_dim;d>=1;d--){
+        const dk=`${_hYr}-${String(_hMo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        _dGroups[dk]=[];_dOrder.push(dk);
+      }
+      _monM.forEach(m=>{const dk=(m.date||'').substring(0,10);if(_dGroups[dk])_dGroups[dk].push(m);});
+      const _dayA=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const _listRows=_dOrder.map(dk=>{
+        const _ms=_dGroups[dk];
+        const _d=new Date(dk+'T12:00:00');
+        const _lbl=`${String(_d.getMonth()+1).padStart(2,'0')}/${String(_d.getDate()).padStart(2,'0')}/${_d.getFullYear()} (${_dayA[_d.getDay()]})`;
+        const _w=_ms.filter(_isW).length;const _l=_ms.length-_w;
+        const _wlTxt=_ms.length>0?`W:${_w} L:${_l}`:'-';
+        const _wlCls=_ms.length===0?'':_w>_l?'pp-wl-win':_l>_w?'pp-wl-loss':'pp-wl-even';
+        const _isExp=!!(app.ppHistExpanded||{})[dk];
+        const _expCards=_isExp?(_ms.length===0
+          ?`<div style="padding:.6rem 1rem;background:rgba(0,0,0,.15);text-align:center;font-size:.76rem;color:var(--chalk2);">No matches</div>`
+          :_ms.map(m=>{
+            const ip1=m.p1===_pName;const opp=ip1?m.p2:m.p1;
+            const pts=(m.score||'0-0').split(/[-–]/).map(Number);
+            const myS=ip1?pts[0]:pts[1];const opS=ip1?pts[1]:pts[0];const win=myS>opS;
+            const fb=m.fmt==='9-Ball'?`<span style="padding:2px 7px;background:#b59a2c;color:#111;font-size:.58rem;font-weight:700;border-radius:4px;">9-Ball</span>`:`<span style="padding:2px 7px;background:#2563eb;color:#fff;font-size:.58rem;font-weight:700;border-radius:4px;">${m.fmt||'9-Ball'}</span>`;
+            const tb=m.type?`<span style="padding:2px 7px;background:rgba(53,94,59,.4);color:var(--gold2);font-size:.58rem;font-weight:700;border-radius:4px;">${m.type}</span>`:'';
+            return `<div style="padding:.7rem 1rem;background:rgba(255,255,255,.025);border-top:1px solid rgba(255,255,255,.06);">
+              <div style="display:flex;gap:.3rem;align-items:center;margin-bottom:.5rem;">${fb}${tb}<span style="margin-left:auto;font-size:.58rem;color:var(--chalk2);">📍 ${m.venue||'—'}</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-size:.82rem;font-weight:${win?'700':'500'};color:${win?'#fff':'rgba(255,255,255,.45)'};">${fmtPlayerName(_pName)}</div>
+                  <div style="font-size:.6rem;color:var(--chalk2);margin:.1rem 0;">vs</div>
+                  <div style="font-size:.82rem;font-weight:${!win?'700':'500'};color:${!win?'#fff':'rgba(255,255,255,.45)'};">${fmtPlayerName(opp)}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;color:${win?'var(--gold)':'var(--chalk2)'};">${myS}</div>
+                  <div style="font-size:.5rem;color:transparent;">-</div>
+                  <div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;color:${!win?'var(--gold)':'var(--chalk2)'};">${opS}</div>
+                </div>
+              </div>
+            </div>`;
+          }).join('')):'' ;
+        return `<div class="pp-date-row-wrap">
+          <div class="pp-date-row" onclick="ppHistToggleDate(${JSON.stringify(dk)})">
+            <span class="pp-date-lbl">${_lbl}</span>
+            <span class="pp-date-wl ${_wlCls}">${_wlTxt}</span>
+          </div>${_expCards}
+        </div>`;
+      }).join('');
+      c.innerHTML=_navHdr+_filterRow+`<div style="margin:0 -1rem;">${_listRows}</div>`;
+    }
 
   } else {
     buildPlayerProfile();
@@ -5821,6 +5957,32 @@ function ppSortHistory(sort){
   return d;
 }
 function ppFmtFilter(f){app.ppFmtFilter=f;ppTab(document.querySelector('.pp-tab[onclick*="history"]'),'history');}
+// ── ClevMoney-style history helpers ──
+function _ppHistBtn(){return document.querySelector('.pp-tab[onclick*="history"]');}
+function ppHistNav(dir){
+  if(!app.ppHistoryMonth){const _n=new Date();app.ppHistoryMonth=`${_n.getFullYear()}-${String(_n.getMonth()+1).padStart(2,'0')}`;}
+  let [yr,mo]=app.ppHistoryMonth.split('-').map(Number);
+  mo+=dir;if(mo>12){mo=1;yr++;}if(mo<1){mo=12;yr--;}
+  // Block navigation before registration month
+  const _ap=approvedPlayers.find(x=>x.name===app.user?.name)||{};
+  if(_ap.approvedAt){
+    const _rd=new Date(_ap.approvedAt);const _ry=_rd.getFullYear();const _rm=_rd.getMonth()+1;
+    if(yr<_ry||(yr===_ry&&mo<_rm)) return;
+  }
+  app.ppHistoryMonth=`${yr}-${String(mo).padStart(2,'0')}`;
+  app.ppHistShowFmt=false;app.ppHistShowVenue=false;
+  ppTab(_ppHistBtn(),'history');
+}
+function ppHistToggleView(){
+  app.ppHistViewMode=app.ppHistViewMode==='calendar'?'list':'calendar';
+  app.ppHistShowFmt=false;app.ppHistShowVenue=false;
+  ppTab(_ppHistBtn(),'history');
+}
+function ppHistToggleFmt(){app.ppHistShowFmt=!app.ppHistShowFmt;app.ppHistShowVenue=false;ppTab(_ppHistBtn(),'history');}
+function ppHistToggleVenue(){app.ppHistShowVenue=!app.ppHistShowVenue;app.ppHistShowFmt=false;ppTab(_ppHistBtn(),'history');}
+function ppHistSetFmt(f){app.ppFmtFilter=f;app.ppHistShowFmt=false;ppTab(_ppHistBtn(),'history');}
+function ppHistSetVenue(v){app.ppVenueFilter=v;app.ppHistShowVenue=false;ppTab(_ppHistBtn(),'history');}
+function ppHistToggleDate(dk){if(!app.ppHistExpanded)app.ppHistExpanded={};app.ppHistExpanded[dk]=!app.ppHistExpanded[dk];ppTab(null,'history');}
 function playerAcceptMatch(i){
   const m=playerPendingMatches[i];
   if(m.me==='p1') m.p1accept=true; else m.p2accept=true;
@@ -6243,7 +6405,7 @@ function filterHistory(btn, period){
   const _u=app.user;
   const _hallEntry=adminHalls.find(h=>h.email===_u?.email||h.username===_u?.username||h.owner===_u?.name);
   const _venueName=_hallEntry?.name||_u?.hall||'';
-  const _base=adminMatches.filter(m=>m.status==='approved'&&_venueName&&m.venue&&(m.venue===_venueName||m.venue.startsWith(_venueName)));
+  const _base=adminMatches.filter(m=>m.status==='approved'&&m.p1ok&&m.p2ok&&m.venueOk&&_venueName&&m.venue&&(m.venue===_venueName||m.venue.startsWith(_venueName)));
   let data=_base;
   if(period==='day') data=data.filter(m=>m.date===today);
   else if(period==='month') data=data.filter(m=>m.date&&m.date.startsWith(thisMonth));
@@ -7562,8 +7724,10 @@ function admApprovePlayer(id){
   const newRank=PLAYERS.find(x=>x.name===p.name)?.rank||'?';
   // Persist approval to localStorage so it survives page reload
   const apIdx=approvedPlayers.findIndex(x=>x.email===p.email||x.username===p.username);
+  const _nowIso=new Date().toISOString();
   const apEntry={id:p.id,name:p.name,username:p.username||'',email:p.email||'',
     region:p.region||'',careerStatus,ppr:initPPR,ppr9:initPPR,ppr10:initPPR,
+    initialPpr:initPPR,approvedAt:_nowIso,
     status:'active',fmt:p.fmt||'9-Ball',
     colors:p.colors||'#1a3a22',mw:0,ml:0,rw:0,rl:0,mi:0,
     mw9:0,ml9:0,mw10:0,ml10:0};
@@ -7845,6 +8009,19 @@ restoreApprovals();
 restoreApprovedHalls();
 restoreTournaments();
 _refreshVenueSelect();
+// ── One-time migration: normalize venue names in adminMatches ──
+// Strips the " – City" suffix that was previously appended by venueSearch,
+// so "Sharks Arena – NCR – Metro Manila" becomes "Sharks Arena".
+(function _normalizeVenueNames(){
+  const _knownHalls=new Set((typeof adminHalls!=='undefined'?adminHalls:[]).filter(h=>h.status==='active').map(h=>h.name).filter(Boolean));
+  let _changed=false;
+  adminMatches.forEach(m=>{
+    if(!m.venue||!m.venue.includes(' – ')) return;
+    const _base=m.venue.split(' – ')[0].trim();
+    if(_knownHalls.has(_base)){m.venue=_base;_changed=true;}
+  });
+  if(_changed) saveAdminMatches();
+})();
 rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
 
 // ── Restore session and last-visited section from previous page load ──
