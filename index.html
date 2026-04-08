@@ -5568,10 +5568,9 @@ function ppTab(btn,tab){
     let _prevYr=_hYr,_prevMo=_hMo-1;if(_prevMo<1){_prevMo=12;_prevYr--;}
     const _pprPrevMonth=_replayPPR(_prevYr,_prevMo);
     const _pprDisplay=_pprThisMonth||(_pp.ppr||1300);
-    // For registration month: use initial PPR as baseline instead of (null) previous month
-    const _isRegMonth=(_hYr===_regYr&&_hMo===_regMo);
+    // When no previous month data exists, compare vs initial PPR (handles reg month + players without approvedAt)
     const _initPpr=_apEntry.initialPpr||(typeof INITIAL_PPR!=='undefined'?(INITIAL_PPR[_pp.status||_pp.careerStatus||'Amateur']||1300):1300);
-    const _pprDelta=_pprThisMonth?(_pprPrevMonth?(_pprThisMonth-_pprPrevMonth):(_isRegMonth?(_pprThisMonth-_initPpr):0)):0;
+    const _pprDelta=_pprThisMonth?(_pprPrevMonth?(_pprThisMonth-_pprPrevMonth):(_pprThisMonth-_initPpr)):0;
     const _pprChgHtml=_pprDelta!==0?`<span class="pp-hist-ppr-change" style="color:${_pprDelta>0?'var(--grn3)':'#e55'}">${_pprDelta>0?'+':'-'}${Math.abs(_pprDelta)}</span>`:`<span class="pp-hist-ppr-change" style="color:var(--chalk2);">—</span>`;
     // ── Career totals ──
     const _careerW=_allM.filter(_isW).length; const _careerL=_allM.length-_careerW;
