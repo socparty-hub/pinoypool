@@ -5521,10 +5521,11 @@ function ppTab(btn,tab){
     const _monthDisp=`${_moNames[_hMo-1]} ${_hYr}`;
     // ── All approved matches ──
     const _allM=adminMatches.filter(m=>m.status==='approved'&&m.p1ok&&m.p2ok&&m.venueOk&&(m.p1===_pName||m.p2===_pName));
-    let _monM=_allM.filter(m=>{const d=new Date(m.date||m.ts||'');return d.getFullYear()===_hYr&&(d.getMonth()+1)===_hMo;});
+    const _bestDate=(m)=>m.date||m.ts||m.approvedAt||m.submittedAt||'';
+    let _monM=_allM.filter(m=>{const d=new Date(_bestDate(m));return d.getFullYear()===_hYr&&(d.getMonth()+1)===_hMo;});
     if(fmtF) _monM=_monM.filter(m=>m.fmt===fmtF);
     if(venueF) _monM=_monM.filter(m=>m.venue===venueF);
-    _monM.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+    _monM.sort((a,b)=>new Date(_bestDate(b))-new Date(_bestDate(a)));
     // ── Helpers ──
     const _isW=(m)=>{const ip1=m.p1===_pName;const pts=(m.score||'0-0').split(/[-–]/).map(Number);return ip1?pts[0]>pts[1]:pts[1]>pts[0];};
     const _allVenues=[...new Set(_allM.map(m=>m.venue||'').filter(v=>v&&v!=='—'))].sort();
@@ -5536,13 +5537,19 @@ function ppTab(btn,tab){
     const _pprChgHtml=_monM.length>0
       ?`<span class="pp-hist-ppr-change" style="color:${_pprDelta>0?'var(--grn3)':_pprDelta<0?'#e55':'var(--chalk2)'}">${_pprDelta>0?'+':''}${_pprDelta}</span>`
       :'';
+    // ── Career totals ──
+    const _careerW=_allM.filter(_isW).length; const _careerL=_allM.length-_careerW;
+    const _careerLine=`<div style="display:flex;justify-content:space-between;align-items:center;padding:.25rem .25rem .5rem;font-size:.68rem;color:var(--chalk2);">
+      <span>Career: <strong style="color:var(--grn3);">${_careerW}W</strong> / <strong style="color:#e55;">${_careerL}L</strong> · ${_allM.length} verified</span>
+      <span style="font-size:.65rem;color:var(--chalk2);">PPR ${_ppr}</span>
+    </div>`;
     // ── Header nav ──
     const _navHdr=`<div class="pp-hist-nav">
       <button class="pp-hist-arrow" onclick="ppHistNav(-1)">&#8592;</button>
       <span class="pp-hist-month-lbl">${_monthDisp}</span>
       <button class="pp-hist-arrow" onclick="ppHistNav(1)">&#8594;</button>
-      <span class="pp-hist-ppr-lbl">${_ppr}${_pprChgHtml}</span>
-    </div>`;
+      <span class="pp-hist-ppr-lbl">${_pprChgHtml||'&nbsp;'}</span>
+    </div>${_careerLine}`;
     // ── Filter row ──
     const _fmtLabel=fmtF||'Format';
     const _venLabel=venueF?(venueF.length>10?venueF.substring(0,10)+'…':venueF):'Venue';
