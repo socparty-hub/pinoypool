@@ -5561,7 +5561,7 @@ function ppTab(btn,tab){
     </div>`:'';
     const _venueDrop=app.ppHistShowVenue?`<div class="pp-hist-drop">
       <button class="pp-hist-drop-item${!venueF?' act':''}" onclick="ppHistSetVenue(null)">All Venues</button>
-      ${_allVenues.map(v=>`<button class="pp-hist-drop-item${venueF===v?' act':''}" onclick="ppHistSetVenue(${JSON.stringify(v)})">📍 ${v}</button>`).join('')}
+      ${_allVenues.map(v=>`<button class="pp-hist-drop-item${venueF===v?' act':''}" onclick="ppHistSetVenue(${JSON.stringify(v).replace(/"/g,'&quot;')})">📍 ${v}</button>`).join('')}
       ${_allVenues.length===0?`<div style="padding:8px 14px;font-size:.75rem;color:var(--chalk2);">No venues found</div>`:''}
     </div>`:'';
     const _filterRow=`<div class="pp-hist-filters">
