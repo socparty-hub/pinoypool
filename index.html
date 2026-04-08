@@ -5564,7 +5564,7 @@ function ppTab(btn,tab){
     const _pprPrevMonth=_replayPPR(_prevYr,_prevMo);
     const _pprDisplay=_pprThisMonth||(_pp.ppr||1300);
     const _pprDelta=(_pprThisMonth&&_pprPrevMonth)?(_pprThisMonth-_pprPrevMonth):0;
-    const _pprChgHtml=_pprThisMonth?`<span class="pp-hist-ppr-change" style="color:${_pprDelta>0?'var(--grn3)':_pprDelta<0?'#e55':'var(--chalk2)'}">${_pprDelta>0?'▲':_pprDelta<0?'▼':''} ${Math.abs(_pprDelta)}</span>`:'';
+    const _pprChgHtml=_pprDelta!==0?`<span class="pp-hist-ppr-change" style="color:${_pprDelta>0?'var(--grn3)':'#e55'}">${_pprDelta>0?'▲':'▼'}${Math.abs(_pprDelta)}</span>`:`<span class="pp-hist-ppr-change" style="color:var(--chalk2);">—</span>`;
     // ── Career totals ──
     const _careerW=_allM.filter(_isW).length; const _careerL=_allM.length-_careerW;
     const _careerLine=`<div style="display:flex;justify-content:space-between;align-items:center;padding:.25rem .25rem .5rem;font-size:.68rem;color:var(--chalk2);">
@@ -5576,9 +5576,8 @@ function ppTab(btn,tab){
       <button class="pp-hist-arrow" onclick="ppHistNav(-1)">&#8592;</button>
       <span class="pp-hist-month-lbl">${_monthDisp}</span>
       <button class="pp-hist-arrow" onclick="ppHistNav(1)">&#8594;</button>
-      <span class="pp-hist-ppr-lbl" style="flex-direction:column;gap:1px;line-height:1.2;">
-        <span style="font-size:.95rem;">${_pprDisplay}</span>
-        ${_pprChgHtml||'<span style="font-size:.6rem;color:var(--chalk2);">no matches</span>'}
+      <span class="pp-hist-ppr-lbl">
+        <span style="font-size:.92rem;">${_pprDisplay}</span>&nbsp;${_pprChgHtml}
       </span>
     </div>${_careerLine}`;
     // ── Filter row ──
