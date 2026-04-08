@@ -2384,7 +2384,7 @@ function _refreshTournamentSelect(){
 function _refreshVenueSelect(){
   // Build venue list from HALLS + adminHalls for search autocomplete
   const adminActive=(typeof adminHalls!=='undefined'?adminHalls:[]).filter(h=>h.status==='active').map(h=>h.name).filter(Boolean);
-  const hallsArr=HALLS.map(h=>`${h.n}${h.c?' – '+h.c:''}`);
+  const hallsArr=HALLS.map(h=>h.n).filter(Boolean);
   app._venueList=[...new Set([...hallsArr,...adminActive])].sort();
 }
 function venueSearch(){
@@ -7963,6 +7963,19 @@ restoreApprovals();
 restoreApprovedHalls();
 restoreTournaments();
 _refreshVenueSelect();
+// ── One-time migration: normalize venue names in adminMatches ──
+// Strips the " – City" suffix that was previously appended by venueSearch,
+// so "Sharks Arena – NCR – Metro Manila" becomes "Sharks Arena".
+(function _normalizeVenueNames(){
+  const _knownHalls=new Set((typeof adminHalls!=='undefined'?adminHalls:[]).filter(h=>h.status==='active').map(h=>h.name).filter(Boolean));
+  let _changed=false;
+  adminMatches.forEach(m=>{
+    if(!m.venue||!m.venue.includes(' – ')) return;
+    const _base=m.venue.split(' – ')[0].trim();
+    if(_knownHalls.has(_base)){m.venue=_base;_changed=true;}
+  });
+  if(_changed) saveAdminMatches();
+})();
 rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
 
 // ── Restore session and last-visited section from previous page load ──
