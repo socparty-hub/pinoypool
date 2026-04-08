@@ -1883,7 +1883,7 @@ function filterHistoryOD(btn, period){
   const _u=app.user;
   const _hallEntry=typeof adminHalls!=='undefined'?adminHalls.find(h=>h.email===_u?.email||h.username===_u?.username||h.owner===_u?.name):null;
   const _venueName=_hallEntry?.name||_u?.hall||'';
-  let data=typeof adminMatches!=='undefined'?adminMatches.filter(m=>m.status==='approved'&&_venueName&&m.venue&&(m.venue===_venueName||m.venue.startsWith(_venueName))):[];
+  let data=typeof adminMatches!=='undefined'?adminMatches.filter(m=>m.status==='approved'&&m.p1ok&&m.p2ok&&m.venueOk&&_venueName&&m.venue&&(m.venue===_venueName||m.venue.startsWith(_venueName))):[];
   if(period==='day') data=data.filter(m=>m.date===today);
   else if(period==='month') data=data.filter(m=>m.date&&m.date.startsWith(thisMonth));
   else if(period==='year') data=data.filter(m=>m.date&&m.date.startsWith(thisYear));
@@ -5581,7 +5581,7 @@ function ppTab(btn,tab){
       // ── CALENDAR VIEW ──
       const _dim=new Date(_hYr,_hMo,0).getDate();
       const _byDate={};
-      _monM.forEach(m=>{const dk=(m.date||'').substring(0,10);if(!_byDate[dk])_byDate[dk]={w:0,l:0};if(_isW(m))_byDate[dk].w++;else _byDate[dk].l++;});
+      _monM.forEach(m=>{const dk=_bestDate(m).substring(0,10);if(!_byDate[dk])_byDate[dk]={w:0,l:0};if(_isW(m))_byDate[dk].w++;else _byDate[dk].l++;});
       const _today=new Date().toISOString().substring(0,10);
       const _dayHdrs=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
       // Build weeks (Mon-start)
@@ -6361,7 +6361,7 @@ function filterHistory(btn, period){
   const _u=app.user;
   const _hallEntry=adminHalls.find(h=>h.email===_u?.email||h.username===_u?.username||h.owner===_u?.name);
   const _venueName=_hallEntry?.name||_u?.hall||'';
-  const _base=adminMatches.filter(m=>m.status==='approved'&&_venueName&&m.venue&&(m.venue===_venueName||m.venue.startsWith(_venueName)));
+  const _base=adminMatches.filter(m=>m.status==='approved'&&m.p1ok&&m.p2ok&&m.venueOk&&_venueName&&m.venue&&(m.venue===_venueName||m.venue.startsWith(_venueName)));
   let data=_base;
   if(period==='day') data=data.filter(m=>m.date===today);
   else if(period==='month') data=data.filter(m=>m.date&&m.date.startsWith(thisMonth));
