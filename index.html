@@ -732,8 +732,8 @@ textarea{resize:vertical;min-height:75px;}
 .pp-hist-nav{display:flex;align-items:center;margin-bottom:.55rem;border-radius:10px;overflow:hidden;border:1px solid var(--border);}
 .pp-hist-arrow{flex:none;width:40px;height:40px;background:rgba(255,255,255,.04);border:none;color:var(--chalk);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:background .15s;}
 .pp-hist-arrow:hover{background:rgba(255,255,255,.1);}
-.pp-hist-month-lbl{flex:1;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--fg);cursor:pointer;}
-.pp-hist-ppr-lbl{flex:none;padding:0 14px;font-family:'DM Mono',monospace;font-weight:700;font-size:.88rem;color:var(--gold);border-left:1px solid var(--border);white-space:nowrap;height:40px;display:flex;align-items:center;gap:5px;}
+.pp-hist-month-lbl{flex:1;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--fg);cursor:pointer;white-space:nowrap;min-width:0;}
+.pp-hist-ppr-lbl{flex:none;padding:0 14px;font-family:'DM Mono',monospace;font-weight:700;font-size:.88rem;color:var(--gold);border-left:1px solid var(--border);white-space:nowrap;height:40px;display:flex;align-items:center;gap:5px;min-width:110px;justify-content:center;}
 .pp-hist-ppr-change{font-size:.68rem;font-weight:600;}
 .pp-hist-filters{display:flex;margin-bottom:.8rem;border:1px solid var(--border);border-radius:10px;overflow:visible;}
 .pp-hist-filter-wrap{flex:1;position:relative;}
@@ -5520,14 +5520,14 @@ function ppTab(btn,tab){
     const _moNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const _monthDisp=`${_moNames[_hMo-1]} ${_hYr}`;
     // ── All approved matches ──
-    const _allM=adminMatches.filter(m=>m.status==='approved'&&(m.p1===_pName||m.p2===_pName));
+    const _allM=adminMatches.filter(m=>m.status==='approved'&&m.p1ok&&m.p2ok&&m.venueOk&&(m.p1===_pName||m.p2===_pName));
     let _monM=_allM.filter(m=>{const d=new Date(m.date||m.ts||'');return d.getFullYear()===_hYr&&(d.getMonth()+1)===_hMo;});
     if(fmtF) _monM=_monM.filter(m=>m.fmt===fmtF);
     if(venueF) _monM=_monM.filter(m=>m.venue===venueF);
     _monM.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
     // ── Helpers ──
     const _isW=(m)=>{const ip1=m.p1===_pName;const pts=(m.score||'0-0').split(/[-–]/).map(Number);return ip1?pts[0]>pts[1]:pts[1]>pts[0];};
-    const _allVenues=[...new Set(_allM.map(m=>m.venue||'').filter(Boolean))].sort();
+    const _allVenues=[...new Set(_allM.map(m=>m.venue||'').filter(v=>v&&v!=='—'))].sort();
     const _pp=PLAYERS.find(x=>x.name===_pName)||{ppr:1300};
     const _ppr=fmtF==='9-Ball'?(_pp.ppr9||_pp.ppr||1300):fmtF==='10-Ball'?(_pp.ppr10||_pp.ppr||1300):(_pp.ppr||1300);
     // Monthly PPR change: rough estimate from W/L this month
