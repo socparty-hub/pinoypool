@@ -5530,13 +5530,41 @@ function ppTab(btn,tab){
     const _isW=(m)=>{const ip1=m.p1===_pName;const pts=(m.score||'0-0').split(/[-–]/).map(Number);return ip1?pts[0]>pts[1]:pts[1]>pts[0];};
     const _allVenues=[...new Set(_allM.map(m=>m.venue||'').filter(v=>v&&v!=='—'))].sort();
     const _pp=PLAYERS.find(x=>x.name===_pName)||{ppr:1300};
-    const _ppr=fmtF==='9-Ball'?(_pp.ppr9||_pp.ppr||1300):fmtF==='10-Ball'?(_pp.ppr10||_pp.ppr||1300):(_pp.ppr||1300);
-    // Monthly PPR change: rough estimate from W/L this month
-    const _mW=_monM.filter(_isW).length; const _mL=_monM.length-_mW;
-    const _pprDelta=(_mW-_mL)*20;
-    const _pprChgHtml=_monM.length>0
-      ?`<span class="pp-hist-ppr-change" style="color:${_pprDelta>0?'var(--grn3)':_pprDelta<0?'#e55':'var(--chalk2)'}">${_pprDelta>0?'+':''}${_pprDelta}</span>`
-      :'';
+    // ── Compute PPR at end of any given month by replaying all matches up to that cutoff ──
+    const _replayPPR=(cutoffYr,cutoffMo)=>{
+      // All approved matches for this player up to end of cutoff month, sorted chronologically
+      const _cutMs=_allM.filter(m=>{
+        const d=new Date(_bestDate(m));
+        return d.getFullYear()<cutoffYr||(d.getFullYear()===cutoffYr&&(d.getMonth()+1)<=cutoffMo);
+      }).sort((a,b)=>new Date(_bestDate(a))-new Date(_bestDate(b)));
+      if(!_cutMs.length) return null;
+      const _status=_pp.status||_pp.careerStatus||'Amateur';
+      const _base=typeof INITIAL_PPR!=='undefined'?(INITIAL_PPR[_status]||1300):1300;
+      let _ppr9=_base,_ppr10=_base,_mw9=0,_ml9=0,_mw10=0,_ml10=0;
+      _cutMs.forEach(m=>{
+        const ip1=m.p1===_pName;
+        const pts=(m.score||'0-0').split(/[-–]/).map(Number);
+        const myS=ip1?pts[0]:pts[1]; const opS=ip1?pts[1]:pts[0];
+        const oppName=ip1?m.p2:m.p1;
+        const oppP=PLAYERS.find(x=>x.name===oppName)||{ppr:_base,ppr9:_base,ppr10:_base,status:'Amateur'};
+        const is9=(m.fmt||'9-Ball')==='9-Ball';
+        const myPpr=is9?_ppr9:_ppr10;
+        const opPpr=is9?(oppP.ppr9||oppP.ppr||_base):(oppP.ppr10||oppP.ppr||_base);
+        const delta=calcMatchPPR(myPpr,opPpr,_status,m.type||'Exhibition',myS,opS,1.0);
+        if(is9){_ppr9=Math.max(100,Math.round(_ppr9+delta));myS>opS?_mw9++:_ml9++;}
+        else{_ppr10=Math.max(100,Math.round(_ppr10+delta));myS>opS?_mw10++:_ml10++;}
+      });
+      const t9=_mw9+_ml9; const t10=_mw10+_ml10; const tot=t9+t10;
+      if(tot===0) return _base;
+      return Math.round((_ppr9*t9+_ppr10*t10)/tot);
+    };
+    const _pprThisMonth=_replayPPR(_hYr,_hMo);
+    // Previous month
+    let _prevYr=_hYr,_prevMo=_hMo-1;if(_prevMo<1){_prevMo=12;_prevYr--;}
+    const _pprPrevMonth=_replayPPR(_prevYr,_prevMo);
+    const _pprDisplay=_pprThisMonth||(_pp.ppr||1300);
+    const _pprDelta=(_pprThisMonth&&_pprPrevMonth)?(_pprThisMonth-_pprPrevMonth):0;
+    const _pprChgHtml=_pprThisMonth?`<span class="pp-hist-ppr-change" style="color:${_pprDelta>0?'var(--grn3)':_pprDelta<0?'#e55':'var(--chalk2)'}">${_pprDelta>0?'▲':_pprDelta<0?'▼':''} ${Math.abs(_pprDelta)}</span>`:'';
     // ── Career totals ──
     const _careerW=_allM.filter(_isW).length; const _careerL=_allM.length-_careerW;
     const _careerLine=`<div style="display:flex;justify-content:space-between;align-items:center;padding:.25rem .25rem .5rem;font-size:.68rem;color:var(--chalk2);">
@@ -5548,7 +5576,10 @@ function ppTab(btn,tab){
       <button class="pp-hist-arrow" onclick="ppHistNav(-1)">&#8592;</button>
       <span class="pp-hist-month-lbl">${_monthDisp}</span>
       <button class="pp-hist-arrow" onclick="ppHistNav(1)">&#8594;</button>
-      <span class="pp-hist-ppr-lbl">${_pprChgHtml||'&nbsp;'}</span>
+      <span class="pp-hist-ppr-lbl" style="flex-direction:column;gap:1px;line-height:1.2;">
+        <span style="font-size:.95rem;">${_pprDisplay}</span>
+        ${_pprChgHtml||'<span style="font-size:.6rem;color:var(--chalk2);">no matches</span>'}
+      </span>
     </div>${_careerLine}`;
     // ── Filter row ──
     const _fmtLabel=fmtF||'Format';
