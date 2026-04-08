@@ -5474,12 +5474,10 @@ function ppTab(btn,tab){
     ${_needMyResponse.length?`
       <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gold);margin-bottom:.6rem;">⚡ Confirm Match Results <span style="background:rgba(229,85,85,.15);border:1px solid rgba(229,85,85,.4);color:#e55;border-radius:10px;padding:1px 8px;font-size:.6rem;margin-left:4px;">${_needMyResponse.length}</span></div>
       ${_needMyResponse.map(m=>{
-        const actionHtml=`<div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-          <button class="btn btn-d btn-sm" style="flex:1;min-width:80px;" onclick="opponentRejectMatch('${m.id}')">✗ Reject</button>
-          <button class="btn btn-sm" style="flex:1;min-width:80px;background:rgba(200,168,75,.1);border-color:rgba(200,168,75,.3);color:var(--gold);" onclick="opponentEditScore('${m.id}')">✏️ Edit Score</button>
-          <button class="btn btn-s btn-sm" style="flex:1;min-width:80px;" onclick="opponentApproveMatch('${m.id}')">✓ Approve</button>
-        </div>
-        <div id="opp-edit-${m.id}"></div>`;
+        const actionHtml=`<div style="display:flex;gap:.5rem;">
+          <button class="btn btn-d btn-sm" style="flex:1;" onclick="opponentRejectMatch('${m.id}')">✗ Reject</button>
+          <button class="btn btn-s btn-sm" style="flex:1;" onclick="opponentApproveMatch('${m.id}')">✓ Approve</button>
+        </div>`;
         return _ppCard(m,true,false,actionHtml);
       }).join('')}`:''}
 
