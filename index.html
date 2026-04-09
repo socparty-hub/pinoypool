@@ -5676,35 +5676,36 @@ function ppTab(btn,tab){
         const _w=_ms.filter(_isW).length;const _l=_ms.length-_w;
         const _wlTxt=_ms.length>0?`W:${_w} L:${_l}`:'-';
         const _wlCls=_ms.length===0?'':_w>_l?'pp-wl-win':_l>_w?'pp-wl-loss':'pp-wl-even';
-        const _isExp=!!(app.ppHistExpanded||{})[dk];
-        const _expCards=_isExp?(_ms.length===0
-          ?`<div style="padding:.6rem 1rem;background:rgba(0,0,0,.15);text-align:center;font-size:.76rem;color:var(--chalk2);">No matches</div>`
-          :_ms.map(m=>{
+        const _hasMatches=_ms.length>0;
+        const _isExp=_hasMatches&&!!(app.ppHistExpanded||{})[dk];
+        const _expCards=_isExp?_ms.map(m=>{
             const ip1=m.p1===_pName;const opp=ip1?m.p2:m.p1;
             const pts=(m.score||'0-0').split(/[-–]/).map(Number);
             const myS=ip1?pts[0]:pts[1];const opS=ip1?pts[1]:pts[0];const win=myS>opS;
+            const oppT=ip1?(m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||''):(m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'');
             const fb=m.fmt==='9-Ball'?`<span style="padding:2px 7px;background:#b59a2c;color:#111;font-size:.58rem;font-weight:700;border-radius:4px;">9-Ball</span>`:`<span style="padding:2px 7px;background:#2563eb;color:#fff;font-size:.58rem;font-weight:700;border-radius:4px;">${m.fmt||'9-Ball'}</span>`;
             const tb=m.type?`<span style="padding:2px 7px;background:rgba(53,94,59,.4);color:var(--gold2);font-size:.58rem;font-weight:700;border-radius:4px;">${m.type}</span>`:'';
+            const tierBadge=oppT?`<span style="padding:1px 6px;border:1px solid rgba(200,168,75,.35);color:var(--gold2);font-size:.55rem;font-weight:700;border-radius:4px;letter-spacing:.5px;">${oppT}</span>`:'';
             return `<div style="padding:.7rem 1rem;background:rgba(255,255,255,.025);border-top:1px solid rgba(255,255,255,.06);">
               <div style="display:flex;gap:.3rem;align-items:center;margin-bottom:.5rem;">${fb}${tb}<span style="margin-left:auto;font-size:.58rem;color:var(--chalk2);">📍 ${m.venue||'—'}</span></div>
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                  <div style="font-size:.82rem;font-weight:${win?'700':'500'};color:${win?'#fff':'rgba(255,255,255,.45)'};">${fmtPlayerName(_pName)}</div>
-                  <div style="font-size:.6rem;color:var(--chalk2);margin:.1rem 0;">vs</div>
-                  <div style="font-size:.82rem;font-weight:${!win?'700':'500'};color:${!win?'#fff':'rgba(255,255,255,.45)'};">${fmtPlayerName(opp)}</div>
+                  <div style="font-size:.85rem;font-weight:700;color:${win?'var(--gold)':'rgba(255,255,255,.9)'};">${fmtPlayerName(_pName)} <span style="font-family:'DM Mono',monospace;font-size:.95rem;">${myS}</span></div>
+                  <div style="font-size:.6rem;color:var(--chalk2);margin:.25rem 0;">vs</div>
+                  <div style="display:flex;align-items:center;gap:.4rem;">
+                    <span style="font-size:.82rem;font-weight:500;color:rgba(255,255,255,.55);">${fmtPlayerName(opp)} <span style="font-family:'DM Mono',monospace;font-size:.9rem;">${opS}</span></span>
+                    ${tierBadge}
+                  </div>
                 </div>
-                <div style="text-align:right;">
-                  <div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;color:${win?'var(--gold)':'var(--chalk2)'};">${myS}</div>
-                  <div style="font-size:.5rem;color:transparent;">-</div>
-                  <div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;color:${!win?'var(--gold)':'var(--chalk2)'};">${opS}</div>
-                </div>
+                <div style="font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:6px;background:${win?'rgba(74,158,90,.2)':'rgba(229,85,85,.15)'};color:${win?'var(--grn3)':'#e55'};">${win?'WIN':'LOSS'}</div>
               </div>
             </div>`;
-          }).join('')):'' ;
+          }).join(''):'';
+        const _chevron=_hasMatches?`<span style="font-size:.65rem;color:${_hasMatches?(_isExp?'var(--gold)':'var(--chalk2)'):'rgba(255,255,255,.12)'};margin-left:.4rem;transition:transform .2s;display:inline-block;transform:${_isExp?'rotate(180deg)':'rotate(0deg)'};">▼</span>`:'';
         return `<div class="pp-date-row-wrap">
-          <div class="pp-date-row" onclick="ppHistToggleDate(${JSON.stringify(dk)})">
+          <div class="pp-date-row" style="${!_hasMatches?'cursor:default;':''}" ${_hasMatches?`onclick="ppHistToggleDate(${JSON.stringify(dk)})"`:''}>
             <span class="pp-date-lbl">${_lbl}</span>
-            <span class="pp-date-wl ${_wlCls}">${_wlTxt}</span>
+            <span style="display:flex;align-items:center;"><span class="pp-date-wl ${_wlCls}">${_wlTxt}</span>${_chevron}</span>
           </div>${_expCards}
         </div>`;
       }).join('');
