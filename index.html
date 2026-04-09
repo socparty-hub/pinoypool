@@ -5501,7 +5501,7 @@ function ppTab(btn,tab){
 
     ${_mySubmitted.length?`
       <div style="font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gold);margin-bottom:.6rem;">📨 Submitted by You <span style="font-family:'DM Mono',monospace;font-size:.6rem;font-weight:400;letter-spacing:0;color:var(--chalk2);margin-left:4px;">${_mySubmitted.length} awaiting opponent</span></div>
-      ${_mySubmitted.map(m=>_ppCard(m,true,false,`<span style="font-size:.72rem;color:var(--chalk2);">⏳ Waiting for ${(m.p2||'').split(' ')[0]} to confirm…</span>`)).join('')}`:''}
+      ${_mySubmitted.map(m=>_ppCard(m,true,false,'')).join('')}`:''}
 
     ${!_editProposed.length&&!_needMyResponse.length&&!_ownerRecorded.length&&!_awaitAdmin.length&&!_mySubmitted.length?`
     <div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;padding:2rem;text-align:center;color:#d0c5af;font-size:.82rem;">🎉 No pending validations — all clear ✓</div>`:''}
