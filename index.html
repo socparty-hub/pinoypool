@@ -5781,18 +5781,46 @@ function buildPlayerProfile(){
     const _rank9b=(_sorted9b.findIndex(x=>x.name===p.name)+1)||'—';
     const _rank10b=(_sorted10b.findIndex(x=>x.name===p.name)+1)||'—';
     const _base2=INITIAL_PPR[p.status]||1300;
-    const _heroCard=`<div class="pp-hdr" style="margin-bottom:1.1rem;">
-      <div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:var(--gold);">${app.user?.moniker||fmtPlayerName(p.name)}</div>
-        <div style="font-size:.76rem;color:var(--chalk);margin-top:2px;">${fmtPlayerName(p.name)} · ${app.user?.region||p.region||'—'}</div>
+    const _heroCard=`<div style="background:linear-gradient(135deg,rgba(20,40,25,.95),rgba(10,22,12,1));border:1px solid rgba(200,168,75,.25);border-radius:14px;padding:1.1rem 1.2rem;margin-bottom:1.1rem;">
+      <!-- Name row -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.9rem;">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:var(--gold);line-height:1.1;">${app.user?.moniker||fmtPlayerName(p.name)}</div>
+          <div style="font-size:.72rem;color:var(--chalk);margin-top:3px;">${fmtPlayerName(p.name)} · ${app.user?.region||p.region||'—'}</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:.95rem;font-weight:700;color:${_tier2.color};background:${_tier2.bg};border:1px solid ${_tier2.border};border-radius:8px;padding:4px 14px;">${_tier2.label}</div>
+          <div style="font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:4px;">Status</div>
+        </div>
       </div>
-      <div style="display:flex;gap:1.2rem;text-align:center;flex-wrap:wrap;">
-        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);">#${p.rank}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Overall Rank</div></div>
-        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold2);">${p.ppr||_base2}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Overall PPR</div></div>
-        <div><div style="font-size:1rem;font-weight:700;color:${_tier2.color};background:${_tier2.bg};border:1px solid ${_tier2.border};border-radius:6px;padding:3px 10px;margin-top:2px;">${_tier2.label}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);margin-top:3px;">Status</div></div>
-        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#f5c842;">${p.ppr9||_base2}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank9b}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">9-Ball</div></div>
-        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#4a9eff;">${p.ppr10||_base2}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank10b}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">10-Ball</div></div>
-        <div><div style="font-family:'DM Mono',monospace;font-size:1.7rem;font-weight:700;color:${_miCol2};">${_miSign2}${p.mi||0}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Momentum</div></div>
+      <!-- Top stats row: Rank | Overall PPR -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem;">
+        <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.65rem .8rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);line-height:1;">#${p.rank}</div>
+          <div style="font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:3px;">Overall Rank</div>
+        </div>
+        <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.65rem .8rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold2);line-height:1;">${p.ppr||_base2}</div>
+          <div style="font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:3px;">Overall PPR</div>
+        </div>
+      </div>
+      <!-- Bottom stats row: 9-Ball | 10-Ball | Momentum -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;">
+        <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.6rem .5rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:#f5c842;line-height:1;">${p.ppr9||_base2}</div>
+          <div style="font-size:.6rem;color:var(--chalk2);margin-top:2px;">#${_rank9b}</div>
+          <div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:3px;">9-Ball</div>
+        </div>
+        <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.6rem .5rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:#4a9eff;line-height:1;">${p.ppr10||_base2}</div>
+          <div style="font-size:.6rem;color:var(--chalk2);margin-top:2px;">#${_rank10b}</div>
+          <div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:3px;">10-Ball</div>
+        </div>
+        <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.6rem .5rem;text-align:center;">
+          <div style="font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:700;color:${_miCol2};line-height:1;">${_miSign2}${p.mi||0}</div>
+          <div style="font-size:.6rem;color:transparent;margin-top:2px;">-</div>
+          <div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:3px;">Momentum</div>
+        </div>
       </div>
     </div>`;
 
