@@ -5703,7 +5703,7 @@ function ppTab(btn,tab){
           }).join(''):'';
         const _chevron=_hasMatches?`<span style="font-size:.65rem;color:${_hasMatches?(_isExp?'var(--gold)':'var(--chalk2)'):'rgba(255,255,255,.12)'};margin-left:.4rem;transition:transform .2s;display:inline-block;transform:${_isExp?'rotate(180deg)':'rotate(0deg)'};">▼</span>`:'';
         return `<div class="pp-date-row-wrap">
-          <div class="pp-date-row" style="${!_hasMatches?'cursor:default;':''}" ${_hasMatches?`onclick="ppHistToggleDate(${JSON.stringify(dk)})"`:''}>
+          <div class="pp-date-row" style="${!_hasMatches?'cursor:default;':''}" ${_hasMatches?`onclick="ppHistToggleDate('${dk}')"`:''}>
             <span class="pp-date-lbl">${_lbl}</span>
             <span style="display:flex;align-items:center;"><span class="pp-date-wl ${_wlCls}">${_wlTxt}</span>${_chevron}</span>
           </div>${_expCards}
