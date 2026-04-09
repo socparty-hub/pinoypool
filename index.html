@@ -5667,7 +5667,7 @@ function ppTab(btn,tab){
         const dk=`${_hYr}-${String(_hMo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         _dGroups[dk]=[];_dOrder.push(dk);
       }
-      _monM.forEach(m=>{const dk=(m.date||'').substring(0,10);if(_dGroups[dk])_dGroups[dk].push(m);});
+      _monM.forEach(m=>{const dk=_bestDate(m).substring(0,10);if(_dGroups[dk])_dGroups[dk].push(m);});
       const _dayA=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
       const _listRows=_dOrder.map(dk=>{
         const _ms=_dGroups[dk];
