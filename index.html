@@ -5980,7 +5980,7 @@ function ppHistToggleFmt(){app.ppHistShowFmt=!app.ppHistShowFmt;app.ppHistShowVe
 function ppHistToggleVenue(){app.ppHistShowVenue=!app.ppHistShowVenue;app.ppHistShowFmt=false;ppTab(_ppHistBtn(),'history');}
 function ppHistSetFmt(f){app.ppFmtFilter=f;app.ppHistShowFmt=false;ppTab(_ppHistBtn(),'history');}
 function ppHistSetVenue(v){app.ppVenueFilter=v;app.ppHistShowVenue=false;ppTab(_ppHistBtn(),'history');}
-function ppHistToggleDate(dk){if(!app.ppHistExpanded)app.ppHistExpanded={};app.ppHistExpanded[dk]=!app.ppHistExpanded[dk];ppTab(null,'history');}
+function ppHistToggleDate(dk){if(!app.ppHistExpanded)app.ppHistExpanded={};app.ppHistExpanded[dk]=!app.ppHistExpanded[dk];ppTab(_ppHistBtn(),'history');}
 function playerAcceptMatch(i){
   const m=playerPendingMatches[i];
   if(m.me==='p1') m.p1accept=true; else m.p2accept=true;
