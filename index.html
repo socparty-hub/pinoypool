@@ -5682,22 +5682,33 @@ function ppTab(btn,tab){
             const ip1=m.p1===_pName;const opp=ip1?m.p2:m.p1;
             const pts=(m.score||'0-0').split(/[-–]/).map(Number);
             const myS=ip1?pts[0]:pts[1];const opS=ip1?pts[1]:pts[0];const win=myS>opS;
+            const myT=ip1?(m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||''):(m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'');
             const oppT=ip1?(m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||''):(m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'');
+            // Handicap: my side vs opp side
+            const myIdx=ip1?0:1;const opIdx=ip1?1:0;
+            const myRack=Array.isArray(m.hcpRack)?m.hcpRack[myIdx]||0:0;
+            const opRack=Array.isArray(m.hcpRack)?m.hcpRack[opIdx]||0:0;
+            const myBalls=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[myIdx])?m.hcpBalls[myIdx]:[];
+            const opBalls=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[opIdx])?m.hcpBalls[opIdx]:[];
+            const _hcpStr=(rack,balls)=>{let s='';if(rack>0)s+=`(+${rack})`;if(balls&&balls.length>0)s+=`(${[...balls].sort((a,b)=>a-b).join(',')})`;return s?`<span style="font-size:.65rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;margin-left:.3rem;">${s}</span>`:''};
             const fb=m.fmt==='9-Ball'?`<span style="padding:2px 7px;background:#b59a2c;color:#111;font-size:.58rem;font-weight:700;border-radius:4px;">9-Ball</span>`:`<span style="padding:2px 7px;background:#2563eb;color:#fff;font-size:.58rem;font-weight:700;border-radius:4px;">${m.fmt||'9-Ball'}</span>`;
             const tb=m.type?`<span style="padding:2px 7px;background:rgba(53,94,59,.4);color:var(--gold2);font-size:.58rem;font-weight:700;border-radius:4px;">${m.type}</span>`:'';
-            const tierBadge=oppT?`<span style="padding:1px 6px;border:1px solid rgba(200,168,75,.35);color:var(--gold2);font-size:.55rem;font-weight:700;border-radius:4px;letter-spacing:.5px;">${oppT}</span>`:'';
+            const _tier=(t)=>t?`<span style="padding:1px 6px;border:1px solid rgba(200,168,75,.35);color:var(--gold2);font-size:.55rem;font-weight:700;border-radius:4px;letter-spacing:.5px;">${t}</span>`:'';
             return `<div style="padding:.7rem 1rem;background:rgba(255,255,255,.025);border-top:1px solid rgba(255,255,255,.06);">
-              <div style="display:flex;gap:.3rem;align-items:center;margin-bottom:.5rem;">${fb}${tb}<span style="margin-left:auto;font-size:.58rem;color:var(--chalk2);">📍 ${m.venue||'—'}</span></div>
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                  <div style="font-size:.85rem;font-weight:700;color:${win?'var(--gold)':'rgba(255,255,255,.9)'};">${fmtPlayerName(_pName)} <span style="font-family:'DM Mono',monospace;font-size:.95rem;">${myS}</span></div>
-                  <div style="font-size:.6rem;color:var(--chalk2);margin:.25rem 0;">vs</div>
-                  <div style="display:flex;align-items:center;gap:.4rem;">
-                    <span style="font-size:.82rem;font-weight:500;color:rgba(255,255,255,.55);">${fmtPlayerName(opp)} <span style="font-family:'DM Mono',monospace;font-size:.9rem;">${opS}</span></span>
-                    ${tierBadge}
-                  </div>
+              <div style="display:flex;gap:.3rem;align-items:center;margin-bottom:.6rem;">${fb}${tb}<span style="margin-left:auto;font-size:.58rem;color:var(--chalk2);">📍 ${m.venue||'—'}</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem;">
+                <div style="display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;">
+                  <span style="font-size:.88rem;font-weight:700;color:${win?'var(--grn3)':'#e55'};">${fmtPlayerName(_pName)}</span>
+                  ${_tier(myT)}${_hcpStr(myRack,myBalls)}
                 </div>
-                <div style="font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:6px;background:${win?'rgba(74,158,90,.2)':'rgba(229,85,85,.15)'};color:${win?'var(--grn3)':'#e55'};">${win?'WIN':'LOSS'}</div>
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:${win?'var(--grn3)':'#e55'};line-height:1;">${myS}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;">
+                  <span style="font-size:.82rem;font-weight:500;color:${!win?'var(--grn3)':'rgba(255,255,255,.45)'};">${fmtPlayerName(opp)}</span>
+                  ${_tier(oppT)}${_hcpStr(opRack,opBalls)}
+                </div>
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:${!win?'var(--grn3)':'rgba(255,255,255,.3)'};line-height:1;">${opS}</span>
               </div>
             </div>`;
           }).join(''):'';
