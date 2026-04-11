@@ -2703,10 +2703,14 @@ function setUser(u){
     if(found){
       app.p1id=found.id;
       const _dp1=document.getElementById('dp1');if(_dp1)_dp1.textContent=u.name.split(' ')[0];
-      const _status=found.careerStatus||found.status||u.careerStatus||'Amateur';
-      const _t=careerTier(0,0,_status);
+      const _status=found.careerStatus||found.status||u.careerStatus||null;
       const _tt=document.getElementById('p1-tier-tag');
-      if(_tt&&_t) _tt.innerHTML=`<span style="font-size:.62rem;padding:2px 9px;border-radius:4px;background:${_t.bg};color:${_t.color};border:1px solid ${_t.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">${_t.label}</span>`;
+      if(_tt){
+        if(_status&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[_status]){
+          const _t=careerTier(0,0,_status);
+          _tt.innerHTML=`<span style="font-size:.62rem;padding:2px 9px;border-radius:4px;background:${_t.bg};color:${_t.color};border:1px solid ${_t.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">${_t.label}</span>`;
+        } else { _tt.innerHTML=''; }
+      }
     }
     inp.readOnly=true;
     inp.style.color='var(--gold)';
@@ -2850,7 +2854,7 @@ function acSearch(inpId, listId){
   const pool=[
     ...activeAP.map(p=>{
       const pl=PLAYERS.find(x=>x.id===p.id||x.name===p.name);
-      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:p.careerStatus||pl?.status||pl?.careerStatus||'Amateur',colors:p.colors||'#1a3a22',rank:pl?.rank||99};
+      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:p.careerStatus||pl?.status||pl?.careerStatus||null,colors:p.colors||'#1a3a22',rank:pl?.rank||99};
     }),
     ...PLAYERS.filter(p=>!apNames.has(p.name))
   ];
@@ -2861,7 +2865,7 @@ function acSearch(inpId, listId){
       <div class="ac-av" style="background:${p.colors}">${getInit(p.name)}</div>
       <div>
         <div style="font-weight:600;">${fmtPlayerName(p.name)}</div>
-        <div style="font-size:.68rem;color:var(--chalk);">${p.region} · ${tierBadge(careerTier(0,0,p.careerStatus))}</div>
+        <div style="font-size:.68rem;color:var(--chalk);">${p.region}${(p.careerStatus&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[p.careerStatus])?' · '+tierBadge(careerTier(0,0,p.careerStatus)):''}</div>
       </div>
       <div class="ac-rank">#${p.rank==='99'||p.rank===99?'—':p.rank}</div>
     </div>`).join('');
@@ -2873,10 +2877,14 @@ function selectPlayer(id,inpId,listId){
   document.getElementById(inpId).value=fmtPlayerName(p.name);
   document.getElementById(listId).classList.remove('open');
   const pNum=inpId==='p1-inp'?'1':'2';
-  const status=p.careerStatus||p.status||'Amateur';
-  const tier=careerTier(0,0,status);
+  const status=p.careerStatus||p.status||null;
   const tagEl=document.getElementById('p'+pNum+'-tier-tag');
-  if(tagEl&&tier) tagEl.innerHTML=`<span style="font-size:.62rem;padding:2px 9px;border-radius:4px;background:${tier.bg};color:${tier.color};border:1px solid ${tier.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">${tier.label}</span>`;
+  if(tagEl){
+    if(status&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[status]){
+      const tier=careerTier(0,0,status);
+      tagEl.innerHTML=`<span style="font-size:.62rem;padding:2px 9px;border-radius:4px;background:${tier.bg};color:${tier.color};border:1px solid ${tier.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">${tier.label}</span>`;
+    } else { tagEl.innerHTML=''; }
+  }
   if(inpId==='p1-inp'){app.p1=p.name;app.p1id=id;const _dpx1=document.getElementById('dp1');if(_dpx1)_dpx1.textContent=p.name.split(' ')[0];}
   else{app.p2=p.name;app.p2id=id;const _dpx2=document.getElementById('dp2');if(_dpx2)_dpx2.textContent=p.name.split(' ')[0];}
 }
@@ -6658,7 +6666,7 @@ function acSearchM(inpId,listId,pNum){
   const pool=[
     ...activeAP.map(p=>{
       const pl=PLAYERS.find(x=>x.id===p.id||x.name===p.name);
-      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:p.careerStatus||pl?.status||pl?.careerStatus||'Amateur',colors:p.colors||'#1a3a22',rank:pl?.rank||99};
+      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:p.careerStatus||pl?.status||pl?.careerStatus||null,colors:p.colors||'#1a3a22',rank:pl?.rank||99};
     }),
     ...PLAYERS.filter(p=>!apNames.has(p.name))
   ];
@@ -6668,7 +6676,7 @@ function acSearchM(inpId,listId,pNum){
     <div class="ac-item" onclick="selectMPlayer('${p.id}','${inpId}','${listId}',${pNum})">
       <div class="ac-av" style="background:${p.colors}">${getInit(p.name)}</div>
       <div><div style="font-weight:600;">${fmtPlayerName(p.name)}</div>
-        <div style="font-size:.68rem;color:var(--chalk);">${p.region} · ${tierBadge(careerTier(0,0,p.careerStatus))}</div>
+        <div style="font-size:.68rem;color:var(--chalk);">${p.region}${(p.careerStatus&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[p.careerStatus])?' · '+tierBadge(careerTier(0,0,p.careerStatus)):''}</div>
       </div>
       <div class="ac-rank">#${p.rank===99?'—':p.rank}</div>
     </div>`).join('');
