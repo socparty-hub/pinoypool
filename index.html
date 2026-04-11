@@ -2080,8 +2080,8 @@ function buildDashboard(){
         const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
         const tier1=(t1&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t1])?careerTier(0,0,t1):null;
         const tier2=(t2&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t2])?careerTier(0,0,t2):null;
-        const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:pendingBadge();
-        const tb2=tier2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier2.bg};color:${tier2.color};border:1px solid ${tier2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier2.label}</span>`:pendingBadge();
+        const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:'';
+        const tb2=tier2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier2.bg};color:${tier2.color};border:1px solid ${tier2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier2.label}</span>`:'';
         return `<div class="dash-match-card"><div class="dash-match-card-inner">
           <div class="dash-match-card-head">
             <div class="dash-match-card-badges">${fmtBadge}${typeBadge}</div>
@@ -3912,8 +3912,8 @@ function renderMatchesPage(){
     const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
     const tier1=(t1&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t1])?careerTier(0,0,t1):null;
     const tier2=(t2&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t2])?careerTier(0,0,t2):null;
-    const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:pendingBadge();
-    const tb2=tier2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier2.bg};color:${tier2.color};border:1px solid ${tier2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier2.label}</span>`:pendingBadge();
+    const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:'';
+    const tb2=tier2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier2.bg};color:${tier2.color};border:1px solid ${tier2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier2.label}</span>`:'';
 
     const hcpR=m.hcpRack||[0,0];
     const hcpB1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
@@ -7313,8 +7313,8 @@ function admTab(btn,tab){
               <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.55rem;">
                 <span class="status-pill ${sClass}" style="flex-shrink:0;">● ${p.status}</span>
                 <select id="cs-${p.id}" style="flex:1;padding:5px 8px;font-size:.78rem;" title="Assign Career Status">
-                  <option value="" ${!p.careerStatus?' selected':''} disabled style="color:#888;">— Assign status —</option>
-                  ${CAREER_STATUS_LIST.map(t=>`<option value="${t}"${p.careerStatus===t?' selected':''}>${t}</option>`).join('')}
+                  <option value="" selected disabled style="color:#888;">— Assign status —</option>
+                  ${CAREER_STATUS_LIST.map(t=>`<option value="${t}">${t}</option>`).join('')}
                 </select>
               </div>
               <div style="display:flex;gap:.5rem;">
@@ -7428,7 +7428,19 @@ function admTab(btn,tab){
     const _admPName=(name)=>{const p=(name||'').trim().split(/\s+/);if(p.length===1)return `<span style="text-transform:uppercase;letter-spacing:.5px;">${p[0]}</span>`;return `${p[0]}<br><span style="text-transform:uppercase;letter-spacing:.5px;">${p.slice(1).join(' ')}</span>`;};
     const _admBadge=`<svg width="18" height="18" viewBox="0 0 24 24" fill="#D4AF37" style="flex-shrink:0;"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z"/></svg>`;
     const _admBadgeEmpty=`<svg width="18" height="18" viewBox="0 0 24 24" fill="#D4AF37" style="flex-shrink:0;opacity:0;"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z"/></svg>`;
-    const _admTier=(t)=>(t&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t])?`<span style="font-family:'Space Grotesk',sans-serif;font-size:.52rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:1px 5px;border-radius:4px;background:rgba(212,175,55,.15);color:var(--gold);border:1px solid rgba(212,175,55,.3);">${t}</span>`:pendingBadge();
+    const _admTier=(t)=>(t&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t])?`<span style="font-family:'Space Grotesk',sans-serif;font-size:.52rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:1px 5px;border-radius:4px;background:rgba(212,175,55,.15);color:var(--gold);border:1px solid rgba(212,175,55,.3);">${t}</span>`:'';
+    // Helper: check if a player in a match is still pending (no career status assigned)
+    const _matchHasPending=(m)=>{
+      const ap1=adminPlayers.find(p=>p.name===m.p1);
+      const ap2=adminPlayers.find(p=>p.name===m.p2);
+      const p1pending=ap1&&(ap1.status==='pending'||!ap1.careerStatus||!CAREER_TIERS[ap1.careerStatus]);
+      const p2pending=ap2&&(ap2.status==='pending'||!ap2.careerStatus||!CAREER_TIERS[ap2.careerStatus]);
+      return p1pending||p2pending;
+    };
+    // Helper: generate approve button — locked if either player is pending
+    const _approveBtn=(id,label='✓ Approve')=>_matchHasPending(adminMatches.find(x=>x.id===id)||{})?
+      `<button class="btn btn-sm" disabled style="flex:1;min-width:0;white-space:normal;text-align:center;opacity:.45;cursor:not-allowed;background:rgba(255,165,0,.08);color:#f5a623;border:1px solid rgba(255,165,0,.25);">🔒 Verify player first</button>`:
+      `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admApproveMatch('${id}')">${label}</button>`;
     // ── Helper: renders a single admin match card with _mvCard-style layout + gold badge state ──
     const _matchRow=(m,p1ok,p2ok,btnHtml)=>{
       const _pts=(m.score||'0-0').split(/[-–]/).map(x=>parseInt(x.trim()));
@@ -7496,7 +7508,7 @@ function admTab(btn,tab){
         ${_ownerPending.map(m=>_matchRow(m,
           true,
           true,
-          `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:nowrap;text-align:center;align-self:stretch;" onclick="admApproveMatch('${m.id}')">✓ Approve</button>
+          `${_approveBtn(m.id,'✓ Approve')}
            <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:nowrap;text-align:center;align-self:stretch;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
 
@@ -7506,7 +7518,7 @@ function admTab(btn,tab){
         ${_playerPending.map(m=>_matchRow(m,
           true,
           !!m.p2ok||!!m.venueOk,
-          `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:nowrap;text-align:center;align-self:stretch;" onclick="admApproveMatch('${m.id}')">✓ Approve</button>
+          `${_approveBtn(m.id,'✓ Approve')}
            <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:nowrap;text-align:center;align-self:stretch;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
 
@@ -7516,7 +7528,7 @@ function admTab(btn,tab){
         ${_pendingBoth.map(m=>_matchRow(m,
           true,
           true,
-          `<button class="btn btn-s btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admApproveMatch('${m.id}')">✓ Approve &amp; Update Rankings</button>
+          `${_approveBtn(m.id,'✓ Approve &amp; Update Rankings')}
            <button class="btn btn-d btn-sm" style="flex:1;min-width:0;white-space:normal;text-align:center;" onclick="admRejectMatch('${m.id}')">✗ Reject</button>`
         )).join('')}`:''}
       `}
@@ -7636,6 +7648,16 @@ function admRefresh(){
 function admApproveMatch(id){
   const m=adminMatches.find(x=>x.id===id);
   if(!m||m.status==='approved') return; // guard: prevent double-processing
+  // Block approval if either player is not yet verified with a career status
+  const _ap1=adminPlayers.find(p=>p.name===m.p1);
+  const _ap2=adminPlayers.find(p=>p.name===m.p2);
+  const _p1pending=_ap1&&(_ap1.status==='pending'||!_ap1.careerStatus||!CAREER_TIERS[_ap1.careerStatus]);
+  const _p2pending=_ap2&&(_ap2.status==='pending'||!_ap2.careerStatus||!CAREER_TIERS[_ap2.careerStatus]);
+  if(_p1pending||_p2pending){
+    const _who=[_p1pending?m.p1:null,_p2pending?m.p2:null].filter(Boolean).join(' & ');
+    toast(`🔒 Cannot approve — <strong>${_who}</strong> must be verified and assigned a Career Status first.`,4000);
+    return;
+  }
   m.status='approved';
   // Force all confirmation flags — admin is approving on behalf of all parties
   m.p1ok=true; m.p2ok=true; m.venueOk=true;
