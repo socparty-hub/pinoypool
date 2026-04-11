@@ -1505,15 +1505,6 @@ textarea{resize:vertical;min-height:75px;}
         <div class="fg"><label>Region / Province</label>
           <select id="rreg"><option>Select region...</option><option>NCR – Metro Manila</option><option>Region III – Central Luzon</option><option>Region IV-A – CALABARZON</option><option>Region VI – Western Visayas</option><option>Region VII – Central Visayas</option><option>Region XI – Davao Region</option></select>
         </div>
-        <div class="fg"><label>Career Status <span style="color:var(--chalk2);font-size:.7rem;font-weight:400;">your current skill level</span></label>
-          <select id="rcareer">
-            <option value="Amateur">Amateur</option>
-            <option value="Skilled">Skilled</option>
-            <option value="Semi-Pro">Semi-Pro</option>
-            <option value="Pro">Pro</option>
-            <option value="Elite">Elite</option>
-          </select>
-        </div>
       </div>
       <div id="rf-owner" style="display:none;">
         <div class="fg"><label>Hall / Venue Name <span style="color:#e55;font-size:.8rem;">*</span></label><input type="text" id="rhn" placeholder="Your billiard hall name"></div>
@@ -2548,7 +2539,7 @@ function doRegister(){
   const region=role==='player'
     ?(document.getElementById('rreg')?.value||'')
     :(document.getElementById('rreg-owner')?.value||'');
-  const selfCareer=(role==='player'?(document.getElementById('rcareer')?.value||'Amateur'):'Amateur');
+  const selfCareer=null;
   const vStatus='pending';
   const _finalize=(backendId=null)=>{
     const pid=backendId||Date.now();
@@ -7289,7 +7280,8 @@ function admTab(btn,tab){
               <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.55rem;">
                 <span class="status-pill ${sClass}" style="flex-shrink:0;">● ${p.status}</span>
                 <select id="cs-${p.id}" style="flex:1;padding:5px 8px;font-size:.78rem;" title="Assign Career Status">
-                  ${CAREER_STATUS_LIST.map(t=>`<option value="${t}"${(p.careerStatus||'Amateur')===t?' selected':''}>${t}</option>`).join('')}
+                  <option value="" ${!p.careerStatus?' selected':''} disabled style="color:#888;">— Assign status —</option>
+                  ${CAREER_STATUS_LIST.map(t=>`<option value="${t}"${p.careerStatus===t?' selected':''}>${t}</option>`).join('')}
                 </select>
               </div>
               <div style="display:flex;gap:.5rem;">
