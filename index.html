@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PinoyPool — Official Philippine Billiards Platform</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#D4AF37">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PinoyPool">
+<link rel="apple-touch-icon" href="/pinoypool-logo-new.png">
 <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600&family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -287,6 +294,19 @@ textarea{resize:vertical;min-height:75px;}
 /* PENDING NOTICE */
 .pend{background:linear-gradient(135deg,rgba(200,168,75,.1),rgba(4,9,3,.88));border:1px solid rgba(200,168,75,.38);border-radius:10px;padding:.9rem 1.2rem;display:flex;align-items:center;gap:11px;margin-bottom:1rem;cursor:pointer;transition:all .2s;}
 .pend:hover{border-color:var(--gold);}
+
+/* PWA INSTALL BANNER */
+#pwa-banner{position:fixed;top:62px;left:0;right:0;z-index:500;background:linear-gradient(135deg,#0f1e14,#0d1a0f);border-bottom:2px solid var(--gold);padding:.85rem 1.1rem;display:none;align-items:center;gap:.85rem;box-shadow:0 6px 24px rgba(0,0,0,.55);animation:pwaSlide .25s ease;}
+@keyframes pwaSlide{from{transform:translateY(-100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+#pwa-banner.show{display:flex;}
+.pwa-icon{width:40px;height:40px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#111;}
+.pwa-text{flex:1;min-width:0;}
+.pwa-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:var(--gold);line-height:1.1;}
+.pwa-sub{font-size:.68rem;color:var(--chalk);margin-top:2px;}
+.pwa-actions{display:flex;gap:.5rem;flex-shrink:0;}
+.pwa-install-btn{background:var(--gold);color:#111;font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:1.5px;padding:7px 16px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;}
+.pwa-dismiss-btn{background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--chalk);font-size:.78rem;padding:7px 12px;border-radius:8px;cursor:pointer;}
+@media(max-width:600px){#pwa-banner{top:52px;flex-wrap:wrap;}.pwa-actions{width:100%;}.pwa-install-btn,.pwa-dismiss-btn{flex:1;text-align:center;}}
 
 /* TOAST */
 .toast{position:fixed;bottom:1.8rem;right:1.8rem;background:linear-gradient(135deg,var(--baize),var(--bg2));border:1px solid var(--gold);border-radius:10px;padding:.85rem 1.3rem;z-index:300;transform:translateY(70px);opacity:0;transition:all .28s;font-size:.86rem;min-width:250px;max-width:330px;}
@@ -833,6 +853,19 @@ textarea{resize:vertical;min-height:75px;}
     <button class="btn btn-o btn-sm" id="btn-login" onclick="openAuth()">Login / Register</button>
   </div>
 </header>
+
+<!-- PWA INSTALL BANNER -->
+<div id="pwa-banner">
+  <img src="pinoypool-logo-new.png" alt="PinoyPool" class="pwa-icon">
+  <div class="pwa-text">
+    <div class="pwa-title">Install PinoyPool</div>
+    <div class="pwa-sub" id="pwa-sub-text">Add to your home screen for the full app experience</div>
+  </div>
+  <div class="pwa-actions">
+    <button class="pwa-dismiss-btn" onclick="dismissPWA()">Not now</button>
+    <button class="pwa-install-btn" id="pwa-install-btn" onclick="installPWA()">Install</button>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════
      DASHBOARD
@@ -8119,6 +8152,68 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
 
 
 
+
+// ── PWA: Service Worker + Install Banner ──
+(function(){
+  // Register service worker
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>{
+      navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    });
+  }
+
+  const BANNER_KEY='pwa_banner_dismissed';
+  let _deferredPrompt=null;
+  const _isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+  const _isInStandalone=window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone;
+
+  function _showBanner(){
+    if(_isInStandalone) return; // already installed
+    if(localStorage.getItem(BANNER_KEY)) return; // dismissed
+    const b=document.getElementById('pwa-banner');
+    if(b){b.classList.add('show');}
+  }
+
+  // Android / Chrome — capture the native prompt
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();
+    _deferredPrompt=e;
+    setTimeout(_showBanner, 1500); // slight delay so page settles first
+  });
+
+  // iOS — no beforeinstallprompt, show manual instructions instead
+  if(_isIOS&&!_isInStandalone){
+    const sub=document.getElementById('pwa-sub-text');
+    const btn=document.getElementById('pwa-install-btn');
+    if(sub) sub.textContent='Tap the Share button then "Add to Home Screen"';
+    if(btn){ btn.textContent='Got it'; btn.onclick=()=>dismissPWA(); }
+    setTimeout(_showBanner, 1500);
+  }
+
+  window.installPWA=function(){
+    const b=document.getElementById('pwa-banner');
+    if(_deferredPrompt){
+      _deferredPrompt.prompt();
+      _deferredPrompt.userChoice.then(c=>{
+        if(c.outcome==='accepted'&&b) b.classList.remove('show');
+        _deferredPrompt=null;
+      });
+    }
+  };
+
+  window.dismissPWA=function(){
+    const b=document.getElementById('pwa-banner');
+    if(b) b.classList.remove('show');
+    localStorage.setItem(BANNER_KEY,'1');
+  };
+
+  // Hide banner when app is installed
+  window.addEventListener('appinstalled',()=>{
+    const b=document.getElementById('pwa-banner');
+    if(b) b.classList.remove('show');
+    _deferredPrompt=null;
+  });
+})();
 </script>
 
 <!-- ══════════════════════════════════════════
