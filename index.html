@@ -401,8 +401,8 @@ textarea{resize:vertical;min-height:75px;}
   /* Portal tabs wrap */
   .pp-tabs{flex-wrap:wrap;}
   .pp-tab{font-size:.75rem;padding:8px 10px;}
-  .adm-tabs-main{flex-wrap:wrap;}
-  .adm-tab{font-size:.72rem;padding:8px 8px;}
+  .adm-tab{font-size:.72rem;padding:8px 6px;}
+  .adm-stat-box{padding:.5rem .6rem;}
 }
 
 /* PLAYER PORTAL */
@@ -428,21 +428,23 @@ textarea{resize:vertical;min-height:75px;}
 .score-range::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--gold2);border:3px solid #0a120e;box-shadow:0 0 0 2px rgba(200,168,75,.35);cursor:pointer;}
 .score-range-labels{display:flex;justify-content:space-between;margin-top:5px;font-size:.58rem;color:var(--chalk2);letter-spacing:1px;font-family:'DM Mono',monospace;}
 /* Admin Portal */
-.adm-hdr{background:linear-gradient(135deg,rgba(90,20,10,.5),rgba(8,14,6,.95));border:1px solid rgba(184,50,40,.4);border-radius:12px;padding:1.4rem;margin-bottom:1.4rem;}
-.adm-hdr-title{font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:#e55;line-height:1.1;}
-.adm-hdr-sub{font-size:.74rem;color:var(--chalk);margin-top:3px;margin-bottom:1rem;}
-.adm-stats-row{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
-.adm-stat-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);line-height:1;}
-.adm-stat-lbl{font-size:.57rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);margin-top:1px;}
-.adm-reset-btn{margin-left:auto;background:rgba(184,50,40,.18);border:1.5px solid rgba(184,50,40,.5);color:#e55;font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:2px;padding:8px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;}
-.adm-reset-btn:hover{background:rgba(184,50,40,.32);}
-.adm-tabs{display:flex;flex-direction:column;border:1px solid rgba(184,50,40,.3);border-radius:10px;overflow:hidden;margin-bottom:1.4rem;}
-.adm-tabs-main{display:flex;}
-.adm-tabs-secondary{display:flex;justify-content:center;border-top:1px solid rgba(184,50,40,.2);}
-.adm-tab{flex:1;padding:10px 14px;background:transparent;border:none;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:1.5px;color:var(--chalk);transition:all .2s;text-align:center;border-right:1px solid rgba(184,50,40,.2);line-height:1.3;}
+.adm-hdr{background:linear-gradient(135deg,rgba(90,20,10,.5),rgba(8,14,6,.95));border:1px solid rgba(184,50,40,.4);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;}
+.adm-hdr-sub{font-size:.7rem;color:var(--chalk);margin-top:.7rem;}
+.adm-stats-row{display:flex;gap:.6rem;}
+.adm-stat-box{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.6rem .75rem;display:flex;align-items:center;gap:.5rem;}
+.adm-stat-box.pending{border-color:rgba(212,175,55,.3);background:rgba(212,175,55,.07);}
+.adm-stat-box-icon{font-size:1rem;line-height:1;flex-shrink:0;}
+.adm-stat-box-label{font-size:.58rem;color:var(--chalk2);text-transform:uppercase;letter-spacing:1px;line-height:1.2;}
+.adm-stat-box-val{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;line-height:1;}
+.adm-stat-box.pending .adm-stat-box-val{color:var(--gold);}
+.adm-tabs{display:flex;flex-direction:column;border:1px solid rgba(184,50,40,.3);border-radius:10px;overflow:hidden;margin-bottom:1.2rem;}
+.adm-tabs-main{display:flex;border-bottom:1px solid rgba(184,50,40,.2);}
+.adm-tabs-main:last-child{border-bottom:none;}
+.adm-tab{flex:1;padding:10px 8px;background:transparent;border:none;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:1.5px;color:var(--chalk);transition:all .2s;text-align:center;border-right:1px solid rgba(184,50,40,.2);line-height:1.25;}
 .adm-tabs-main .adm-tab:last-child{border-right:none;}
-.adm-tabs-secondary .adm-tab{border-right:none;flex:0 0 auto;min-width:55%;}
-.adm-tab:hover,.adm-tab.act{background:rgba(184,50,40,.15);color:#e55;}
+.adm-tab:hover,.adm-tab.act{background:rgba(212,175,55,.12);color:var(--gold);}
+.adm-reset-bottom{width:100%;margin-top:1.4rem;padding:13px;background:rgba(184,50,40,.15);border:1.5px solid rgba(184,50,40,.5);border-radius:10px;color:#e55;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:2px;cursor:pointer;}
+.adm-reset-bottom:hover{background:rgba(184,50,40,.3);}
 .adm-badge{background:#e55;color:#fff;border-radius:10px;padding:1px 7px;font-size:.6rem;margin-left:5px;font-family:'DM Mono',monospace;}
 .adm-row{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;margin-bottom:.7rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;transition:border-color .2s;}
 .adm-row:hover{border-color:rgba(184,50,40,.35);}
@@ -1404,21 +1406,21 @@ textarea{resize:vertical;min-height:75px;}
 ══════════════════════════════════════════ -->
 <div id="view-admin" class="view">
   <div class="adm-hdr">
-    <div class="adm-hdr-title">⚙️ Master Admin Dashboard</div>
-    <div class="adm-hdr-sub">PinoyPool · Full System Access · All actions are logged</div>
     <div class="adm-stats-row" id="adm-stats"></div>
+    <div class="adm-hdr-sub">PinoyPool · Full System Access · All actions are logged</div>
   </div>
   <div class="adm-tabs" id="adm-tabs">
     <div class="adm-tabs-main">
-      <button class="adm-tab act" onclick="admTab(this,'players')">Player<br>Registration<span class="adm-badge" id="adm-b-players">0</span></button>
-      <button class="adm-tab" onclick="admTab(this,'halls')">🏢 Hall<br>Owners<span class="adm-badge" id="adm-b-halls">0</span></button>
-      <button class="adm-tab" onclick="admTab(this,'matches')">⚡ Match<br>Approvals<span class="adm-badge" id="adm-b-matches">0</span></button>
+      <button class="adm-tab act" onclick="admTab(this,'players')">👤 Player Reg<span class="adm-badge" id="adm-b-players">0</span></button>
+      <button class="adm-tab" onclick="admTab(this,'halls')">🏠 Hall Owners<span class="adm-badge" id="adm-b-halls">0</span></button>
     </div>
-    <div class="adm-tabs-secondary">
+    <div class="adm-tabs-main">
+      <button class="adm-tab" onclick="admTab(this,'matches')">⚡ Match Approvals<span class="adm-badge" id="adm-b-matches">0</span></button>
       <button class="adm-tab" onclick="admTab(this,'tournaments')">🏆 Tournaments<span class="adm-badge" id="adm-b-tournaments">0</span></button>
     </div>
   </div>
   <div id="adm-content"></div>
+  <button class="adm-reset-bottom" onclick="admResetAllData()">⚠ Reset All System Data</button>
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -7181,19 +7183,18 @@ function buildAdmin(){
   if(el('adm-b-tournaments')) el('adm-b-tournaments').textContent=pendT;
   // Stats header: use approved arrays for accurate counts (avoid double-counting)
   el('adm-stats').innerHTML=`
-    <div>
-      <div class="adm-stat-num">${PLAYERS.length}</div>
-      <div class="adm-stat-lbl">Players</div>
+    <div class="adm-stat-box">
+      <div class="adm-stat-box-icon">👤</div>
+      <div><div class="adm-stat-box-label">Players</div><div class="adm-stat-box-val">${PLAYERS.length}</div></div>
     </div>
-    <div>
-      <div class="adm-stat-num">${adminHalls.filter(h=>h.status==='active').length}</div>
-      <div class="adm-stat-lbl">Halls</div>
+    <div class="adm-stat-box">
+      <div class="adm-stat-box-icon">🏠</div>
+      <div><div class="adm-stat-box-label">Halls</div><div class="adm-stat-box-val">${adminHalls.filter(h=>h.status==='active').length}</div></div>
     </div>
-    <div>
-      <div id="adm-stat-pending" class="adm-stat-num" style="color:#e55;">${pendP+pendH+pendM+pendT}</div>
-      <div class="adm-stat-lbl">Pending</div>
-    </div>
-    <button onclick="admResetAllData()" class="adm-reset-btn">⚠ Reset All Data</button>`;
+    <div class="adm-stat-box pending">
+      <div class="adm-stat-box-icon">⚡</div>
+      <div><div class="adm-stat-box-label">Pending</div><div id="adm-stat-pending" class="adm-stat-box-val">${pendP+pendH+pendM+pendT}</div></div>
+    </div>`;
   const _activeTab=app.admTab||'players';
   const _activeBtn=Array.from(document.querySelectorAll('.adm-tab')).find(b=>b.getAttribute('onclick')?.includes(`'${_activeTab}'`))||document.querySelector('.adm-tab');
   admTab(_activeBtn, _activeTab);
@@ -7453,28 +7454,30 @@ function admTab(btn,tab){
     <!-- Pending approvals -->
     <div class="card" style="margin-bottom:1.1rem;">
       <div class="ct">🏆 Tournament Submissions
-        <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;color:${pendingT.length?'#e55':'var(--chalk)'};">${pendingT.length} pending</span>
+        <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;margin-left:.5rem;color:var(--chalk);">(Priority Feed)</span>
       </div>
       ${pendingT.length===0
         ?'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No pending tournament submissions</div>'
         :pendingT.map(t=>`
-          <div class="adm-row">
-            <div style="flex:1;min-width:0;">
-              <div style="font-weight:600;font-size:.9rem;">${t.name}</div>
-              <div style="font-size:.73rem;color:var(--chalk);margin-top:3px;">${t.fmt} · ${fmtDate(t.date)}${t.edate?' → '+fmtDate(t.edate):''}</div>
-              <div style="font-size:.7rem;color:var(--chalk2);margin-top:2px;">📍 ${t.venue} · Submitted by ${t.ownerName||'Admin'}</div>
-              ${t.notes?`<div style="font-size:.7rem;color:var(--chalk2);margin-top:2px;">${t.notes}</div>`:''}
-            </div>
-            <div class="adm-actions">
-              <span class="status-pill sp-pending">● pending</span>
-              <button class="btn btn-d btn-sm" onclick="admRejectTournament('${t.id}')">✗ Reject</button>
-              <button class="btn btn-s btn-sm" onclick="admApproveTournament('${t.id}')">✓ Approve</button>
+          <div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;padding:1rem 1.1rem;margin-bottom:.75rem;">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:1.5px;margin-bottom:.75rem;">🏆 ${t.name}</div>
+            <table style="width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:.9rem;">
+              <tr><td style="color:var(--chalk2);padding:2px 0;width:60px;">Format:</td><td style="color:var(--chalk);">${t.fmt||'9-Ball'}</td></tr>
+              <tr><td style="color:var(--chalk2);padding:2px 0;">Dates:</td><td style="color:var(--chalk);">${fmtDate(t.date)}${t.edate?' — '+fmtDate(t.edate):''}</td></tr>
+              <tr><td style="color:var(--chalk2);padding:2px 0;">Venue:</td><td style="color:var(--chalk);">${t.venue||'—'}</td></tr>
+              <tr><td style="color:var(--chalk2);padding:2px 0;">By:</td><td style="color:var(--chalk);">${t.ownerName||'Admin'}</td></tr>
+              ${t.notes?`<tr><td style="color:var(--chalk2);padding:2px 0;">Notes:</td><td style="color:var(--chalk);">${t.notes}</td></tr>`:''}
+            </table>
+            <div style="display:flex;gap:.6rem;">
+              <button class="btn btn-d" style="flex:1;" onclick="admRejectTournament('${t.id}')">✗ Reject</button>
+              <button class="btn btn-s" style="flex:1;" onclick="admApproveTournament('${t.id}')">✓ Approve</button>
             </div>
           </div>`).join('')}
     </div>
     <!-- Create tournament (admin only) -->
     <div class="card" style="margin-bottom:1.1rem;">
-      <div class="ct">➕ Create Tournament</div>
+      <div class="ct" style="cursor:pointer;user-select:none;" onclick="const b=document.getElementById('adm-create-t-body');b.style.display=b.style.display==='none'?'block':'none';">+ Create New Tournament <span style="font-size:.65rem;font-weight:400;letter-spacing:0;text-transform:none;color:var(--chalk2);">(Expand/Collapse)</span></div>
+      <div id="adm-create-t-body">
       <p style="font-size:.76rem;color:var(--chalk2);margin-bottom:1.1rem;">Create a tournament and assign it to a hall. It will be immediately active and available for match records.</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem .9rem;margin-bottom:1rem;">
         <div class="fg" style="grid-column:1/-1;"><label>Tournament Name *</label><input type="text" id="at-name" placeholder="e.g. PinoyPool Open 2026"></div>
@@ -7491,7 +7494,8 @@ function admTab(btn,tab){
         </div>
         <div class="fg" style="grid-column:1/-1;"><label>Notes / Description</label><input type="text" id="at-notes" placeholder="Optional"></div>
       </div>
-      <button class="btn btn-p" style="width:100%;" onclick="admCreateTournament()">✓ Create &amp; Activate Tournament</button>
+      <button class="btn btn-p" style="width:100%;" onclick="admCreateTournament()">🏆 Create &amp; Activate Tournament</button>
+      </div><!-- /adm-create-t-body -->
     </div>
     <!-- Active tournaments -->
     <div class="card">
