@@ -5431,7 +5431,7 @@ function ppTab(btn,tab){
   const hdr=document.getElementById('pp-hdr');
   if(hdr) hdr.style.display='none';
   const c=document.getElementById('pp-content');
-  const p=PLAYERS.find(x=>x.name===app.user?.name)||PLAYERS[0]||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||'Amateur',status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
+  const p=PLAYERS.find(x=>x.name===app.user?.name)||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||null,status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
 
   // ── Show queued match notifications (e.g. owner validated a match) ──
   try{
@@ -5793,7 +5793,7 @@ function buildPlayerProfile(){
   const c=document.getElementById('pp-profile-content')||document.getElementById('pp-content');
   if(!c) return;
   if(!app.user){c.innerHTML='<div style="text-align:center;color:var(--chalk2);padding:2rem;">Please log in to view your profile.</div>';return;}
-  const p=PLAYERS.find(x=>x.name===app.user?.name)||PLAYERS[0]||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||'Amateur',status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
+  const p=PLAYERS.find(x=>x.name===app.user?.name)||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||null,status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
   {
     // Tier system — use admin-assigned career status first, fall back to win-% derived
     const totalMatches=p.mw+p.ml;
