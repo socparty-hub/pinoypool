@@ -7302,21 +7302,24 @@ function admTab(btn,tab){
       ${(()=>{
         const pending=adminHalls.filter(h=>h.status==='pending'||h.status==='review');
         if(!pending.length) return '<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No pending hall applications</div>';
-        return pending.map(h=>`<div class="adm-row">
-          <div style="flex:1;min-width:0;">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1.5px;">${h.name}</div>
-              <span class="status-pill sp-pending">● pending</span>
+        return pending.map(h=>`
+          <div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;padding:1rem 1.1rem;margin-bottom:.75rem;">
+            <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;">
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:1.5px;flex:1;">🏢 ${h.name}</div>
+              <span class="status-pill sp-pending" style="flex-shrink:0;">● pending</span>
             </div>
-            <div style="font-size:.73rem;color:var(--chalk);">Owner: <strong>${h.owner}</strong> · 📍 ${h.city} · ${h.tables} tables</div>
-            <div style="font-size:.7rem;color:var(--chalk2);margin-top:2px;">${h.email} · ${h.contact} · Submitted ${h.submitted}</div>
-            <div style="font-size:.7rem;color:var(--gold);margin-top:2px;">📘 ${h.fb}</div>
-          </div>
-          <div class="adm-actions">
-            <button class="btn btn-d btn-sm" onclick="admRejectHall('${h.id}')">✗ Reject</button>
-            <button class="btn btn-s btn-sm" onclick="admApproveHall('${h.id}')">✓ Approve & Grant Access</button>
-          </div>
-        </div>`).join('');
+            <table style="width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:.9rem;">
+              <tr><td style="color:var(--chalk2);padding:2px 0;width:70px;">Owner:</td><td style="color:var(--chalk);font-weight:600;">${h.owner}</td></tr>
+              <tr><td style="color:var(--chalk2);padding:2px 0;">Location:</td><td style="color:var(--chalk);">${h.city||'—'}${h.tables?` · ${h.tables} tables`:''}</td></tr>
+              <tr><td style="color:var(--chalk2);padding:2px 0;">Contact:</td><td style="color:var(--chalk);">${h.email||'—'} · ${h.contact||'—'}</td></tr>
+              <tr><td style="color:var(--chalk2);padding:2px 0;">Submitted:</td><td style="color:var(--chalk);">${h.submitted||'—'}</td></tr>
+              ${h.fb?`<tr><td style="color:var(--chalk2);padding:2px 0;">FB:</td><td><a href="${h.fb}" style="color:var(--gold);font-size:.72rem;" target="_blank">📘 ${h.fb}</a></td></tr>`:''}
+            </table>
+            <div style="display:flex;gap:.5rem;">
+              <button class="btn btn-d" style="flex:1;" onclick="admRejectHall('${h.id}')">✗ Reject</button>
+              <button class="btn btn-s" style="flex:1;" onclick="admApproveHall('${h.id}')">✓ Approve &amp; Grant Access</button>
+            </div>
+          </div>`).join('');
       })()}
     </div>
     <div class="card">
