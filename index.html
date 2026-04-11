@@ -2027,11 +2027,15 @@ function buildDashboard(){
   // — Stat counters — only admin-approved matches count as "Verified"
   const approvedAdminCount=typeof adminMatches!=='undefined'?adminMatches.filter(x=>x.status==='approved').length:0;
   const el=n=>document.getElementById(n);
-  if(el('stat-players')) el('stat-players').textContent=PLAYERS.length.toLocaleString();
+  // Player count = all unique usernames registered (active + pending), not just ranked players
+  const _regCount=typeof adminPlayers!=='undefined'
+    ?new Set(adminPlayers.filter(p=>p.role==='player'||!p.role).map(p=>p.username||String(p.id)).filter(Boolean)).size
+    :PLAYERS.length;
+  if(el('stat-players')) el('stat-players').textContent=_regCount.toLocaleString();
   if(el('stat-matches')) el('stat-matches').textContent=approvedAdminCount.toLocaleString();
   if(el('stat-halls'))   el('stat-halls').textContent=(typeof approvedHalls!=='undefined'?approvedHalls.length:0).toLocaleString();
   // Trend indicators
-  if(el('stat-players-trend')&&PLAYERS.length>0) el('stat-players-trend').textContent='↑ '+PLAYERS.length;
+  if(el('stat-players-trend')&&_regCount>0) el('stat-players-trend').textContent='↑ '+_regCount;
   if(el('stat-matches-trend')&&approvedAdminCount>0) el('stat-matches-trend').textContent='↑ '+approvedAdminCount;
 
   // — Recent Verified Matches — card format with full player/score/hcp detail
@@ -2072,10 +2076,10 @@ function buildDashboard(){
         const isWin=scParts.length===2&&scParts[0]>scParts[1];
         const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)?.status||'');
         const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
-        const tier1=t1?careerTier(0,0,t1):null;
-        const tier2=t2?careerTier(0,0,t2):null;
-        const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:'';
-        const tb2=tier2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier2.bg};color:${tier2.color};border:1px solid ${tier2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier2.label}</span>`:'';
+        const tier1=(t1&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t1])?careerTier(0,0,t1):null;
+        const tier2=(t2&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t2])?careerTier(0,0,t2):null;
+        const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:pendingBadge();
+        const tb2=tier2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier2.bg};color:${tier2.color};border:1px solid ${tier2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier2.label}</span>`:pendingBadge();
         return `<div class="dash-match-card"><div class="dash-match-card-inner">
           <div class="dash-match-card-head">
             <div class="dash-match-card-badges">${fmtBadge}${typeBadge}</div>
@@ -2532,6 +2536,11 @@ function doRegister(){
   const hall=role==='owner'?(document.getElementById('rhn')?.value.trim()||''):null;
   if(role==='owner'&&!hall){toast('⚠️ Hall / Venue Name is required.');return;}
   if(ph.length!==11||!ph.startsWith('09')){toast('⚠️ Enter a valid 11-digit PH mobile number.');return;}
+  const _takenPhones=[
+    ...(typeof adminPlayers!=='undefined'?adminPlayers.map(p=>p.phone||''):[]),
+    ...(typeof registeredUsers!=='undefined'?registeredUsers.map(u=>u.phone||''):[])
+  ].map(p=>p.replace(/\s/g,'')).filter(Boolean);
+  if(_takenPhones.includes(ph)){toast('⚠️ This phone number is already registered.');return;}
   if(pw.length<8){toast('⚠️ Password must be at least 8 characters.');return;}
   if(pw!==pw2){toast('⚠️ Passwords do not match.');return;}
   const name=fn+' '+ln;
@@ -2698,18 +2707,19 @@ function setUser(u){
     const inp=document.getElementById('p1-inp');
     inp.value=fmtPlayerName(u.name); app.p1=u.name;
     // Look in PLAYERS first; fall back to adminPlayers(active) in case initFromBackend hasn't finished
+    // Include pending players so they can record matches immediately after registration
     const found=PLAYERS.find(p=>p.name===u.name||p.name.replace(/\./g,'').toLowerCase()===u.name.replace(/\./g,'').toLowerCase()||p.name.toLowerCase().startsWith(u.name.toLowerCase())||u.name.toLowerCase().startsWith(p.name.toLowerCase()))
-      ||(typeof adminPlayers!=='undefined'?adminPlayers.find(p=>(p.name===u.name||p.email===u.email)&&p.status==='active'):null);
+      ||(typeof adminPlayers!=='undefined'?adminPlayers.find(p=>(p.name===u.name||p.email===u.email)&&(p.status==='active'||p.status==='pending')):null);
     if(found){
       app.p1id=found.id;
       const _dp1=document.getElementById('dp1');if(_dp1)_dp1.textContent=u.name.split(' ')[0];
-      const _status=found.careerStatus||found.status||u.careerStatus||null;
+      const _status=found.careerStatus||u.careerStatus||null;
       const _tt=document.getElementById('p1-tier-tag');
       if(_tt){
         if(_status&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[_status]){
           const _t=careerTier(0,0,_status);
           _tt.innerHTML=`<span style="font-size:.62rem;padding:2px 9px;border-radius:4px;background:${_t.bg};color:${_t.color};border:1px solid ${_t.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">${_t.label}</span>`;
-        } else { _tt.innerHTML=''; }
+        } else { _tt.innerHTML=pendingBadge(); }
       }
     }
     inp.readOnly=true;
@@ -2848,13 +2858,15 @@ function acSearch(inpId, listId){
   if(_tt) _tt.innerHTML='';
   if(val.length<2){list.classList.remove('open');return;}
   const other=inpId==='p1-inp'?app.p2:app.p1;
-  // Build pool: active adminPlayers (primary, works before/after initFromBackend) + PLAYERS (deduped)
-  const activeAP=typeof adminPlayers!=='undefined'?adminPlayers.filter(p=>p.status==='active'):[];
+  // Build pool: active + pending adminPlayers (primary) + PLAYERS (deduped)
+  // Pending players are searchable immediately after registration
+  const activeAP=typeof adminPlayers!=='undefined'?adminPlayers.filter(p=>p.status==='active'||p.status==='pending'):[];
   const apNames=new Set(activeAP.map(p=>p.name));
   const pool=[
     ...activeAP.map(p=>{
       const pl=PLAYERS.find(x=>x.id===p.id||x.name===p.name);
-      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:p.careerStatus||pl?.status||pl?.careerStatus||null,colors:p.colors||'#1a3a22',rank:pl?.rank||99};
+      const _isPending=p.status==='pending'||!p.careerStatus||(typeof CAREER_TIERS!=='undefined'&&p.careerStatus&&!CAREER_TIERS[p.careerStatus]);
+      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:p.careerStatus||pl?.status||pl?.careerStatus||null,isPending:_isPending,colors:p.colors||'#1a3a22',rank:pl?.rank||99};
     }),
     ...PLAYERS.filter(p=>!apNames.has(p.name))
   ];
@@ -2865,7 +2877,7 @@ function acSearch(inpId, listId){
       <div class="ac-av" style="background:${p.colors}">${getInit(p.name)}</div>
       <div>
         <div style="font-weight:600;">${fmtPlayerName(p.name)}</div>
-        <div style="font-size:.68rem;color:var(--chalk);">${p.region}${(p.careerStatus&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[p.careerStatus])?' · '+tierBadge(careerTier(0,0,p.careerStatus)):''}</div>
+        <div style="font-size:.68rem;color:var(--chalk);">${p.region} · ${p.isPending?pendingBadge():(p.careerStatus&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[p.careerStatus])?tierBadge(careerTier(0,0,p.careerStatus)):pendingBadge()}</div>
       </div>
       <div class="ac-rank">#${p.rank==='99'||p.rank===99?'—':p.rank}</div>
     </div>`).join('');
@@ -2883,7 +2895,7 @@ function selectPlayer(id,inpId,listId){
     if(status&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[status]){
       const tier=careerTier(0,0,status);
       tagEl.innerHTML=`<span style="font-size:.62rem;padding:2px 9px;border-radius:4px;background:${tier.bg};color:${tier.color};border:1px solid ${tier.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">${tier.label}</span>`;
-    } else { tagEl.innerHTML=''; }
+    } else { tagEl.innerHTML=pendingBadge(); }
   }
   if(inpId==='p1-inp'){app.p1=p.name;app.p1id=id;const _dpx1=document.getElementById('dp1');if(_dpx1)_dpx1.textContent=p.name.split(' ')[0];}
   else{app.p2=p.name;app.p2id=id;const _dpx2=document.getElementById('dp2');if(_dpx2)_dpx2.textContent=p.name.split(' ')[0];}
@@ -3172,11 +3184,12 @@ function updateBadge(){
 
 function sendChallenge(){
   if(!app.p1||!app.p1id){
-    if(app.user?.role==='player'){
+    // Try to resolve p1id from adminPlayers (covers pending players not yet in PLAYERS[])
+    if(app.user?.role==='player'&&app.user?.name){
       const entry=typeof adminPlayers!=='undefined'&&adminPlayers.find(p=>p.email===app.user.email||p.name===app.user.name);
-      if(entry&&entry.status==='pending'){toast('⏳ Your account is pending admin approval. You can record matches once your account is activated.');return;}
-    }
-    toast('⚠️ Select Player 1 from the registered players list.');return;
+      if(entry){app.p1=app.user.name;app.p1id=entry.id;}
+      else{toast('⚠️ Select Player 1 from the registered players list.');return;}
+    } else {toast('⚠️ Select Player 1 from the registered players list.');return;}
   }
   if(!app.p2||!app.p2id){toast('⚠️ Select Player 2 from the registered players list.');return;}
   if(app.p1id===app.p2id){toast('⚠️ Players must be different.');return;}
@@ -3892,10 +3905,10 @@ function renderMatchesPage(){
 
     const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)?.status||'');
     const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
-    const tier1=t1?careerTier(0,0,t1):null;
-    const tier2=t2?careerTier(0,0,t2):null;
-    const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:'';
-    const tb2=tier2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier2.bg};color:${tier2.color};border:1px solid ${tier2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier2.label}</span>`:'';
+    const tier1=(t1&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t1])?careerTier(0,0,t1):null;
+    const tier2=(t2&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t2])?careerTier(0,0,t2):null;
+    const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:pendingBadge();
+    const tb2=tier2?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier2.bg};color:${tier2.color};border:1px solid ${tier2.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier2.label}</span>`:pendingBadge();
 
     const hcpR=m.hcpRack||[0,0];
     const hcpB1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
@@ -4032,6 +4045,13 @@ function careerTier(mw,ml,status){
   return CAREER_TIERS['Amateur'];
 }
 function tierBadge(t){return`<span style="font-size:.65rem;padding:2px 8px;border-radius:4px;background:${t.bg};color:${t.color};border:1px solid ${t.border};white-space:nowrap;">${t.label}</span>`;}
+function pendingBadge(){return`<span style="font-size:.65rem;padding:2px 8px;border-radius:4px;background:rgba(255,165,0,.1);color:#f5a623;border:1px solid rgba(255,165,0,.3);white-space:nowrap;letter-spacing:.5px;font-weight:700;">PENDING</span>`;}
+/* isPendingPlayer: true if player has no admin-assigned career status */
+function isPendingPlayer(nameOrObj){
+  const ap=typeof adminPlayers!=='undefined'?(typeof nameOrObj==='string'?adminPlayers.find(p=>p.name===nameOrObj):nameOrObj):null;
+  if(!ap) return false;
+  return !ap.careerStatus||(typeof CAREER_TIERS!=='undefined'&&!CAREER_TIERS[ap.careerStatus]);
+}
 function rankClass(i){return i===0?'lb-rank top1':i===1?'lb-rank top2':i===2?'lb-rank top3':'lb-rank';}
 
 /* ══════════════════ OFFICIAL PPR FORMULA (PDF §6-§10) ══════════════════
