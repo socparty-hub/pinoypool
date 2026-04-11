@@ -1505,6 +1505,15 @@ textarea{resize:vertical;min-height:75px;}
         <div class="fg"><label>Region / Province</label>
           <select id="rreg"><option>Select region...</option><option>NCR – Metro Manila</option><option>Region III – Central Luzon</option><option>Region IV-A – CALABARZON</option><option>Region VI – Western Visayas</option><option>Region VII – Central Visayas</option><option>Region XI – Davao Region</option></select>
         </div>
+        <div class="fg"><label>Career Status <span style="color:var(--chalk2);font-size:.7rem;font-weight:400;">your current skill level</span></label>
+          <select id="rcareer">
+            <option value="Amateur">Amateur</option>
+            <option value="Skilled">Skilled</option>
+            <option value="Semi-Pro">Semi-Pro</option>
+            <option value="Pro">Pro</option>
+            <option value="Elite">Elite</option>
+          </select>
+        </div>
       </div>
       <div id="rf-owner" style="display:none;">
         <div class="fg"><label>Hall / Venue Name <span style="color:#e55;font-size:.8rem;">*</span></label><input type="text" id="rhn" placeholder="Your billiard hall name"></div>
@@ -2539,6 +2548,7 @@ function doRegister(){
   const region=role==='player'
     ?(document.getElementById('rreg')?.value||'')
     :(document.getElementById('rreg-owner')?.value||'');
+  const selfCareer=(role==='player'?(document.getElementById('rcareer')?.value||'Amateur'):'Amateur');
   const vStatus='pending';
   const _finalize=(backendId=null)=>{
     const pid=backendId||Date.now();
@@ -2551,7 +2561,7 @@ function doRegister(){
     // Store personal details in adminPlayers for both players and hall owners
     if(!adminPlayers.find(p=>p.email===em)){
       adminPlayers.unshift({id:pid,name,username:un,email:em,phone:ph,region,
-        status:'pending',careerStatus:'Amateur',mw:0,ml:0,rw:0,rl:0,
+        status:'pending',careerStatus:selfCareer,mw:0,ml:0,rw:0,rl:0,
         ppr:0,mi:0,sos:0,colors:'#1a3a22',joined:new Date().toISOString().slice(0,10),role});
     }
     // Hall owner: also add to adminHalls as a pending application for admin review
@@ -2574,7 +2584,7 @@ function doRegister(){
   fetch('/api/register',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({firstName:fn,lastName:ln,username:un,email:em,phone:ph,dob,role,moniker:moniker||'',hallName:hall,city:addr,region})
+    body:JSON.stringify({firstName:fn,lastName:ln,username:un,email:em,phone:ph,dob,role,moniker:moniker||'',hallName:hall,city:addr,region,careerStatus:selfCareer})
   })
   .then(r=>r.json())
   .then(data=>{if(!data.ok){toast('⚠️ '+(data.message||'Registration failed.'));return;}_finalize(data.id||null);})
