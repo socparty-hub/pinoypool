@@ -5820,11 +5820,13 @@ function buildPlayerProfile(){
   if(!app.user){c.innerHTML='<div style="text-align:center;color:var(--chalk2);padding:2rem;">Please log in to view your profile.</div>';return;}
   const p=PLAYERS.find(x=>x.name===app.user?.name)||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||null,status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
   {
-    // Tier system — use admin-assigned career status first, fall back to win-% derived
+    // Determine if player is pending (no admin-assigned career status yet)
+    const _apEntry=typeof adminPlayers!=='undefined'?adminPlayers.find(ap=>ap.name===p.name||ap.email===app.user?.email):null;
+    const _isPlayerPending=!_apEntry||_apEntry.status==='pending'||!_apEntry.careerStatus||!(typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[_apEntry.careerStatus]);
+    // Tier system — only use admin-assigned career status, never derive from win%
     const totalMatches=p.mw+p.ml;
-    const winPct=Math.round(p.mw/(totalMatches||1)*100);
-    const ct=careerTier(p.mw,p.ml,p.status||p.careerStatus||app.user?.careerStatus);
-    const tierName=ct.label;
+    const ct=_isPlayerPending?null:careerTier(p.mw,p.ml,p.status||p.careerStatus||app.user?.careerStatus);
+    const tierName=ct?ct.label:'Pending';
     const isOfficial=totalMatches>=10;
 
     // SVG ranking graph — built from real approved match data
@@ -5859,14 +5861,13 @@ function buildPlayerProfile(){
     const areaPath=`M${padL},${gH-padB} `+pts.map((pt,i)=>`L${padL+i*xStep},${padT+(pt.rank-1)*yScale}`).join(' ')+` L${padL+(pts.length-1)*xStep},${gH-padB} Z`;
 
     // ── Hero / monicker card ──
-    const _tier2=careerTier(p.mw,p.ml,p.status);
+    const _tier2=_isPlayerPending?null:careerTier(p.mw,p.ml,p.status);
     const _miSign2=(p.mi||0)>0?'+':'';
     const _miCol2=(p.mi||0)>3?'var(--grn3)':(p.mi||0)<-3?'#e55':(p.mi||0)>0?'var(--gold)':'var(--chalk2)';
     const _sorted9b=[...PLAYERS].sort((a,b)=>(b.ppr9||b.ppr)-(a.ppr9||a.ppr));
     const _sorted10b=[...PLAYERS].sort((a,b)=>(b.ppr10||b.ppr)-(a.ppr10||a.ppr));
-    const _rank9b=(_sorted9b.findIndex(x=>x.name===p.name)+1)||'—';
-    const _rank10b=(_sorted10b.findIndex(x=>x.name===p.name)+1)||'—';
-    const _base2=INITIAL_PPR[p.status]||1300;
+    const _rank9b=_isPlayerPending?'—':((_sorted9b.findIndex(x=>x.name===p.name)+1)||'—');
+    const _rank10b=_isPlayerPending?'—':((_sorted10b.findIndex(x=>x.name===p.name)+1)||'—');
     const _heroCard=`<div style="background:linear-gradient(135deg,rgba(20,40,25,.95),rgba(10,22,12,1));border:1px solid rgba(200,168,75,.25);border-radius:14px;padding:1.1rem 1.2rem;margin-bottom:1.1rem;">
       <!-- Name row -->
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.9rem;">
@@ -5875,30 +5876,33 @@ function buildPlayerProfile(){
           <div style="font-size:.72rem;color:var(--chalk);margin-top:3px;">${fmtPlayerName(p.name)} · ${app.user?.region||p.region||'—'}</div>
         </div>
         <div style="text-align:center;">
-          <div style="font-size:.95rem;font-weight:700;color:${_tier2.color};background:${_tier2.bg};border:1px solid ${_tier2.border};border-radius:8px;padding:4px 14px;">${_tier2.label}</div>
+          ${_isPlayerPending
+            ?`<div style="font-size:.85rem;font-weight:700;color:#f5a623;background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.35);border-radius:8px;padding:4px 14px;letter-spacing:.5px;">PENDING</div>`
+            :`<div style="font-size:.95rem;font-weight:700;color:${_tier2.color};background:${_tier2.bg};border:1px solid ${_tier2.border};border-radius:8px;padding:4px 14px;">${_tier2.label}</div>`
+          }
           <div style="font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:4px;">Status</div>
         </div>
       </div>
       <!-- Top stats row: Rank | Overall PPR -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem;">
         <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.65rem .8rem;text-align:center;">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);line-height:1;">#${p.rank}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);line-height:1;">${_isPlayerPending?'—':'#'+(p.rank||'—')}</div>
           <div style="font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:3px;">Overall Rank</div>
         </div>
         <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.65rem .8rem;text-align:center;">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold2);line-height:1;">${p.ppr||_base2}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold2);line-height:1;">${_isPlayerPending?'—':(p.ppr||'—')}</div>
           <div style="font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:3px;">Overall PPR</div>
         </div>
       </div>
       <!-- Bottom stats row: 9-Ball | 10-Ball | Momentum -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;">
         <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.6rem .5rem;text-align:center;">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--c9);line-height:1;">${p.ppr9||_base2}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--c9);line-height:1;">${_isPlayerPending?'—':(p.ppr9||'—')}</div>
           <div style="font-size:.6rem;color:var(--chalk2);margin-top:2px;">#${_rank9b}</div>
           <div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:3px;">9-Ball</div>
         </div>
         <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.6rem .5rem;text-align:center;">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--c10);line-height:1;">${p.ppr10||_base2}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--c10);line-height:1;">${_isPlayerPending?'—':(p.ppr10||'—')}</div>
           <div style="font-size:.6rem;color:var(--chalk2);margin-top:2px;">#${_rank10b}</div>
           <div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:3px;">10-Ball</div>
         </div>
@@ -5918,12 +5922,12 @@ function buildPlayerProfile(){
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;">
             <div>
               <div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-bottom:6px;">PinoyPool Rating</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--gold2);line-height:1;">${p.ppr||INITIAL_PPR[p.status]||1300}</div>
-              <div style="font-size:.65rem;color:var(--chalk);margin-top:2px;">PPR · Assigned by Master Admin</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--gold2);line-height:1;">${_isPlayerPending?'—':(p.ppr||'—')}</div>
+              <div style="font-size:.65rem;color:var(--chalk);margin-top:2px;">${_isPlayerPending?'Pending admin verification':'PPR · Assigned by Master Admin'}</div>
             </div>
             <div style="text-align:right;">
-              <div style="margin-bottom:.4rem;">${tierBadge(careerTier(p.mw,p.ml,p.status||p.careerStatus))}</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);line-height:1;">#${p.rank||'—'}</div>
+              <div style="margin-bottom:.4rem;">${_isPlayerPending?pendingBadge():tierBadge(careerTier(p.mw,p.ml,p.status||p.careerStatus))}</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);line-height:1;">${_isPlayerPending?'—':'#'+(p.rank||'—')}</div>
               <div style="font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--chalk);">National Rank</div>
             </div>
           </div>
