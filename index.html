@@ -5821,9 +5821,12 @@ function buildPlayerProfile(){
   const p=PLAYERS.find(x=>x.name===app.user?.name)||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||null,status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
   {
     // Determine if player is pending (no admin-assigned career status yet)
+    // Priority: adminPlayers entry → PLAYERS status field → treat as pending
     const _apEntry=typeof adminPlayers!=='undefined'?adminPlayers.find(ap=>ap.name===p.name||ap.email===app.user?.email):null;
-    const _isPlayerPending=!_apEntry||_apEntry.status==='pending'||!_apEntry.careerStatus||!(typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[_apEntry.careerStatus]);
-    // Tier system — only use admin-assigned career status, never derive from win%
+    const _hasValidCareer=(s)=>!!(s&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[s]);
+    const _isPlayerPending=_apEntry
+      ?(_apEntry.status==='pending'||!_hasValidCareer(_apEntry.careerStatus))
+      :!_hasValidCareer(p.status);  // fallback for seeded/test accounts in PLAYERS[]
     const totalMatches=p.mw+p.ml;
     const ct=_isPlayerPending?null:careerTier(p.mw,p.ml,p.status||p.careerStatus||app.user?.careerStatus);
     const tierName=ct?ct.label:'Pending';
@@ -5834,12 +5837,13 @@ function buildPlayerProfile(){
     const _pMatches=adminMatches
       .filter(m=>m.status==='approved'&&(m.p1===_pName||m.p2===_pName))
       .sort((a,b)=>(a.approvedAt||a.date||'').localeCompare(b.approvedAt||b.date||''));
-    const _totalPlayers=Math.max(approvedPlayers.length||1,p.rank);
+    const _safeRank=p.rank||1; // guard against undefined rank for pending/unseeded players
+    const _totalPlayers=Math.max(approvedPlayers.length||1,_safeRank);
     let pts;
     if(_pMatches.length===0){
-      pts=[{month:'—',rank:p.rank},{month:'Now',rank:p.rank}];
+      pts=[{month:'—',rank:_safeRank},{month:'Now',rank:_safeRank}];
     } else {
-      const _initRank=Math.min(_totalPlayers,p.rank+_pMatches.length);
+      const _initRank=Math.min(_totalPlayers,_safeRank+_pMatches.length);
       pts=[{month:'Start',rank:_initRank}];
       let _simRank=_initRank;
       _pMatches.forEach(m=>{
@@ -5850,10 +5854,10 @@ function buildPlayerProfile(){
         const _d=new Date(m.approvedAt||m.date||Date.now());
         pts.push({month:_d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),rank:_simRank});
       });
-      pts[pts.length-1].rank=p.rank; // snap to actual current rank
+      pts[pts.length-1].rank=_safeRank; // snap to actual current rank
     }
-    if(pts.length<2) pts=[{month:'—',rank:p.rank},{month:'Now',rank:p.rank}];
-    const maxRank=Math.max(...pts.map(pt=>pt.rank),p.rank)+1;
+    if(pts.length<2) pts=[{month:'—',rank:_safeRank},{month:'Now',rank:_safeRank}];
+    const maxRank=Math.max(...pts.map(pt=>pt.rank),_safeRank)+1;
     const gW=500,gH=140,padL=30,padR=10,padT=15,padB=25;
     const xStep=(gW-padL-padR)/Math.max(1,pts.length-1);
     const yScale=(gH-padT-padB)/(maxRank);
