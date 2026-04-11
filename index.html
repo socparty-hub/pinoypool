@@ -2715,10 +2715,9 @@ function setUser(u){
     if(found){
       app.p1id=found.id;
       const _dp1=document.getElementById('dp1');if(_dp1)_dp1.textContent=u.name.split(' ')[0];
-      // found.status in PLAYERS[] = career status (Elite/Pro/etc)
-      // found.status in adminPlayers = account status (active/pending) — guard against that
-      const _rawS=found.careerStatus||found.status||u.careerStatus||null;
-      const _status=(typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[_rawS])?_rawS:null;
+      // Use PLAYERS[] as source of truth — same as getPlayerCurrentCareerStatus()
+      // Prevents stale adminPlayers.careerStatus (e.g. corrupt 'Amateur') from leaking through
+      const _status=getPlayerCurrentCareerStatus(u.name);
       const _tt=document.getElementById('p1-tier-tag');
       if(_tt){
         if(_status){
