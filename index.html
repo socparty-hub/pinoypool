@@ -1813,8 +1813,8 @@ function odTab(tab, btn){
         const _win1=parseInt(_s1O)>parseInt(_s2O);
         const _lp1=typeof adminPlayers!=='undefined'?adminPlayers.find(p=>p.name===m.p1):null;
         const _lp2=typeof adminPlayers!=='undefined'?adminPlayers.find(p=>p.name===m.p2):null;
-        const _p1T=_lp1?.careerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||m.p1CareerStatus||'';
-        const _p2T=_lp2?.careerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||m.p2CareerStatus||'';
+        const _p1T=getPlayerCurrentCareerStatus(m.p1)||'';
+        const _p2T=getPlayerCurrentCareerStatus(m.p2)||'';
         const _mr1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0; const _mr2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
         const _mb1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
         const _mb2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
@@ -2076,8 +2076,8 @@ function buildDashboard(){
         const s1=isNaN(scParts[0])?'—':scParts[0];
         const s2=isNaN(scParts[1])?'—':scParts[1];
         const isWin=scParts.length===2&&scParts[0]>scParts[1];
-        const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)?.status||'');
-        const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
+        const t1=getPlayerCurrentCareerStatus(m.p1)||'';
+        const t2=getPlayerCurrentCareerStatus(m.p2)||'';
         const tier1=(t1&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t1])?careerTier(0,0,t1):null;
         const tier2=(t2&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t2])?careerTier(0,0,t2):null;
         const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:'';
@@ -2870,8 +2870,9 @@ function acSearch(inpId, listId){
   const pool=[
     ...activeAP.map(p=>{
       const pl=PLAYERS.find(x=>x.id===p.id||x.name===p.name);
-      const _isPending=p.status==='pending'||!p.careerStatus||(typeof CAREER_TIERS!=='undefined'&&p.careerStatus&&!CAREER_TIERS[p.careerStatus]);
-      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:p.careerStatus||pl?.status||pl?.careerStatus||null,isPending:_isPending,colors:p.colors||'#1a3a22',rank:pl?.rank||99};
+      const _cs=getPlayerCurrentCareerStatus(p.name);// null if not admin-approved
+      const _isPending=!_cs;
+      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:_cs,isPending:_isPending,colors:p.colors||'#1a3a22',rank:pl?.rank||99};
     }),
     ...PLAYERS.filter(p=>!apNames.has(p.name))
   ];
@@ -2894,7 +2895,7 @@ function selectPlayer(id,inpId,listId){
   document.getElementById(inpId).value=fmtPlayerName(p.name);
   document.getElementById(listId).classList.remove('open');
   const pNum=inpId==='p1-inp'?'1':'2';
-  const status=p.careerStatus||p.status||null;
+  const status=getPlayerCurrentCareerStatus(p.name);// null for pending/unverified players
   const tagEl=document.getElementById('p'+pNum+'-tier-tag');
   if(tagEl){
     if(status&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[status]){
@@ -3865,8 +3866,8 @@ function renderMatchesPage(){
   // Career status filter — match if either player has the tier
   if(f.tier){
     matches=matches.filter(m=>{
-      const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)?.status||'');
-      const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
+      const t1=getPlayerCurrentCareerStatus(m.p1)||'';
+      const t2=getPlayerCurrentCareerStatus(m.p2)||'';
       return t1===f.tier||t2===f.tier;
     });
   }
@@ -3908,8 +3909,8 @@ function renderMatchesPage(){
     const s2=isNaN(scParts[1])?'—':scParts[1];
     const isWin=scParts.length===2&&scParts[0]>scParts[1];
 
-    const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)?.status||'');
-    const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
+    const t1=getPlayerCurrentCareerStatus(m.p1)||'';
+    const t2=getPlayerCurrentCareerStatus(m.p2)||'';
     const tier1=(t1&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t1])?careerTier(0,0,t1):null;
     const tier2=(t2&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t2])?careerTier(0,0,t2):null;
     const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:'';
@@ -4056,6 +4057,15 @@ function isPendingPlayer(nameOrObj){
   const ap=typeof adminPlayers!=='undefined'?(typeof nameOrObj==='string'?adminPlayers.find(p=>p.name===nameOrObj):nameOrObj):null;
   if(!ap) return false;
   return !ap.careerStatus||(typeof CAREER_TIERS!=='undefined'&&!CAREER_TIERS[ap.careerStatus]);
+}
+/* Returns the current admin-assigned career status string (e.g. 'Elite') for a player,
+   or null if not yet admin-approved. Uses PLAYERS[] as the single source of truth —
+   it is only populated via restoreApprovals() from admin-approved entries, so it
+   never contains stale/corrupted data from old match records or pre-fix submissions. */
+function getPlayerCurrentCareerStatus(name){
+  const pl=PLAYERS.find(x=>x.name===name);
+  if(pl&&pl.status&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[pl.status]) return pl.status;
+  return null;
 }
 function rankClass(i){return i===0?'lb-rank top1':i===1?'lb-rank top2':i===2?'lb-rank top3':'lb-rank';}
 
@@ -5486,8 +5496,8 @@ function ppTab(btn,tab){
       const r2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
       const b1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
       const b2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
-      const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
-      const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+      const t1=getPlayerCurrentCareerStatus(m.p1)||'';
+      const t2=getPlayerCurrentCareerStatus(m.p2)||'';
       return `<div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;overflow:hidden;margin-bottom:1rem;box-shadow:0 4px 16px rgba(0,0,0,.35);">
         <div style="background:rgba(0,0,0,.25);padding:.6rem 1rem;border-bottom:1px solid #2e3732;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -6336,8 +6346,8 @@ function ptab(tab){
       const r2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
       const b1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
       const b2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
-      const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
-      const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+      const t1=getPlayerCurrentCareerStatus(m.p1)||'';
+      const t2=getPlayerCurrentCareerStatus(m.p2)||'';
       return `<div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;overflow:hidden;margin-bottom:1rem;box-shadow:0 4px 16px rgba(0,0,0,.35);">
         <div style="background:rgba(0,0,0,.25);padding:.6rem 1rem;border-bottom:1px solid #2e3732;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
