@@ -401,8 +401,8 @@ textarea{resize:vertical;min-height:75px;}
   /* Portal tabs wrap */
   .pp-tabs{flex-wrap:wrap;}
   .pp-tab{font-size:.75rem;padding:8px 10px;}
-  .adm-tabs{flex-wrap:wrap;}
-  .adm-tab{font-size:.75rem;padding:8px 10px;flex:1 1 auto;}
+  .adm-tabs-main{flex-wrap:wrap;}
+  .adm-tab{font-size:.72rem;padding:8px 8px;}
 }
 
 /* PLAYER PORTAL */
@@ -428,10 +428,20 @@ textarea{resize:vertical;min-height:75px;}
 .score-range::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--gold2);border:3px solid #0a120e;box-shadow:0 0 0 2px rgba(200,168,75,.35);cursor:pointer;}
 .score-range-labels{display:flex;justify-content:space-between;margin-top:5px;font-size:.58rem;color:var(--chalk2);letter-spacing:1px;font-family:'DM Mono',monospace;}
 /* Admin Portal */
-.adm-hdr{background:linear-gradient(135deg,rgba(90,20,10,.5),rgba(8,14,6,.95));border:1px solid rgba(184,50,40,.4);border-radius:12px;padding:1.4rem;margin-bottom:1.4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
-.adm-tabs{display:flex;gap:0;border:1px solid rgba(184,50,40,.3);border-radius:10px;overflow:hidden;margin-bottom:1.4rem;}
-.adm-tab{flex:1;padding:10px 14px;background:transparent;border:none;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--chalk);transition:all .2s;text-align:center;border-right:1px solid rgba(184,50,40,.2);}
-.adm-tab:last-child{border-right:none;}
+.adm-hdr{background:linear-gradient(135deg,rgba(90,20,10,.5),rgba(8,14,6,.95));border:1px solid rgba(184,50,40,.4);border-radius:12px;padding:1.4rem;margin-bottom:1.4rem;}
+.adm-hdr-title{font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:#e55;line-height:1.1;}
+.adm-hdr-sub{font-size:.74rem;color:var(--chalk);margin-top:3px;margin-bottom:1rem;}
+.adm-stats-row{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+.adm-stat-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);line-height:1;}
+.adm-stat-lbl{font-size:.57rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);margin-top:1px;}
+.adm-reset-btn{margin-left:auto;background:rgba(184,50,40,.18);border:1.5px solid rgba(184,50,40,.5);color:#e55;font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:2px;padding:8px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;}
+.adm-reset-btn:hover{background:rgba(184,50,40,.32);}
+.adm-tabs{display:flex;flex-direction:column;border:1px solid rgba(184,50,40,.3);border-radius:10px;overflow:hidden;margin-bottom:1.4rem;}
+.adm-tabs-main{display:flex;}
+.adm-tabs-secondary{display:flex;justify-content:center;border-top:1px solid rgba(184,50,40,.2);}
+.adm-tab{flex:1;padding:10px 14px;background:transparent;border:none;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:1.5px;color:var(--chalk);transition:all .2s;text-align:center;border-right:1px solid rgba(184,50,40,.2);line-height:1.3;}
+.adm-tabs-main .adm-tab:last-child{border-right:none;}
+.adm-tabs-secondary .adm-tab{border-right:none;flex:0 0 auto;min-width:55%;}
 .adm-tab:hover,.adm-tab.act{background:rgba(184,50,40,.15);color:#e55;}
 .adm-badge{background:#e55;color:#fff;border-radius:10px;padding:1px 7px;font-size:.6rem;margin-left:5px;font-family:'DM Mono',monospace;}
 .adm-row{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;margin-bottom:.7rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;transition:border-color .2s;}
@@ -1394,17 +1404,19 @@ textarea{resize:vertical;min-height:75px;}
 ══════════════════════════════════════════ -->
 <div id="view-admin" class="view">
   <div class="adm-hdr">
-    <div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:#e55;">⚙️ Master Admin Dashboard</div>
-      <div style="font-size:.76rem;color:var(--chalk);margin-top:2px;">PinoyPool · Full System Access · All actions are logged</div>
-    </div>
-    <div style="display:flex;gap:1.2rem;text-align:center;flex-wrap:wrap;" id="adm-stats"></div>
+    <div class="adm-hdr-title">⚙️ Master Admin Dashboard</div>
+    <div class="adm-hdr-sub">PinoyPool · Full System Access · All actions are logged</div>
+    <div class="adm-stats-row" id="adm-stats"></div>
   </div>
   <div class="adm-tabs" id="adm-tabs">
-    <button class="adm-tab act" onclick="admTab(this,'players')">Player Registration<span class="adm-badge" id="adm-b-players">0</span></button>
-    <button class="adm-tab" onclick="admTab(this,'halls')">🏢 Hall Owners<span class="adm-badge" id="adm-b-halls">0</span></button>
-    <button class="adm-tab" onclick="admTab(this,'matches')">⚡ Match Approvals<span class="adm-badge" id="adm-b-matches">0</span></button>
-    <button class="adm-tab" onclick="admTab(this,'tournaments')">🏆 Tournaments<span class="adm-badge" id="adm-b-tournaments">0</span></button>
+    <div class="adm-tabs-main">
+      <button class="adm-tab act" onclick="admTab(this,'players')">Player<br>Registration<span class="adm-badge" id="adm-b-players">0</span></button>
+      <button class="adm-tab" onclick="admTab(this,'halls')">🏢 Hall<br>Owners<span class="adm-badge" id="adm-b-halls">0</span></button>
+      <button class="adm-tab" onclick="admTab(this,'matches')">⚡ Match<br>Approvals<span class="adm-badge" id="adm-b-matches">0</span></button>
+    </div>
+    <div class="adm-tabs-secondary">
+      <button class="adm-tab" onclick="admTab(this,'tournaments')">🏆 Tournaments<span class="adm-badge" id="adm-b-tournaments">0</span></button>
+    </div>
   </div>
   <div id="adm-content"></div>
 </div>
@@ -7169,21 +7181,19 @@ function buildAdmin(){
   if(el('adm-b-tournaments')) el('adm-b-tournaments').textContent=pendT;
   // Stats header: use approved arrays for accurate counts (avoid double-counting)
   el('adm-stats').innerHTML=`
-    <div style="text-align:center;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);">${PLAYERS.length}</div>
-      <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Players</div>
+    <div>
+      <div class="adm-stat-num">${PLAYERS.length}</div>
+      <div class="adm-stat-lbl">Players</div>
     </div>
-    <div style="text-align:center;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);">${adminHalls.filter(h=>h.status==='active').length}</div>
-      <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Halls</div>
+    <div>
+      <div class="adm-stat-num">${adminHalls.filter(h=>h.status==='active').length}</div>
+      <div class="adm-stat-lbl">Halls</div>
     </div>
-    <div style="text-align:center;">
-      <div id="adm-stat-pending" style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#e55;">${pendP+pendH+pendM+pendT}</div>
-      <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Pending</div>
+    <div>
+      <div id="adm-stat-pending" class="adm-stat-num" style="color:#e55;">${pendP+pendH+pendM+pendT}</div>
+      <div class="adm-stat-lbl">Pending</div>
     </div>
-    <div style="text-align:center;margin-left:auto;">
-      <button onclick="admResetAllData()" style="background:rgba(184,50,40,.18);border:1px solid rgba(184,50,40,.45);color:#e55;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:6px;cursor:pointer;">⚠ Reset All Data</button>
-    </div>`;
+    <button onclick="admResetAllData()" class="adm-reset-btn">⚠ Reset All Data</button>`;
   const _activeTab=app.admTab||'players';
   const _activeBtn=Array.from(document.querySelectorAll('.adm-tab')).find(b=>b.getAttribute('onclick')?.includes(`'${_activeTab}'`))||document.querySelector('.adm-tab');
   admTab(_activeBtn, _activeTab);
