@@ -11,6 +11,7 @@
   --panel:rgba(15,26,18,0.94);
   --baize:#1B4332;--baize2:#22502e;
   --gold:#D4AF37;--gold2:#FFD700;--gold-dim:rgba(212,175,55,0.15);--gold-border:rgba(212,175,55,0.22);
+  --c9:#F4C430;--c9fg:#111;--c10:#5579D9;--c10fg:#fff;
   --ivory:#f2edd8;--chalk:#aaa490;--chalk2:rgba(170,164,144,0.5);
   --red:#b83228;--red2:rgba(184,50,40,0.2);--red3:rgba(184,50,40,0.45);
   --grn:#1f8c4e;--grn2:rgba(31,140,78,0.2);--grn3:#2ecc71;
@@ -1605,7 +1606,7 @@ function apiPersist(key,value){
 function fmtBallTag(fmt){
   if(!fmt) return '<span class="tag">—</span>';
   const is9=fmt==='9-Ball';
-  return `<span class="tag" style="background:${is9?'#f5c842':'#4a9eff'};color:${is9?'#111':'#fff'};font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${fmt}</span>`;
+  return `<span class="tag" style="background:${is9?'var(--c9)':'var(--c10)'};color:${is9?'var(--c9fg)':'var(--c10fg)'};font-weight:700;border:none;min-width:4.2rem;text-align:center;display:inline-block;">${fmt}</span>`;
 }
 
 /* ── Date helper ── */
@@ -1729,7 +1730,7 @@ function odTab(tab, btn){
     const _ownedPending=typeof manualPending!=='undefined'?manualPending.filter(m=>!hallName||!m.venue||m.venue===hallName):[];
     const _totalActions=_ownedPending.length+_playerSetMatches.length+pendVal.length;
     const _scO='font-family:\'DM Mono\',monospace;font-weight:700;font-size:1rem;';
-    const _fBO=f=>f==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
+    const _fBO=f=>f==='9-Ball'?`<span class="tag" style="background:var(--c9);color:var(--c9fg);font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:var(--c10);color:var(--c10fg);font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
     c.innerHTML=`
     <div class="card" style="margin-bottom:1.1rem;">
       <div class="ct">⚡ Pending Match Actions
@@ -1936,7 +1937,7 @@ function filterHistoryOD(btn, period){
       const pts=sc.split(/[-–]/).map(x=>parseInt(x.trim()));
       const s1=isNaN(pts[0])?'—':pts[0]; const s2=isNaN(pts[1])?'—':pts[1];
       const win1=pts.length===2&&pts[0]>pts[1];
-      const _fmtBadge=m.fmt==='10-Ball'?`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;font-size:.6rem;">10-Ball</span>`:`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;font-size:.6rem;">9-Ball</span>`;
+      const _fmtBadge=m.fmt==='10-Ball'?`<span class="tag" style="background:var(--c10);color:var(--c10fg);font-weight:700;border:none;font-size:.6rem;">10-Ball</span>`:`<span class="tag" style="background:var(--c9);color:var(--c9fg);font-weight:700;border:none;font-size:.6rem;">9-Ball</span>`;
       const _typeBadge=m.type?`<span class="tag tgd" style="font-size:.6rem;">${m.type}</span>`:'';
       return `<div class="dash-match-card"><div class="dash-match-card-inner">
         <div class="dash-match-card-head">
@@ -2016,8 +2017,8 @@ function buildDashboard(){
       lc.style.cssText=`max-height:${visibleH}px;overflow-y:auto;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:rgba(53,94,59,.4) transparent;`;
       lc.innerHTML=recent.map(m=>{
         const fmtBadge=m.fmt==='9-Ball'
-          ?`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
-          :`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">10-Ball</span>`;
+          ?`<span style="padding:2px 8px;background:var(--c9);color:var(--c9fg);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
+          :`<span style="padding:2px 8px;background:var(--c10);color:var(--c10fg);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">10-Ball</span>`;
         const typeBadge=m.type?`<span style="padding:2px 8px;background:rgba(53,94,59,.4);border:1px solid rgba(53,94,59,.3);color:var(--gold2);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.type}</span>`:'';
         const hcpR=m.hcpRack||[0,0];
         const hcpB1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
@@ -3868,8 +3869,8 @@ function renderMatchesPage(){
     const hcpTag2=hcpTag(hcpR[1],hcpB2);
 
     const fmtBadge=m.fmt==='9-Ball'
-      ?`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
-      :`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">10-Ball</span>`;
+      ?`<span style="padding:2px 8px;background:var(--c9);color:var(--c9fg);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
+      :`<span style="padding:2px 8px;background:var(--c10);color:var(--c10fg);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">10-Ball</span>`;
     const typeBadge=m.type?`<span style="padding:2px 8px;background:rgba(53,94,59,.4);border:1px solid rgba(53,94,59,.3);color:var(--gold2);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.type}</span>`:'';
 
     return `<div class="dash-match-card"><div class="dash-match-card-inner">
@@ -5374,8 +5375,8 @@ function buildPlayerPortal(){
     <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);">#${p.rank}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Overall Rank</div></div>
     <div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold2);">${p.ppr||_base}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Overall PPR</div></div>
     <div><div style="font-size:1rem;font-weight:700;color:${_tier.color};background:${_tier.bg};border:1px solid ${_tier.border};border-radius:6px;padding:3px 10px;margin-top:2px;">${_tier.label}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);margin-top:3px;">Status</div></div>
-    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#f5c842;">${_ppr9}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank9}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">9-Ball</div></div>
-    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#4a9eff;">${_ppr10}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank10}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">10-Ball</div></div>
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--c9);">${_ppr9}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank9}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">9-Ball</div></div>
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--c10);">${_ppr10}<span style="font-size:.75rem;color:var(--chalk);margin-left:4px;">#${_rank10}</span></div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">10-Ball</div></div>
     <div><div style="font-family:'DM Mono',monospace;font-size:1.7rem;font-weight:700;color:${_miCol};">${_miSign}${p.mi||0}</div><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk);">Momentum</div></div>`;
 
   // Show first tab
@@ -5408,7 +5409,7 @@ function ppTab(btn,tab){
   const _ppHcp=(rack,balls)=>{let s='';if(rack>0)s+=`(+${rack})`;if(balls&&balls.length>0)s+=`(${[...balls].sort((a,b)=>a-b).join(',')})`;return s?`<span style="font-size:.68rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;letter-spacing:0;">${s}</span>`:''};
   const _ppName=(name)=>{const p=name.trim().split(' ');return p.length===1?`<span style="text-transform:uppercase;letter-spacing:.5px;">${p[0]}</span>`:`${p[0]}<br><span style="text-transform:uppercase;letter-spacing:.5px;">${p.slice(1).join(' ')}</span>`};
   const _ppTier=(status)=>{if(!status)return '';const t=careerTier(0,0,status);return `<span style="font-size:.55rem;font-weight:800;padding:1px 6px;border-radius:3px;background:${t.bg};color:${t.color};border:1px solid ${t.border};font-family:'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:.5px;">${t.label}</span>`};
-  const _ppFmt=(fmt)=>fmt==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt||'9-Ball'}</span>`;
+  const _ppFmt=(fmt)=>fmt==='9-Ball'?`<span class="tag" style="background:var(--c9);color:var(--c9fg);font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt}</span>`:`<span class="tag" style="background:var(--c10);color:var(--c10fg);font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt||'9-Ball'}</span>`;
   const _ppType=(type)=>type?`<span class="tag tgd">${type}</span>`:'';
   const _ppCard=(m,p1ok,p2ok,actionHtml,extraInfo='')=>{
       const sc=(m.score||m.sc||'0-0').split(/[-–]/).map(x=>x.trim());
@@ -5709,7 +5710,7 @@ function ppTab(btn,tab){
             const myBalls=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[myIdx])?m.hcpBalls[myIdx]:[];
             const opBalls=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[opIdx])?m.hcpBalls[opIdx]:[];
             const _hcpStr=(rack,balls)=>{let s='';if(rack>0)s+=`(+${rack})`;if(balls&&balls.length>0)s+=`(${[...balls].sort((a,b)=>a-b).join(',')})`;return s?`<span style="font-size:.65rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;margin-left:.3rem;">${s}</span>`:''};
-            const fb=m.fmt==='9-Ball'?`<span style="padding:2px 7px;background:#b59a2c;color:#111;font-size:.58rem;font-weight:700;border-radius:4px;">9-Ball</span>`:`<span style="padding:2px 7px;background:#2563eb;color:#fff;font-size:.58rem;font-weight:700;border-radius:4px;">${m.fmt||'9-Ball'}</span>`;
+            const fb=m.fmt==='9-Ball'?`<span style="padding:2px 7px;background:var(--c9);color:var(--c9fg);font-size:.58rem;font-weight:700;border-radius:4px;">9-Ball</span>`:`<span style="padding:2px 7px;background:var(--c10);color:var(--c10fg);font-size:.58rem;font-weight:700;border-radius:4px;">${m.fmt||'9-Ball'}</span>`;
             const tb=m.type?`<span style="padding:2px 7px;background:rgba(53,94,59,.4);color:var(--gold2);font-size:.58rem;font-weight:700;border-radius:4px;">${m.type}</span>`:'';
             const _tier=(t)=>t?`<span style="padding:1px 6px;border:1px solid rgba(200,168,75,.35);color:var(--gold2);font-size:.55rem;font-weight:700;border-radius:4px;letter-spacing:.5px;">${t}</span>`:'';
             return `<div style="padding:.7rem 1rem;background:rgba(255,255,255,.025);border-top:1px solid rgba(255,255,255,.06);">
@@ -5825,12 +5826,12 @@ function buildPlayerProfile(){
       <!-- Bottom stats row: 9-Ball | 10-Ball | Momentum -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;">
         <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.6rem .5rem;text-align:center;">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:#f5c842;line-height:1;">${p.ppr9||_base2}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--c9);line-height:1;">${p.ppr9||_base2}</div>
           <div style="font-size:.6rem;color:var(--chalk2);margin-top:2px;">#${_rank9b}</div>
           <div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:3px;">9-Ball</div>
         </div>
         <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.6rem .5rem;text-align:center;">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:#4a9eff;line-height:1;">${p.ppr10||_base2}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--c10);line-height:1;">${p.ppr10||_base2}</div>
           <div style="font-size:.6rem;color:var(--chalk2);margin-top:2px;">#${_rank10b}</div>
           <div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--chalk2);margin-top:3px;">10-Ball</div>
         </div>
@@ -6239,8 +6240,8 @@ function ptab(tab){
     };
     // ── Helper: format badge — uses app's existing tag styles ──
     const _fmtBadge=(fmt)=>fmt==='9-Ball'
-      ?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt}</span>`
-      :`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt||'9-Ball'}</span>`;
+      ?`<span class="tag" style="background:var(--c9);color:var(--c9fg);font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt}</span>`
+      :`<span class="tag" style="background:var(--c10);color:var(--c10fg);font-weight:700;border:none;min-width:4rem;text-align:center;">${fmt||'9-Ball'}</span>`;
     // ── Helper: match type badge ──
     const _typeBadge=(type)=>type?`<span class="tag tgd">${type}</span>`:'';
     // ── Gold badge SVG (verified/approved icon) ──
@@ -6517,8 +6518,8 @@ function filterHistory(btn, period){
     const _hTag1=_h1?`<span style="font-size:.72rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;">${_h1}</span>`:'';
     const _hTag2=_h2?`<span style="font-size:.72rem;color:#e8a040;font-family:'DM Mono',monospace;font-weight:600;">${_h2}</span>`:'';
     const _fmtBadge=m.fmt==='9-Ball'
-      ?`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
-      :`<span style="padding:2px 8px;background:#2563eb;color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.fmt||'9-Ball'}</span>`;
+      ?`<span style="padding:2px 8px;background:var(--c9);color:var(--c9fg);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">9-Ball</span>`
+      :`<span style="padding:2px 8px;background:var(--c10);color:var(--c10fg);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.fmt||'9-Ball'}</span>`;
     const _typeBadge=m.type?`<span style="padding:2px 8px;background:rgba(53,94,59,.4);border:1px solid rgba(53,94,59,.3);color:var(--gold2);font-size:.6rem;font-weight:700;border-radius:4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">${m.type}</span>`:'';
     return `<div class="dash-match-card"><div class="dash-match-card-inner">
       <div class="dash-match-card-head">
@@ -7355,7 +7356,7 @@ function admTab(btn,tab){
         <div style="flex:1;height:1px;background:linear-gradient(90deg,${color||'rgba(255,255,255,.08)'} 0%,transparent 100%);opacity:.35;"></div>
       </div>`;
     // ── Admin match card helpers ──
-    const _admFmtB=f=>f==='9-Ball'?`<span class="tag" style="background:#f5c842;color:#111;font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:#4a9eff;color:#fff;font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
+    const _admFmtB=f=>f==='9-Ball'?`<span class="tag" style="background:var(--c9);color:var(--c9fg);font-weight:700;border:none;min-width:4rem;text-align:center;">${f}</span>`:`<span class="tag" style="background:var(--c10);color:var(--c10fg);font-weight:700;border:none;min-width:4rem;text-align:center;">${f||'9-Ball'}</span>`;
     const _admPName=(name)=>{const p=(name||'').trim().split(/\s+/);if(p.length===1)return `<span style="text-transform:uppercase;letter-spacing:.5px;">${p[0]}</span>`;return `${p[0]}<br><span style="text-transform:uppercase;letter-spacing:.5px;">${p.slice(1).join(' ')}</span>`;};
     const _admBadge=`<svg width="18" height="18" viewBox="0 0 24 24" fill="#D4AF37" style="flex-shrink:0;"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z"/></svg>`;
     const _admBadgeEmpty=`<svg width="18" height="18" viewBox="0 0 24 24" fill="#D4AF37" style="flex-shrink:0;opacity:0;"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z"/></svg>`;
