@@ -3417,8 +3417,8 @@ function submitFinalScore(){
     hcpRack:[hcpState.rack[0]||0,hcpState.rack[1]||0],
     hcpBall:[hcpState.balls[0].size||0,hcpState.balls[1].size||0],
     hcpBalls:[_hcpB1,_hcpB2],
-    p1CareerStatus:PLAYERS.find(p=>p.name===app.p1)?.status||'Amateur',
-    p2CareerStatus:PLAYERS.find(p=>p.name===app.p2)?.status||'Amateur',
+    p1CareerStatus:(PLAYERS.find(p=>p.name===app.p1)?.status)||(typeof adminPlayers!=='undefined'?adminPlayers.find(p=>p.name===app.p1)?.careerStatus:null)||null,
+    p2CareerStatus:(PLAYERS.find(p=>p.name===app.p2)?.status)||(typeof adminPlayers!=='undefined'?adminPlayers.find(p=>p.name===app.p2)?.careerStatus:null)||null,
     venue:_venue,
     date:new Date().toISOString().slice(0,10),
     status:'pending-opponent',
@@ -5828,6 +5828,7 @@ function buildPlayerProfile(){
       ?(_apEntry.status==='pending'||!_hasValidCareer(_apEntry.careerStatus))
       :!_hasValidCareer(p.status);  // fallback for seeded/test accounts in PLAYERS[]
     const totalMatches=p.mw+p.ml;
+    const winPct=Math.round((p.mw||0)/((p.mw||0)+(p.ml||0)||1)*100);
     const ct=_isPlayerPending
       ?{label:'Pending',bg:'rgba(255,165,0,.1)',color:'#f5a623',border:'rgba(255,165,0,.35)'}
       :careerTier(p.mw,p.ml,p.status||p.careerStatus||app.user?.careerStatus);
