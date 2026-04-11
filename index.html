@@ -7232,8 +7232,8 @@ function admTab(btn,tab){
             const _email=_ru?.email||p.email||'—';
             const _region=_ru?.region||p.region||'—';
             const _phone=_ru?.phone||p.phone||'—';
-            return`<div class="adm-row">
-              <div style="display:flex;align-items:center;gap:.9rem;min-width:0;flex:1;">
+            return`<div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;padding:.9rem 1rem;margin-bottom:.75rem;">
+              <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:.85rem;">
                 <div class="av" style="background:${p.colors||'#1a3a22'};flex-shrink:0;">${getInit(p.name)}</div>
                 <div style="min-width:0;">
                   <div style="font-weight:600;font-size:.9rem;">${fmtPlayerName(p.name)}</div>
@@ -7241,13 +7241,15 @@ function admTab(btn,tab){
                   <div style="font-size:.68rem;color:var(--chalk2);margin-top:1px;">${_phone} · Applied ${p.joined||p.submittedAt?.slice(0,10)||'—'}</div>
                 </div>
               </div>
-              <div class="adm-actions">
-                <span class="status-pill ${sClass}">● ${p.status}</span>
-                <select id="cs-${p.id}" style="width:auto;padding:5px 9px;font-size:.78rem;" title="Assign Career Status">
+              <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.55rem;">
+                <span class="status-pill ${sClass}" style="flex-shrink:0;">● ${p.status}</span>
+                <select id="cs-${p.id}" style="flex:1;padding:5px 8px;font-size:.78rem;" title="Assign Career Status">
                   ${CAREER_STATUS_LIST.map(t=>`<option value="${t}"${(p.careerStatus||'Amateur')===t?' selected':''}>${t}</option>`).join('')}
                 </select>
-                <button class="btn btn-d btn-sm" onclick="admRejectPlayer('${p.id}')">✗ Reject</button>
-                <button class="btn btn-s btn-sm" onclick="admApprovePlayer('${p.id}')">✓ Approve</button>
+              </div>
+              <div style="display:flex;gap:.5rem;">
+                <button class="btn btn-d" style="flex:1;" onclick="admRejectPlayer('${p.id}')">✗ Reject</button>
+                <button class="btn btn-s" style="flex:1;" onclick="admApprovePlayer('${p.id}')">✓ Approve</button>
               </div>
             </div>`;
           }).join('')
