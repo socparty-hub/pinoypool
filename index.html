@@ -2586,7 +2586,7 @@ function doRegister(){
   fetch('/api/register',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({firstName:fn,lastName:ln,username:un,email:em,phone:ph,dob,role,moniker:moniker||'',hallName:hall,city:addr,region,careerStatus:selfCareer})
+    body:JSON.stringify({firstName:fn,lastName:ln,username:un,email:em,phone:ph,dob,role,moniker:moniker||'',hallName:hall,city:addr,region,careerStatus:selfCareer,password:pw})
   })
   .then(r=>r.json())
   .then(data=>{if(!data.ok){toast('⚠️ '+(data.message||'Registration failed.'));return;}_finalize(data.id||null);})
@@ -7935,12 +7935,13 @@ function admApprovePlayer(id){
   // Also sync verificationStatus in registeredUsers so .catch() fallback doesn't re-show as pending
   const ru=registeredUsers.find(r=>r.email===p.email||r.username===p.username);
   if(ru){ru.verificationStatus='active';saveRegisteredUsers();}
-  // Persist approval to backend
+  // Render immediately with current (already-updated) local state, then persist to backend.
+  // buildAdmin() is chained to the PATCH response so the background GET fires AFTER MySQL is updated,
+  // eliminating the race condition where GET returns stale 'pending' status before PATCH completes.
+  buildDashboard();
   fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({status:'active',careerStatus,ppr:initPPR,approvedAt:new Date().toISOString()})
-  }).catch(()=>{});
-  buildAdmin();
-  buildDashboard();
+  }).then(()=>buildAdmin()).catch(()=>buildAdmin());
   if(app.lbTab) renderLbTab(app.lbTab);
   // Store approval notification for the player — shown on their next login
   if(p.email){
