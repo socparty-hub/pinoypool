@@ -43,6 +43,19 @@ nav{display:flex;gap:2px;}
 .nb.act{border-bottom:2px solid var(--gold);border-radius:5px 5px 0 0;}
 #nb-admin{display:none!important;}
 .nav-badge{position:absolute;top:2px;right:3px;background:#e55;color:#fff;font-size:.52rem;font-weight:700;min-width:14px;height:14px;border-radius:7px;padding:0 3px;display:flex;align-items:center;justify-content:center;line-height:1;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.4);}
+/* ── Notification Bell ── */
+#notif-bell{display:none;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;padding:5px;color:var(--chalk);width:32px;height:32px;border-radius:50%;transition:background .2s;position:relative;flex-shrink:0;}
+#notif-bell:hover{background:rgba(212,175,55,.15);}
+#notif-badge{display:none;position:absolute;top:0;right:0;background:#e55;color:#fff;font-size:.52rem;font-weight:700;min-width:14px;height:14px;border-radius:7px;padding:0 3px;align-items:center;justify-content:center;line-height:1;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.4);}
+#notif-panel{display:none;position:absolute;right:0;top:calc(100% + 6px);width:310px;background:var(--panel);border:1px solid rgba(212,175,55,.2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.55);z-index:1001;max-height:380px;overflow-y:auto;overflow-x:hidden;}
+.np-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(212,175,55,.15);font-weight:700;font-size:.82rem;color:var(--gold);position:sticky;top:0;background:var(--panel);z-index:1;}
+.np-mark-read{background:none;border:1px solid rgba(212,175,55,.3);color:var(--chalk);font-size:.67rem;padding:2px 8px;border-radius:4px;cursor:pointer;white-space:nowrap;}
+.np-mark-read:hover{background:rgba(212,175,55,.1);}
+.np-item{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.4;}
+.np-item.np-unread{background:rgba(212,175,55,.07);}
+.np-msg{font-size:.77rem;color:var(--chalk);}
+.np-time{font-size:.65rem;color:rgba(255,255,255,.3);margin-top:2px;}
+.np-empty{padding:20px 14px;text-align:center;color:rgba(255,255,255,.3);font-size:.8rem;}
 .hdr-right{display:flex;gap:8px;align-items:center;}
 .auth-bar{display:none;align-items:center;gap:8px;font-size:0.82rem;color:var(--chalk);}
 .av-sm{width:30px;height:30px;border-radius:50%;background:var(--baize);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:0.82rem;color:var(--gold);cursor:pointer;}
@@ -834,6 +847,13 @@ textarea{resize:vertical;min-height:75px;}
   </nav>
   <div class="hdr-right">
     <div class="auth-bar" id="auth-bar">
+      <div id="notif-wrap" style="position:relative;">
+        <button id="notif-bell" onclick="toggleNotifPanel()" title="Notifications">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          <span id="notif-badge">0</span>
+        </button>
+        <div id="notif-panel"></div>
+      </div>
       <div style="position:relative;">
         <div class="av-sm" id="hdr-av" onclick="toggleAvDropdown()">?</div>
         <div id="av-dropdown">
@@ -2581,6 +2601,9 @@ function doRegister(){
     }
     closeM('m-auth');
     toast(`🎉 Welcome, <strong>@${un}</strong>! ${role==='player'?'Your account is pending admin verification.':`Your hall registration is pending admin approval.`}`);
+    // ── Notify admin of new registration ──
+    if(role==='player') addNotification('admin','new_player_registration',`👤 <strong>New Player Registration</strong> — <strong>${name}</strong> (@${un}) from ${region||'—'} has registered and is pending approval.`);
+    else if(role==='owner') addNotification('admin','new_owner_registration',`🏢 <strong>New Hall Owner Registration</strong> — <strong>${name}</strong> (@${un}) registered <strong>${hall||'a hall'}</strong> in ${region||'—'} and is pending approval.`);
     if(role==='owner') setTimeout(()=>sv('portal',document.getElementById('nb-portal')),600);
   };
   fetch('/api/register',{
@@ -2793,6 +2816,7 @@ function updateNavBadges(){
     const cnt=manualPending.length+venueCnt;
     _setNavBadge(nbPortal,cnt);
   }
+  updateNotifBell();
 }
 function _setNavBadge(btn,count){
   let b=btn.querySelector('.nav-badge');
@@ -2804,9 +2828,117 @@ function _setNavBadge(btn,count){
     if(b) b.style.display='none';
   }
 }
+
+/* ══════════════════════════════════════════════
+   NOTIFICATION CENTER
+   Storage: pp_notifications in localStorage + MySQL
+   Structure: { username: [{id, type, msg, read, at}] }
+   ══════════════════════════════════════════════ */
+var _notifStore={};
+function _loadNotifStore(){try{_notifStore=JSON.parse(localStorage.getItem('pp_notifications')||'{}');}catch{_notifStore={};}}
+function _saveNotifStore(){
+  const v=JSON.stringify(_notifStore);
+  try{localStorage.setItem('pp_notifications',v);}catch{}
+  apiPersist('pp_notifications',v);
+}
+function _usernameFor(name){
+  if(!name) return '';
+  const sources=[
+    typeof registeredUsers!=='undefined'?registeredUsers:[],
+    typeof adminPlayers!=='undefined'?adminPlayers:[],
+    typeof approvedPlayers!=='undefined'?approvedPlayers:[]
+  ];
+  for(const arr of sources){
+    const found=arr.find(u=>u.name===name||u.username===name);
+    if(found&&found.username) return found.username;
+  }
+  return name.toLowerCase().replace(/\s+/g,'');
+}
+function _notifUsername(){
+  if(!app.user) return '';
+  return app.user.role==='admin'?'admin':(app.user.username||app.user.name||'');
+}
+function addNotification(username,type,msg){
+  if(!username) return;
+  _loadNotifStore();
+  if(!_notifStore[username]) _notifStore[username]=[];
+  _notifStore[username].unshift({
+    id:'n-'+Date.now()+'-'+Math.random().toString(36).slice(2,5),
+    type,msg,read:false,at:new Date().toISOString()
+  });
+  if(_notifStore[username].length>30) _notifStore[username]=_notifStore[username].slice(0,30);
+  _saveNotifStore();
+  updateNotifBell();
+}
+function _getUnreadCount(username){
+  if(!username) return 0;
+  _loadNotifStore();
+  return (_notifStore[username]||[]).filter(n=>!n.read).length;
+}
+function updateNotifBell(){
+  const bell=document.getElementById('notif-bell');
+  const badge=document.getElementById('notif-badge');
+  if(!bell||!badge) return;
+  const un=_notifUsername();
+  const count=_getUnreadCount(un);
+  bell.style.display=app.user?'flex':'none';
+  if(count>0){badge.textContent=count>99?'99+':count;badge.style.display='flex';}
+  else{badge.style.display='none';}
+}
+function toggleNotifPanel(){
+  const panel=document.getElementById('notif-panel');
+  if(!panel) return;
+  if(panel.style.display!=='none'){panel.style.display='none';return;}
+  renderNotifPanel();
+  panel.style.display='block';
+}
+function renderNotifPanel(){
+  const panel=document.getElementById('notif-panel');
+  if(!panel) return;
+  const un=_notifUsername();
+  _loadNotifStore();
+  const notifs=(_notifStore[un]||[]).slice(0,25);
+  if(!notifs.length){
+    panel.innerHTML=`<div class="np-head"><span>Notifications</span></div><div class="np-empty">No notifications yet.</div>`;
+    return;
+  }
+  const unread=notifs.filter(n=>!n.read).length;
+  const items=notifs.map(n=>`<div class="np-item${n.read?'':' np-unread'}"><div class="np-msg">${n.msg}</div><div class="np-time">${_fmtNotifTime(n.at)}</div></div>`).join('');
+  panel.innerHTML=`<div class="np-head"><span>Notifications${unread>0?` <span style="background:#e55;color:#fff;font-size:.55rem;padding:1px 6px;border-radius:8px;margin-left:4px;font-family:'Space Grotesk',sans-serif;">${unread} new</span>`:''}</span>${unread>0?`<button class="np-mark-read" onclick="markAllNotifsRead()">Mark all read</button>`:''}</div><div>${items}</div>`;
+  setTimeout(()=>markAllNotifsRead(),2500);
+}
+function markAllNotifsRead(){
+  const un=_notifUsername();
+  if(!un) return;
+  _loadNotifStore();
+  if(_notifStore[un]) _notifStore[un].forEach(n=>n.read=true);
+  _saveNotifStore();
+  updateNotifBell();
+  const panel=document.getElementById('notif-panel');
+  if(panel&&panel.style.display!=='none'){
+    panel.querySelectorAll('.np-item').forEach(el=>el.classList.remove('np-unread'));
+    const head=panel.querySelector('.np-head');
+    if(head) head.innerHTML='<span>Notifications</span>';
+  }
+}
+function _fmtNotifTime(iso){
+  try{
+    const d=new Date(iso),now=new Date(),diff=now-d;
+    if(diff<60000) return 'just now';
+    if(diff<3600000) return Math.floor(diff/60000)+'m ago';
+    if(diff<86400000) return Math.floor(diff/3600000)+'h ago';
+    if(diff<604800000) return Math.floor(diff/86400000)+'d ago';
+    return d.toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+  }catch{return '';}
+}
+
 function logout(){
   try{localStorage.removeItem('pp_session');}catch{}
   app.user=null;
+  // Hide & reset notification bell
+  const _bell=document.getElementById('notif-bell');if(_bell) _bell.style.display='none';
+  const _nbadge=document.getElementById('notif-badge');if(_nbadge) _nbadge.style.display='none';
+  const _npanel=document.getElementById('notif-panel');if(_npanel) _npanel.style.display='none';
   document.getElementById('btn-login').style.display='inline-flex';
   document.getElementById('auth-bar').style.display='none';
   ['nb-match','nb-portal','nb-player-portal','nb-admin'].forEach(id=>{
@@ -2913,6 +3045,11 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('#auth-bar')){
     const dd=document.getElementById('av-dropdown');
     if(dd) dd.classList.remove('open');
+  }
+  // Close notification panel on outside click
+  if(!e.target.closest('#notif-wrap')){
+    const np=document.getElementById('notif-panel');
+    if(np) np.style.display='none';
   }
   // Close hamburger menu on outside click
   if(!e.target.closest('#main-nav')&&!e.target.closest('#hdr-ham')){
@@ -3430,6 +3567,13 @@ function submitFinalScore(){
   buildDashboard();
   updateNavBadges();
   toast('📨 Match submitted! Awaiting <strong>opponent</strong> and <strong>venue</strong> confirmation before rankings update.');
+  // ── Notify opponent (p2) that a match was recorded against them ──
+  const _p2un=_usernameFor(app.p2||'');
+  if(_p2un) addNotification(_p2un,'match_received',`📨 <strong>Match Record</strong> — <strong>${app.p1||'A player'}</strong> recorded a ${app.fmt||'9-Ball'} match against you · Score: <strong>${s1}-${s2}</strong> · 📍 ${_venue}. Please confirm in your portal.`);
+  // ── Notify venue owner that a match was submitted at their hall ──
+  const _venueOwner=typeof adminHalls!=='undefined'?adminHalls.find(h=>h.name&&_venue&&_venue.includes(h.name)):null;
+  const _venueOwnerUn=_venueOwner?.username||'';
+  if(_venueOwnerUn&&_venueOwnerUn!==_p2un) addNotification(_venueOwnerUn,'match_pending_venue',`🏢 <strong>Match Pending Venue Approval</strong> — <strong>${app.p1||'Player'}</strong> vs <strong>${app.p2||'Player'}</strong> · ${app.fmt||'9-Ball'} · 📍 ${_venue}. Awaiting your validation.`);
   resetMatch();
   // Redirect player straight to Match Validation in their portal
   const _ppBtn=document.getElementById('nb-player-portal');
@@ -5478,15 +5622,8 @@ function ppTab(btn,tab){
   const c=document.getElementById('pp-content');
   const p=PLAYERS.find(x=>x.name===app.user?.name)||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||null,status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
 
-  // ── Show queued match notifications (e.g. owner validated a match) ──
-  try{
-    const _nKey='pp_match_notifs_'+(app.user?.name||'');
-    const _notifs=JSON.parse(localStorage.getItem(_nKey)||'[]');
-    if(_notifs.length){
-      _notifs.forEach((n,i)=>setTimeout(()=>toast(n.msg,6000),i*700));
-      localStorage.removeItem(_nKey);
-    }
-  }catch{}
+  // ── Refresh notification bell when player portal loads ──
+  updateNotifBell();
 
   // ── Shared player name + helpers (available to both validation and history tabs) ──
   const _myName=app.user?.name||'';
@@ -6810,6 +6947,13 @@ function submitManualMatch(){
   manualPending.push(entry);
   saveManualPending();
   renderManualPending();
+  // ── Notify both players that a match was recorded by the hall owner ──
+  [entry.p1,entry.p2].forEach(pName=>{
+    if(!pName) return;
+    const _opp=pName===entry.p1?entry.p2:entry.p1;
+    const _pun=_usernameFor(pName);
+    if(_pun) addNotification(_pun,'match_received',`🏢 <strong>Match Recorded by Hall</strong> — <strong>${app.user?.name||'Hall Owner'}</strong> recorded a ${entry.fmt||'9-Ball'} match: <strong>${entry.p1}</strong> vs <strong>${entry.p2}</strong> · Score: <strong>${entry.sc}</strong> · 🏆 Winner: <strong>${entry.winner}</strong>. Please confirm in your portal.`);
+  });
 
   // Reset form fields
   document.getElementById('mp1-inp').value='';
@@ -6956,21 +7100,14 @@ function ownerValidateMatch(id){
   m.validatedByOwnerAt=new Date().toISOString();
   m.approvedByVenue=app.user?.name||'Hall Owner';
   saveAdminMatches();
-  // ── Store a notification for each player so they see it on their next portal visit ──
+  // ── Notify each player that the venue validated their match ──
   const _scoreDisp=m.score||m.sc||'—';
   const _winner=(()=>{const pts=_scoreDisp.split('-').map(Number);return pts[0]>pts[1]?m.p1:m.p2;})();
   [m.p1,m.p2].forEach(pName=>{
     if(!pName) return;
     const _opp=pName===m.p1?m.p2:m.p1;
-    const _notifKey='pp_match_notifs_'+pName;
-    let _notifs=[];try{_notifs=JSON.parse(localStorage.getItem(_notifKey)||'[]');}catch{}
-    _notifs.push({
-      id:m.id,
-      type:'match_validated',
-      msg:`🏢 <strong>Match Validated</strong> — ${m.fmt} vs <strong>${_opp}</strong> · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${_scoreDisp}</strong> · 🏆 ${_winner.split(' ')[0]} wins · 📍 ${m.venue}. Awaiting Admin final approval.`,
-      at:new Date().toISOString()
-    });
-    try{localStorage.setItem(_notifKey,JSON.stringify(_notifs));}catch{}
+    const _pun=_usernameFor(pName);
+    if(_pun) addNotification(_pun,'match_approved_venue',`🏢 <strong>Match Approved by Venue</strong> — ${m.fmt} vs <strong>${_opp}</strong> · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${_scoreDisp}</strong> · 🏆 ${_winner.split(' ')[0]} wins · 📍 ${m.venue}. Awaiting Admin final approval.`);
   });
   ptab('matches');
   updateNavBadges();
@@ -7713,6 +7850,15 @@ function admApproveMatch(id){
   buildDashboard();
   admRefresh();
   toast(`✅ Match <strong>${m.p1} vs ${m.p2}</strong> approved! Rankings updated.`);
+  // ── Notify both players that admin approved the match ──
+  const _amScore=m.score||'—';
+  const _amWinner=(()=>{const pts=_amScore.split('-').map(Number);return pts[0]>pts[1]?m.p1:m.p2;})();
+  [m.p1,m.p2].forEach(pName=>{
+    if(!pName) return;
+    const _opp=pName===m.p1?m.p2:m.p1;
+    const _pun=_usernameFor(pName);
+    if(_pun) addNotification(_pun,'match_approved_admin',`✅ <strong>Match Approved by Admin</strong> — ${m.fmt||'9-Ball'} vs <strong>${_opp}</strong> · Score: <strong style="font-family:'DM Mono',monospace;color:var(--gold);">${_amScore}</strong> · 🏆 ${_amWinner.split(' ')[0]} wins. Your PPR has been updated!`);
+  });
 }
 function admRejectMatch(id){
   const m=adminMatches.find(x=>x.id===id);
@@ -7800,6 +7946,9 @@ function admApproveTournament(id){
   _refreshTournamentSelect();
   admRefresh();
   toast(`✅ <strong>${t.name}</strong> approved and now active!`);
+  // ── Notify tournament's hall owner ──
+  const _tOwnerUn=_usernameFor(t.ownerName||'')||t.ownerEmail||'';
+  if(_tOwnerUn) addNotification(_tOwnerUn,'tournament_approved',`🏆 <strong>Tournament Approved</strong> — <strong>${t.name}</strong> has been approved by Admin and is now live! Players can register at <strong>${t.venue||'your hall'}</strong>.`);
 }
 function admRejectTournament(id){
   const t=adminTournaments.find(x=>x.id===id);
@@ -7948,6 +8097,9 @@ function admApprovePlayer(id){
     const notif={careerStatus,ppr:initPPR,rank:newRank,approvedAt:new Date().toISOString(),name:p.name};
     try{localStorage.setItem('pp_notif_'+p.email,JSON.stringify(notif));}catch{}
   }
+  // ── Also add to new notification center ──
+  const _playerUn=p.username||_usernameFor(p.name||'');
+  if(_playerUn) addNotification(_playerUn,'registration_approved',`🎉 <strong>Registration Approved!</strong> — Welcome to PinoyPool, <strong>${p.name}</strong>! Career Status: <strong style="color:var(--gold);">${careerStatus}</strong> · Starting PPR: <strong style="color:var(--gold);">${initPPR}</strong> · Ranked <strong style="color:var(--gold);">#${newRank}</strong> nationally.`);
   toast(`✅ <strong>${p.name}</strong> approved as <strong>${careerStatus}</strong> · Initial PPR: ${initPPR} · Ranked #${newRank}`);
 }
 function admSuspendPlayer(id){
@@ -8004,6 +8156,9 @@ function admApproveHall(id){
     if(view&&view.classList.contains('act')) buildPortal();
   }
   toast(`✅ <strong>${h.name}</strong> approved! Hall is now live. <strong>${h.owner}</strong> granted full portal access.`);
+  // ── Notify the hall owner ──
+  const _hOwnerUn=h.username||_usernameFor(h.owner||'');
+  if(_hOwnerUn) addNotification(_hOwnerUn,'hall_approved',`🏢 <strong>Hall Registration Approved!</strong> — <strong>${h.name}</strong> has been approved by Admin. Your Hall Portal is now active. Welcome to PinoyPool!`);
 }
 function admRejectHall(id){
   const h=adminHalls.find(x=>x.id===id);

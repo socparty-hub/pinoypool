@@ -13,6 +13,7 @@ const ALLOWED_KEYS = [
   'pp_approvedHalls',
   'pp_tournaments',
   'pp_testPasswords',
+  'pp_notifications',
 ];
 
 const pool = mysql.createPool({
