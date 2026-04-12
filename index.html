@@ -5349,6 +5349,17 @@ const rankHistory=[
 
 function buildPlayerPortal(){
   if(!app.user){return;}
+  // Re-check approval status in case admin approved since login (same-browser scenario)
+  if(app.user.verificationStatus==='pending'||app.user.verificationStatus===null){
+    const _ap=typeof approvedPlayers!=='undefined'?approvedPlayers.find(x=>x.email===app.user.email||x.username===app.user.username):null;
+    if(_ap&&_ap.status==='active'&&_ap.careerStatus&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[_ap.careerStatus]){
+      app.user.verificationStatus='active';
+      app.user.careerStatus=_ap.careerStatus;
+      try{localStorage.setItem('pp_session',JSON.stringify(app.user));}catch{}
+      const _ru=registeredUsers.find(r=>r.email===app.user.email||r.username===app.user.username);
+      if(_ru){_ru.verificationStatus='active';saveRegisteredUsers();}
+    }
+  }
   const u=app.user;
   const p=PLAYERS.find(x=>x.name===u.name);
   const isPending=u.verificationStatus==='pending'||!p;
@@ -5827,6 +5838,17 @@ function buildPlayerProfile(){
   const c=document.getElementById('pp-profile-content')||document.getElementById('pp-content');
   if(!c) return;
   if(!app.user){c.innerHTML='<div style="text-align:center;color:var(--chalk2);padding:2rem;">Please log in to view your profile.</div>';return;}
+  // Re-check approval status in case admin approved since login (same-browser scenario)
+  if(app.user.verificationStatus==='pending'||app.user.verificationStatus===null){
+    const _ap=typeof approvedPlayers!=='undefined'?approvedPlayers.find(x=>x.email===app.user.email||x.username===app.user.username):null;
+    if(_ap&&_ap.status==='active'&&_ap.careerStatus&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[_ap.careerStatus]){
+      app.user.verificationStatus='active';
+      app.user.careerStatus=_ap.careerStatus;
+      try{localStorage.setItem('pp_session',JSON.stringify(app.user));}catch{}
+      const _ru=registeredUsers.find(r=>r.email===app.user.email||r.username===app.user.username);
+      if(_ru){_ru.verificationStatus='active';saveRegisteredUsers();}
+    }
+  }
   const p=PLAYERS.find(x=>x.name===app.user?.name)||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||null,status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
   {
     // Determine if player is pending (no admin-assigned career status yet)
@@ -7236,11 +7258,11 @@ function buildAdmin(){
         if(r.role==='player'||r.role==='fan'){
           const existing=adminPlayers.find(p=>p.id===r.id||p.email===r.email);
           if(!existing){
-            adminPlayers.unshift({id:r.id,name:name.trim(),username:r.username||'',status:r.status||'pending',email:r.email,phone:r.phone,region:r.region,submittedAt:r.submittedAt,careerStatus:r.careerStatus||'Amateur',ppr:r.ppr||0,tier:'C',colors:'#1a3a22'});
+            adminPlayers.unshift({id:r.id,name:name.trim(),username:r.username||'',status:r.status||'pending',email:r.email,phone:r.phone,region:r.region,submittedAt:r.submittedAt,careerStatus:r.careerStatus||null,ppr:r.ppr||0,tier:'C',colors:'#1a3a22'});
             changed=true;
-          } else if(existing.status!==r.status&&!_localStatusChanged.has(String(r.id))){
+          } else if(existing.status!==r.status&&!_localStatusChanged.has(String(r.id))&&!_localStatusChanged.has(String(existing.id))){
             // Sync status changes from backend (e.g. approved on another device)
-            // Skip if this player's status was changed locally to avoid race with PATCH
+            // Guard checks BOTH backend id and local id — they may differ when local id is Date.now()
             existing.status=r.status||existing.status;
             if(r.careerStatus) existing.careerStatus=r.careerStatus;
             if(r.ppr) existing.ppr=r.ppr;
@@ -7368,7 +7390,7 @@ function admTab(btn,tab){
             <div style="min-width:0;flex:1;">
               <div style="font-weight:600;font-size:.88rem;line-height:1.4;">${fmtPlayerName(p.name)}</div>
               <div style="font-size:.68rem;color:var(--chalk);margin-top:2px;">${_email} · ${_region}</div>
-              <div style="font-size:.65rem;color:var(--chalk2);margin-top:1px;">Joined ${p.joined||'—'} · W:${p.mw} L:${p.ml}</div>
+              <div style="font-size:.65rem;color:var(--chalk2);margin-top:1px;">Joined ${p.joined||'—'} · W:${p.mw||0} L:${p.ml||0}</div>
             </div>
           </div>
           <div style="display:flex;gap:.45rem;align-items:center;">
@@ -7872,9 +7894,10 @@ function admSetCareer(id,tier){
 function admApprovePlayer(id){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
   if(!p)return;
-  // Read career status from inline dropdown, fallback to stored or Amateur
+  // Require career status to be explicitly selected before approving
   const csEl=document.getElementById('cs-'+id);
-  const careerStatus=csEl?.value||p.careerStatus||'Amateur';
+  const careerStatus=csEl?.value||'';
+  if(!careerStatus){toast('⚠️ Please assign a Career Status before approving.');return;}
   const initPPR=INITIAL_PPR[careerStatus]||1300;
   p.status='active';
   p.careerStatus=careerStatus;
@@ -8072,7 +8095,7 @@ function initFromBackend(){
               id:r.id, name, username:r.username||'', email:r.email||'',
               phone:r.phone||'', region:r.region||'',
               status:r.status||'pending',
-              careerStatus:r.careerStatus||'Amateur', ppr:r.ppr||0,
+              careerStatus:r.careerStatus||null, ppr:r.ppr||0,
               mw:0, ml:0, rw:0, rl:0, mi:0, sos:0, colors:'#1a3a22',
               joined:(r.submittedAt||'').slice(0,10), submittedAt:r.submittedAt||''
             });
@@ -8092,7 +8115,7 @@ function initFromBackend(){
           if(r.status==='active'&&!PLAYERS.find(p=>p.id===r.id||p.name===name)){
             PLAYERS.push({
               id:r.id, name, region:r.region||'',
-              status:r.careerStatus||'Amateur', fmt:'9-Ball', colors:'#1a3a22',
+              status:r.careerStatus||null, fmt:'9-Ball', colors:'#1a3a22',
               mw:0, ml:0, rw:0, rl:0, ppr:r.ppr||1300, pr:0, mi:0, sos:0,
               rank:PLAYERS.length+1
             });
