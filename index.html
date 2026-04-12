@@ -53,6 +53,8 @@ nav{display:flex;gap:2px;}
 .np-mark-read:hover{background:rgba(212,175,55,.1);}
 .np-item{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.4;}
 .np-item.np-unread{background:rgba(212,175,55,.07);}
+.np-item.np-clickable{cursor:pointer;transition:background .15s;}
+.np-item.np-clickable:hover{background:rgba(212,175,55,.12);}
 .np-msg{font-size:.77rem;color:var(--chalk);}
 .np-time{font-size:.65rem;color:rgba(255,255,255,.3);margin-top:2px;}
 .np-empty{padding:20px 14px;text-align:center;color:rgba(255,255,255,.3);font-size:.8rem;}
@@ -2902,6 +2904,28 @@ function toggleNotifPanel(){
   renderNotifPanel();
   panel.style.display='block';
 }
+/* ── Notification destination routes (type → navigation action) ── */
+const _NOTIF_ROUTES={
+  // Player
+  'registration_approved': ()=>{ sv('player-portal',document.getElementById('nb-player-portal')); },
+  'match_received':        ()=>{ sv('player-portal',document.getElementById('nb-player-portal')); setTimeout(()=>{ const b=document.querySelector('.pp-tab[onclick*="validation"]'); if(b) ppTab(b,'validation'); },200); },
+  'match_approved_venue':  null, // no destination
+  'match_approved_admin':  ()=>{ sv('player-portal',document.getElementById('nb-player-portal')); setTimeout(()=>{ const b=document.querySelector('.pp-tab[onclick*="history"]'); if(b) ppTab(b,'history'); },200); },
+  // Owner
+  'match_pending_venue':   ()=>{ sv('portal',document.getElementById('nb-portal')); setTimeout(()=>ptab('matches'),200); },
+  'hall_approved':         ()=>{ sv('hall-profile',null); },
+  'tournament_approved':   ()=>{ sv('portal',document.getElementById('nb-portal')); setTimeout(()=>ptab('tournaments'),200); },
+  // Admin
+  'new_player_registration': ()=>{ sv('admin',document.getElementById('nb-admin')); setTimeout(()=>{ const b=document.querySelector('.adm-tab[onclick*="players"]'); if(b) admTab(b,'players'); },200); },
+  'new_owner_registration':  ()=>{ sv('admin',document.getElementById('nb-admin')); setTimeout(()=>{ const b=document.querySelector('.adm-tab[onclick*="halls"]'); if(b) admTab(b,'halls'); },200); },
+};
+function _goNotifDest(type){
+  const panel=document.getElementById('notif-panel');
+  if(panel) panel.style.display='none';
+  const fn=_NOTIF_ROUTES[type];
+  if(typeof fn==='function') fn();
+}
+
 function renderNotifPanel(){
   const panel=document.getElementById('notif-panel');
   if(!panel) return;
@@ -2909,11 +2933,17 @@ function renderNotifPanel(){
   _loadNotifStore();
   const notifs=(_notifStore[un]||[]).slice(0,25);
   if(!notifs.length){
-    panel.innerHTML=`<div class="np-head"><span>Notifications</span></div><div class="np-empty">No notifications yet.</div>`;
+    panel.innerHTML=`<div class="np-head"><span>Notifications</span></div><div class="np-empty">No notifications yet.</div><div class="np-footer"><button class="np-clear-all" onclick="clearAllNotifs()">🗑 Clear all notifications</button></div>`;
     return;
   }
   const unread=notifs.filter(n=>!n.read).length;
-  const items=notifs.map(n=>`<div class="np-item${n.read?'':' np-unread'}"><div class="np-msg">${n.msg}</div><div class="np-time">${_fmtNotifTime(n.at)}</div></div>`).join('');
+  const items=notifs.map(n=>{
+    const hasRoute=typeof _NOTIF_ROUTES[n.type]==='function';
+    return `<div class="np-item${n.read?'':' np-unread'}${hasRoute?' np-clickable':''}" ${hasRoute?`onclick="_goNotifDest('${n.type}')"`:''}>
+      <div class="np-msg">${n.msg}</div>
+      <div class="np-time">${_fmtNotifTime(n.at)}${hasRoute?' <span style="color:rgba(212,175,55,.5);font-size:.6rem;">↗ tap to open</span>':''}</div>
+    </div>`;
+  }).join('');
   panel.innerHTML=`<div class="np-head"><span>Notifications${unread>0?` <span style="background:#e55;color:#fff;font-size:.55rem;padding:1px 6px;border-radius:8px;margin-left:4px;font-family:'Space Grotesk',sans-serif;">${unread} new</span>`:''}</span>${unread>0?`<button class="np-mark-read" onclick="markAllNotifsRead()">Mark all read</button>`:''}</div><div>${items}</div><div class="np-footer"><button class="np-clear-all" onclick="clearAllNotifs()">🗑 Clear all notifications</button></div>`;
   setTimeout(()=>markAllNotifsRead(),2500);
 }
