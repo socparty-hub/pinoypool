@@ -22,10 +22,18 @@ try { webpush = require('web-push'); } catch(e) {
 /* ── Configure VAPID for Web Push ── */
 const VAPID_PUBLIC  = process.env.VAPID_PUBLIC_KEY  || '';
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || '';
-const VAPID_EMAIL   = process.env.VAPID_EMAIL       || 'mailto:admin@pinoypool.ph';
+const _vapidEmailRaw = process.env.VAPID_EMAIL || 'admin@pinoypool.ph';
+const VAPID_EMAIL = (_vapidEmailRaw.startsWith('mailto:') || _vapidEmailRaw.startsWith('https:'))
+  ? _vapidEmailRaw
+  : `mailto:${_vapidEmailRaw}`;
 if (webpush && VAPID_PUBLIC && VAPID_PRIVATE) {
-  webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
-  console.error('[PUSH] VAPID configured — mobile push enabled.');
+  try {
+    webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
+    console.error('[PUSH] VAPID configured — mobile push enabled.');
+  } catch(e) {
+    console.error('[PUSH] VAPID config failed:', e.message, '— push disabled.');
+    webpush = null;
+  }
 } else {
   console.error('[PUSH] Mobile push disabled (web-push missing or VAPID keys not set).');
 }
