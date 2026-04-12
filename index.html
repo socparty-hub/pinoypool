@@ -6240,7 +6240,7 @@ function buildPlayerProfile(){
         </div>
       </div>
       <div>
-        <div class="card" style="margin-bottom:1rem;">
+        ${_isStagingEnv ? `<div class="card" style="margin-bottom:1rem;">
           <div class="ct">🏆 Ranking & Tier</div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.7rem;">
             <div>
@@ -6290,7 +6290,7 @@ function buildPlayerProfile(){
             </svg>
           </div>
           <div style="font-size:.7rem;color:var(--chalk2);text-align:center;margin-top:.5rem;">Lower = Better · Rank #1 is the highest</div>
-        </div>
+        </div>` : ''}
       </div>
     </div>`;
   }
@@ -8503,6 +8503,9 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
 
 
 
+
+// ── Environment flag: true on staging, false on production ──
+const _isStagingEnv = !/^(www\.)?pinoypool\.com$/.test(window.location.hostname);
 
 // ── PWA: Service Worker + Install Banner ──
 (function(){
