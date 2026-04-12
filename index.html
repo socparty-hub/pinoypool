@@ -2789,6 +2789,8 @@ function setUser(u){
   if(u.role==='player') showPendNotice();
   // Update nav notification badges
   setTimeout(updateNavBadges, 50);
+  // Request push notification permission and subscribe
+  _initPushAfterLogin();
 }
 function updateNavBadges(){
   const myName=app.user?.name||'';
@@ -2869,6 +2871,11 @@ function addNotification(username,type,msg){
   if(_notifStore[username].length>30) _notifStore[username]=_notifStore[username].slice(0,30);
   _saveNotifStore();
   updateNotifBell();
+  // ── Also fire a mobile Web Push to all subscribed devices ──
+  const _plainBody=msg.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+  fetch('/api/push/send',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({username,title:'PinoyPool',body:_plainBody,type})
+  }).catch(()=>{});
 }
 function _getUnreadCount(username){
   if(!username) return 0;
@@ -2930,6 +2937,46 @@ function _fmtNotifTime(iso){
     if(diff<604800000) return Math.floor(diff/86400000)+'d ago';
     return d.toLocaleDateString('en-PH',{month:'short',day:'numeric'});
   }catch{return '';}
+}
+
+/* ── Web Push: request permission + subscribe on login ── */
+var _vapidPublicKey='';
+function _urlBase64ToUint8Array(b64){
+  const pad='='.repeat((4-b64.length%4)%4);
+  const raw=atob((b64+pad).replace(/-/g,'+').replace(/_/g,'/'));
+  const buf=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++) buf[i]=raw.charCodeAt(i);
+  return buf;
+}
+async function _registerPushSubscription(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)) return;
+  try{
+    // Fetch VAPID public key from server (so it's not hardcoded client-side)
+    if(!_vapidPublicKey){
+      const r=await fetch('/api/push/vapid-public-key');
+      const d=await r.json();
+      _vapidPublicKey=d.key||'';
+    }
+    if(!_vapidPublicKey) return; // push not configured on server
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted') return;
+    const reg=await navigator.serviceWorker.ready;
+    const existing=await reg.pushManager.getSubscription();
+    const sub=existing||await reg.pushManager.subscribe({
+      userVisibleOnly:true,
+      applicationServerKey:_urlBase64ToUint8Array(_vapidPublicKey)
+    });
+    const un=_notifUsername();
+    if(!un) return;
+    fetch('/api/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:un,subscription:sub.toJSON()})}).catch(()=>{});
+  }catch(err){
+    console.warn('[Push] Subscription failed:',err.message);
+  }
+}
+// Trigger subscription with a slight delay after login (gives SW time to activate)
+function _initPushAfterLogin(){
+  setTimeout(_registerPushSubscription, 1500);
 }
 
 function logout(){
