@@ -56,6 +56,9 @@ nav{display:flex;gap:2px;}
 .np-msg{font-size:.77rem;color:var(--chalk);}
 .np-time{font-size:.65rem;color:rgba(255,255,255,.3);margin-top:2px;}
 .np-empty{padding:20px 14px;text-align:center;color:rgba(255,255,255,.3);font-size:.8rem;}
+.np-footer{padding:10px 14px;border-top:1px solid rgba(255,255,255,.06);position:sticky;bottom:0;background:var(--panel);}
+.np-clear-all{width:100%;background:none;border:1px solid rgba(229,85,85,.3);color:rgba(229,85,85,.8);font-size:.72rem;padding:7px;border-radius:6px;cursor:pointer;text-align:center;transition:background .2s,color .2s;}
+.np-clear-all:hover{background:rgba(229,85,85,.12);color:#e55;border-color:rgba(229,85,85,.6);}
 .hdr-right{display:flex;gap:8px;align-items:center;}
 .auth-bar{display:none;align-items:center;gap:8px;font-size:0.82rem;color:var(--chalk);}
 .av-sm{width:30px;height:30px;border-radius:50%;background:var(--baize);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:0.82rem;color:var(--gold);cursor:pointer;}
@@ -2911,8 +2914,18 @@ function renderNotifPanel(){
   }
   const unread=notifs.filter(n=>!n.read).length;
   const items=notifs.map(n=>`<div class="np-item${n.read?'':' np-unread'}"><div class="np-msg">${n.msg}</div><div class="np-time">${_fmtNotifTime(n.at)}</div></div>`).join('');
-  panel.innerHTML=`<div class="np-head"><span>Notifications${unread>0?` <span style="background:#e55;color:#fff;font-size:.55rem;padding:1px 6px;border-radius:8px;margin-left:4px;font-family:'Space Grotesk',sans-serif;">${unread} new</span>`:''}</span>${unread>0?`<button class="np-mark-read" onclick="markAllNotifsRead()">Mark all read</button>`:''}</div><div>${items}</div>`;
+  panel.innerHTML=`<div class="np-head"><span>Notifications${unread>0?` <span style="background:#e55;color:#fff;font-size:.55rem;padding:1px 6px;border-radius:8px;margin-left:4px;font-family:'Space Grotesk',sans-serif;">${unread} new</span>`:''}</span>${unread>0?`<button class="np-mark-read" onclick="markAllNotifsRead()">Mark all read</button>`:''}</div><div>${items}</div><div class="np-footer"><button class="np-clear-all" onclick="clearAllNotifs()">🗑 Clear all notifications</button></div>`;
   setTimeout(()=>markAllNotifsRead(),2500);
+}
+function clearAllNotifs(){
+  const un=_notifUsername();
+  if(!un) return;
+  _loadNotifStore();
+  _notifStore[un]=[];
+  _saveNotifStore();
+  updateNotifBell();
+  const panel=document.getElementById('notif-panel');
+  if(panel) panel.innerHTML=`<div class="np-head"><span>Notifications</span></div><div class="np-empty">No notifications yet.</div>`;
 }
 function markAllNotifsRead(){
   const un=_notifUsername();
