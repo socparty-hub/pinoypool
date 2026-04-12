@@ -2205,35 +2205,16 @@ function solo(btn){btn.closest('.tg').querySelectorAll('.tb').forEach(b=>b.class
 // On first load, defaults are seeded once by initTestPasswords() below.
 const TEST_ACCOUNTS=[
   {
-    email:'player@pinoypool.com',
-    name:'Juan dela Cruz', role:'player', initials:'JD', username:'juandelacruz',
-    dob:'1995-06-15', phone:'09123456789',
-    email_addr:'player@pinoypool.com', region:'NCR – Metro Manila'
-  },
-  {
-    email:'owner@pinoypool.com',
-    name:'Maria Santos', role:'owner', initials:'MS', username:'mariasantos1',
-    dob:'1988-03-22', phone:'09987654321',
-    email_addr:'owner@pinoypool.com', region:'NCR – Metro Manila',
-    hall:'Cue Masters Billiards'
-  },
-  {
     email:'admin@pinoypool.com',
-    name:'Administrator', role:'admin', initials:'AD', username:'ADMIN'
-  },
-  {
-    email:'dennis.po@pool.ph',
-    name:'Dennis Po', role:'player', initials:'DP', username:'dennispo',
-    dob:'1990-01-01', phone:'09171234567',
-    email_addr:'dennis.po@pool.ph', region:'NCR – Metro Manila'
+    name:'admin', role:'admin', initials:'AD', username:'Admin'
   }
 ];
 (function initTestPasswords(){
   const key='pp_testPasswords';
   let pws={};
   try{const _raw=JSON.parse(localStorage.getItem(key)||'{}');pws=(typeof _raw==='object'&&!Array.isArray(_raw)&&_raw!==null)?_raw:{};}catch{}
-  // Always ensure ADMIN password is set (reset-proof)
-  if(!pws['ADMIN']) pws['ADMIN']='12345678';
+  // Always ensure Admin password is set (reset-proof)
+  if(!pws['Admin']) pws['Admin']='Cnroa123!';
   const v=JSON.stringify(pws);
   localStorage.setItem(key,v);
   apiPersist(key,v);
