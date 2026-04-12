@@ -12,17 +12,22 @@ try { require('dotenv').config(); } catch(e) { process.stderr.write('[STARTUP] d
 const express  = require('express');
 const path     = require('path');
 const fs       = require('fs');
-const webpush  = require('web-push');
+
+/* ── web-push: optional — server starts normally even if not installed ── */
+let webpush = null;
+try { webpush = require('web-push'); } catch(e) {
+  console.error('[PUSH] web-push not installed — mobile push disabled. Run: npm install');
+}
 
 /* ── Configure VAPID for Web Push ── */
 const VAPID_PUBLIC  = process.env.VAPID_PUBLIC_KEY  || '';
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || '';
 const VAPID_EMAIL   = process.env.VAPID_EMAIL       || 'mailto:admin@pinoypool.ph';
-if (VAPID_PUBLIC && VAPID_PRIVATE) {
+if (webpush && VAPID_PUBLIC && VAPID_PRIVATE) {
   webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
-  console.error('[PUSH] VAPID configured.');
+  console.error('[PUSH] VAPID configured — mobile push enabled.');
 } else {
-  console.error('[PUSH] VAPID keys missing — push notifications disabled.');
+  console.error('[PUSH] Mobile push disabled (web-push missing or VAPID keys not set).');
 }
 let db;
 try {
@@ -142,7 +147,7 @@ app.post('/api/push/subscribe', async (req, res) => {
 
 /* ── API: send a push notification to a user ── */
 app.post('/api/push/send', async (req, res) => {
-  if (!VAPID_PUBLIC || !VAPID_PRIVATE) return res.json({ ok: false, reason: 'vapid_missing' });
+  if (!webpush || !VAPID_PUBLIC || !VAPID_PRIVATE) return res.json({ ok: false, reason: 'push_unavailable' });
   const { username, title, body, type } = req.body;
   if (!username) return res.status(400).json({ ok: false, error: 'Missing username' });
 
