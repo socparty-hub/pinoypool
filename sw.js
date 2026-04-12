@@ -1,4 +1,4 @@
-const CACHE = 'pinoypool-v1';
+const CACHE = 'pinoypool-v2';
 const PRECACHE = ['/', '/index.html', '/pinoypool-logo-new.png'];
 
 self.addEventListener('install', e => {
@@ -16,7 +16,6 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Only handle GET requests
   if (e.request.method !== 'GET') return;
   e.respondWith(
     caches.match(e.request).then(cached => {
@@ -28,6 +27,42 @@ self.addEventListener('fetch', e => {
         return res;
       }).catch(() => cached);
       return cached || network;
+    })
+  );
+});
+
+/* ── Web Push: show notification when received ── */
+self.addEventListener('push', e => {
+  let data = { title: 'PinoyPool', body: 'You have a new notification.', type: '' };
+  try { data = Object.assign(data, e.data.json()); } catch {}
+
+  const options = {
+    body: data.body,
+    icon: '/pinoypool-logo-new.png',
+    badge: '/pinoypool-logo-new.png',
+    tag: data.type || 'pp-notif',
+    renotify: true,
+    vibrate: [200, 100, 200],
+    data: { url: '/' }
+  };
+
+  e.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+/* ── Tap on notification: open/focus the app ── */
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const target = e.notification.data?.url || '/';
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const client of list) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(target);
     })
   );
 });

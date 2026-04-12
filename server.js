@@ -9,9 +9,21 @@ process.on('uncaughtException', (err) => {
 process.stderr.write('[STARTUP] server.js loading...\n');
 try { require('dotenv').config(); } catch(e) { process.stderr.write('[STARTUP] dotenv error: ' + e.message + '\n'); }
 
-const express = require('express');
-const path    = require('path');
-const fs      = require('fs');
+const express  = require('express');
+const path     = require('path');
+const fs       = require('fs');
+const webpush  = require('web-push');
+
+/* ── Configure VAPID for Web Push ── */
+const VAPID_PUBLIC  = process.env.VAPID_PUBLIC_KEY  || '';
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || '';
+const VAPID_EMAIL   = process.env.VAPID_EMAIL       || 'mailto:admin@pinoypool.ph';
+if (VAPID_PUBLIC && VAPID_PRIVATE) {
+  webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
+  console.error('[PUSH] VAPID configured.');
+} else {
+  console.error('[PUSH] VAPID keys missing — push notifications disabled.');
+}
 let db;
 try {
   db = require('./db');
@@ -107,6 +119,65 @@ app.patch('/api/registrations/:id', async (req, res) => {
     await db.set('pp_registeredUsers', JSON.stringify(users));
   }
   res.json({ ok: true });
+});
+
+/* ── API: save a push subscription for a user ── */
+app.post('/api/push/subscribe', async (req, res) => {
+  const { username, subscription } = req.body;
+  if (!username || !subscription || !subscription.endpoint) {
+    return res.status(400).json({ ok: false, error: 'Missing username or subscription' });
+  }
+  const store = await db.getAll().catch(() => ({}));
+  let subs = {};
+  try { subs = JSON.parse(store['pp_push_subscriptions'] || '{}'); } catch {}
+  if (!subs[username]) subs[username] = [];
+  // Deduplicate by endpoint
+  const exists = subs[username].find(s => s.endpoint === subscription.endpoint);
+  if (!exists) subs[username].push(subscription);
+  // Cap per user at 10 devices
+  if (subs[username].length > 10) subs[username] = subs[username].slice(-10);
+  await db.set('pp_push_subscriptions', JSON.stringify(subs)).catch(() => {});
+  res.json({ ok: true });
+});
+
+/* ── API: send a push notification to a user ── */
+app.post('/api/push/send', async (req, res) => {
+  if (!VAPID_PUBLIC || !VAPID_PRIVATE) return res.json({ ok: false, reason: 'vapid_missing' });
+  const { username, title, body, type } = req.body;
+  if (!username) return res.status(400).json({ ok: false, error: 'Missing username' });
+
+  const store = await db.getAll().catch(() => ({}));
+  let subs = {};
+  try { subs = JSON.parse(store['pp_push_subscriptions'] || '{}'); } catch {}
+  const userSubs = subs[username] || [];
+  if (!userSubs.length) return res.json({ ok: true, sent: 0 });
+
+  const payload = JSON.stringify({ title: title || 'PinoyPool', body: body || 'New notification', type: type || '' });
+  const dead = [];
+  let sent = 0;
+
+  await Promise.all(userSubs.map(async sub => {
+    try {
+      await webpush.sendNotification(sub, payload);
+      sent++;
+    } catch (err) {
+      // 410 Gone or 404 = subscription expired, remove it
+      if (err.statusCode === 410 || err.statusCode === 404) dead.push(sub.endpoint);
+    }
+  }));
+
+  // Clean up dead subscriptions
+  if (dead.length) {
+    subs[username] = subs[username].filter(s => !dead.includes(s.endpoint));
+    await db.set('pp_push_subscriptions', JSON.stringify(subs)).catch(() => {});
+  }
+
+  res.json({ ok: true, sent });
+});
+
+/* ── API: expose VAPID public key to the client ── */
+app.get('/api/push/vapid-public-key', (req, res) => {
+  res.json({ key: VAPID_PUBLIC });
 });
 
 /* ── API: admin data reset (clears all server-side data) ── */
