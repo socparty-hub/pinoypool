@@ -8513,14 +8513,21 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
     });
   }
 
-  const BANNER_KEY='pwa_banner_dismissed';
+  const BANNER_KEY='pwa_banner_dismissed_at';
+  const BANNER_EXPIRY_MS=7*24*60*60*1000; // re-prompt after 7 days
   let _deferredPrompt=null;
   const _isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
   const _isInStandalone=window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone;
 
+  function _isDismissedRecently(){
+    const t=localStorage.getItem(BANNER_KEY);
+    if(!t) return false;
+    return (Date.now()-parseInt(t,10))<BANNER_EXPIRY_MS;
+  }
+
   function _showBanner(){
     if(_isInStandalone) return; // already installed
-    if(localStorage.getItem(BANNER_KEY)) return; // dismissed
+    if(_isDismissedRecently()) return; // dismissed within last 7 days
     const b=document.getElementById('pwa-banner');
     if(b){b.classList.add('show');}
   }
@@ -8555,7 +8562,7 @@ rebuildStatsFromMatches(); // Sync W/L/PPR from authoritative match history
   window.dismissPWA=function(){
     const b=document.getElementById('pwa-banner');
     if(b) b.classList.remove('show');
-    localStorage.setItem(BANNER_KEY,'1');
+    localStorage.setItem(BANNER_KEY, String(Date.now())); // timestamp — expires in 7 days
   };
 
   // Hide banner when app is installed

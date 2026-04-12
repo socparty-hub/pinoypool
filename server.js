@@ -85,6 +85,7 @@ app.post('/api/register', async (req, res) => {
   };
   users.push(entry);
   await db.set('pp_registeredUsers', JSON.stringify(users));
+  invalidateDbCache();
   console.log(`[REG] New ${role} registration received (id: ${entry.id})`);
   res.json({ ok: true, id: entry.id, message: 'Registration received! Admin will review and activate your account within 24–48 hours.' });
 });
@@ -130,6 +131,7 @@ app.patch('/api/registrations/:id', async (req, res) => {
     if (typeof ppr === 'number') user.ppr = ppr;
     if (approvedAt)       user.approvedAt = approvedAt;
     await db.set('pp_registeredUsers', JSON.stringify(users));
+    invalidateDbCache();
   }
   res.json({ ok: true });
 });
@@ -201,6 +203,7 @@ app.post('/api/admin/reset', async (req, res) => {
   for (const k of db.ALLOWED_KEYS.filter(k => k !== 'pp_testPasswords')) {
     await db.set(k, '[]');
   }
+  invalidateDbCache();
   console.log('[RESET] All server data cleared by admin.');
   res.json({ ok: true, message: 'All server data cleared.' });
 });
@@ -214,8 +217,25 @@ app.post('/api/store/:key', async (req, res) => {
   }
   const ok = await db.set(key, value);
   if (!ok) return res.status(403).json({ error: 'key not permitted' });
+  invalidateDbCache();
   res.json({ ok: true });
 });
+
+/* ── In-memory cache for db.getAll() — avoids MySQL hit on every page load ── */
+let _dbCache     = null;
+let _dbCacheTime = 0;
+const DB_CACHE_TTL = 30 * 1000; // 30 seconds
+
+async function getCachedData() {
+  const now = Date.now();
+  if (_dbCache && (now - _dbCacheTime) < DB_CACHE_TTL) return _dbCache;
+  _dbCache     = await db.getAll();
+  _dbCacheTime = now;
+  return _dbCache;
+}
+
+/** Call this whenever a write happens so the next read is fresh */
+function invalidateDbCache() { _dbCache = null; }
 
 /* ── Serve index.html with server-injected persisted data ── */
 app.get('*', async (req, res) => {
@@ -228,7 +248,7 @@ app.get('*', async (req, res) => {
   }
 
   let serverData;
-  try { serverData = await db.getAll(); } catch (e) { serverData = {}; }
+  try { serverData = await getCachedData(); } catch (e) { serverData = {}; }
   const injection   = `<script>window.__SD__=${JSON.stringify(serverData)};</script>`;
   html = html.replace('<!-- __SERVER_DATA__ -->', injection);
 
