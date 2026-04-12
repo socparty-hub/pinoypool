@@ -8166,7 +8166,7 @@ function initFromBackend(){
               id:r.id||('ru-'+Date.now()+'-'+Math.random()), name, username:r.username||'', email:r.email||'',
               phone:r.phone||'', region:r.region||'',
               status:r.verificationStatus||'pending',
-              careerStatus:r.careerStatus||'Amateur', ppr:r.ppr||0,
+              careerStatus:r.careerStatus||null, ppr:r.ppr||0,
               mw:0, ml:0, rw:0, rl:0, mi:0, sos:0, colors:'#1a3a22',
               joined:(r.submittedAt||'').slice(0,10), role:r.role
             });
@@ -8186,7 +8186,7 @@ function initFromBackend(){
               id:r.id||('ru-'+Date.now()+'-'+Math.random()), name, username:r.username||'', email:r.email||'',
               phone:r.phone||'', region:r.region||'',
               status:r.verificationStatus||'pending',
-              careerStatus:r.careerStatus||'Amateur', ppr:r.ppr||0,
+              careerStatus:r.careerStatus||null, ppr:r.ppr||0,
               mw:0, ml:0, rw:0, rl:0, mi:0, sos:0, colors:'#1a3a22',
               joined:(r.submittedAt||'').slice(0,10), role:r.role
             });
@@ -8195,6 +8195,24 @@ function initFromBackend(){
       });
       buildDashboard();
     });
+}
+
+/* Restore pending players from registeredUsers into adminPlayers.
+   Runs unconditionally at page load so pending players are always
+   searchable in autocomplete regardless of backend availability. */
+function restorePendingPlayers(){
+  const matchById=(arr,id,em)=>arr.find(p=>(id!=null&&String(p.id)===String(id))||p.email===em);
+  registeredUsers.forEach(r=>{
+    if((r.role==='player'||r.role==='fan')&&!matchById(adminPlayers,r.id,r.email)){
+      adminPlayers.push({
+        id:r.id,name:r.name||'',username:r.username||'',email:r.email||'',
+        phone:r.phone||'',region:r.region||'',role:r.role||'player',
+        status:r.verificationStatus||'pending',careerStatus:null,ppr:0,
+        mw:0,ml:0,rw:0,rl:0,mi:0,sos:0,colors:'#1a3a22',
+        joined:'',submittedAt:''
+      });
+    }
+  });
 }
 
 /* ══════════════════ INIT ══════════════════ */
@@ -8206,6 +8224,7 @@ updateBadge();
 initFromBackend();
 restoreApprovals();
 restoreApprovedHalls();
+restorePendingPlayers();
 restoreTournaments();
 _refreshVenueSelect();
 // ── One-time migration: normalize venue names in adminMatches ──
