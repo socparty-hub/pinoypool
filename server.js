@@ -52,7 +52,7 @@ app.post('/api/register', async (req, res) => {
     city:               city       || '',
     region:             region     || '',
     verificationStatus: 'pending',
-    careerStatus:       'Amateur',
+    careerStatus:       null,
     ppr:                0,
     submittedAt:        new Date().toISOString()
   };
@@ -80,7 +80,7 @@ app.get('/api/registrations', async (req, res) => {
       region:      u.region      || '',
       status:      u.verificationStatus || 'pending',
       submittedAt: u.submittedAt || '',
-      careerStatus:u.careerStatus|| 'Amateur',
+      careerStatus:u.careerStatus||null,
       ppr:         u.ppr         || 0,
       hallName:    u.hall || u.hallName || '',
       city:        u.city        || '',
