@@ -1,0 +1,25 @@
+{
+  "name": "PinoyPool",
+  "short_name": "PinoyPool",
+  "description": "Philippine Billiards Ranking Platform — Official PPR standings and match records.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A120E",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "pinoypool-logo-new.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "pinoypool-logo-new.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

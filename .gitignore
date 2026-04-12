@@ -45,7 +45,11 @@ pinoypool-v10-owner.html
 pinoypool-v10-player.html
 pinoypool-v10-scout.html
 
+# Runtime logs
+startup.log
+
 # Other dev artifacts
+pinoypool-v10.html
 ph-billiards-app.html
 sikad-ph-v2.html
 preview-server.js
