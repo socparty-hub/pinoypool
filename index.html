@@ -2933,7 +2933,7 @@ function renderNotifPanel(){
   _loadNotifStore();
   const notifs=(_notifStore[un]||[]).slice(0,25);
   if(!notifs.length){
-    panel.innerHTML=`<div class="np-head"><span>Notifications</span></div><div class="np-empty">No notifications yet.</div><div class="np-footer"><button class="np-clear-all" onclick="clearAllNotifs()">🗑 Clear all notifications</button></div>`;
+    panel.innerHTML=`<div class="np-head"><span>Notifications</span></div><div class="np-empty">No notifications yet.</div>`;
     return;
   }
   const unread=notifs.filter(n=>!n.read).length;
