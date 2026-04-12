@@ -32,7 +32,7 @@ app.use(express.static(path.join(__dirname), { index: false }));
 
 /* ── API: register a new player / hall owner / scout ── */
 app.post('/api/register', async (req, res) => {
-  const { firstName, lastName, username, email, phone, dob, role, hallName, city, region } = req.body;
+  const { firstName, lastName, username, email, phone, dob, role, hallName, city, region, password, moniker } = req.body;
   if (!firstName || !lastName || !role) {
     return res.status(400).json({ ok: false, message: 'Missing required fields.' });
   }
@@ -51,6 +51,8 @@ app.post('/api/register', async (req, res) => {
     hallName:           hallName   || '',
     city:               city       || '',
     region:             region     || '',
+    moniker:            moniker    || '',
+    password:           password   || '',
     verificationStatus: 'pending',
     careerStatus:       null,
     ppr:                0,
