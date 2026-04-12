@@ -1813,8 +1813,8 @@ function odTab(tab, btn){
         const _win1=parseInt(_s1O)>parseInt(_s2O);
         const _lp1=typeof adminPlayers!=='undefined'?adminPlayers.find(p=>p.name===m.p1):null;
         const _lp2=typeof adminPlayers!=='undefined'?adminPlayers.find(p=>p.name===m.p2):null;
-        const _p1T=_lp1?.careerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||m.p1CareerStatus||'';
-        const _p2T=_lp2?.careerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||m.p2CareerStatus||'';
+        const _p1T=getPlayerCurrentCareerStatus(m.p1)||'';
+        const _p2T=getPlayerCurrentCareerStatus(m.p2)||'';
         const _mr1=Array.isArray(m.hcpRack)?m.hcpRack[0]||0:0; const _mr2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
         const _mb1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
         const _mb2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
@@ -2076,8 +2076,8 @@ function buildDashboard(){
         const s1=isNaN(scParts[0])?'—':scParts[0];
         const s2=isNaN(scParts[1])?'—':scParts[1];
         const isWin=scParts.length===2&&scParts[0]>scParts[1];
-        const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)?.status||'');
-        const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
+        const t1=getPlayerCurrentCareerStatus(m.p1)||'';
+        const t2=getPlayerCurrentCareerStatus(m.p2)||'';
         const tier1=(t1&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t1])?careerTier(0,0,t1):null;
         const tier2=(t2&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t2])?careerTier(0,0,t2):null;
         const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:'';
@@ -2715,10 +2715,9 @@ function setUser(u){
     if(found){
       app.p1id=found.id;
       const _dp1=document.getElementById('dp1');if(_dp1)_dp1.textContent=u.name.split(' ')[0];
-      // found.status in PLAYERS[] = career status (Elite/Pro/etc)
-      // found.status in adminPlayers = account status (active/pending) — guard against that
-      const _rawS=found.careerStatus||found.status||u.careerStatus||null;
-      const _status=(typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[_rawS])?_rawS:null;
+      // Use PLAYERS[] as source of truth — same as getPlayerCurrentCareerStatus()
+      // Prevents stale adminPlayers.careerStatus (e.g. corrupt 'Amateur') from leaking through
+      const _status=getPlayerCurrentCareerStatus(u.name);
       const _tt=document.getElementById('p1-tier-tag');
       if(_tt){
         if(_status){
@@ -2870,8 +2869,9 @@ function acSearch(inpId, listId){
   const pool=[
     ...activeAP.map(p=>{
       const pl=PLAYERS.find(x=>x.id===p.id||x.name===p.name);
-      const _isPending=p.status==='pending'||!p.careerStatus||(typeof CAREER_TIERS!=='undefined'&&p.careerStatus&&!CAREER_TIERS[p.careerStatus]);
-      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:p.careerStatus||pl?.status||pl?.careerStatus||null,isPending:_isPending,colors:p.colors||'#1a3a22',rank:pl?.rank||99};
+      const _cs=getPlayerCurrentCareerStatus(p.name);// null if not admin-approved
+      const _isPending=!_cs;
+      return{id:p.id,name:p.name,region:p.region||'',fmt:pl?.fmt||'9-Ball',careerStatus:_cs,isPending:_isPending,colors:p.colors||'#1a3a22',rank:pl?.rank||99};
     }),
     ...PLAYERS.filter(p=>!apNames.has(p.name))
   ];
@@ -2894,7 +2894,7 @@ function selectPlayer(id,inpId,listId){
   document.getElementById(inpId).value=fmtPlayerName(p.name);
   document.getElementById(listId).classList.remove('open');
   const pNum=inpId==='p1-inp'?'1':'2';
-  const status=p.careerStatus||p.status||null;
+  const status=getPlayerCurrentCareerStatus(p.name);// null for pending/unverified players
   const tagEl=document.getElementById('p'+pNum+'-tier-tag');
   if(tagEl){
     if(status&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[status]){
@@ -3417,8 +3417,8 @@ function submitFinalScore(){
     hcpRack:[hcpState.rack[0]||0,hcpState.rack[1]||0],
     hcpBall:[hcpState.balls[0].size||0,hcpState.balls[1].size||0],
     hcpBalls:[_hcpB1,_hcpB2],
-    p1CareerStatus:PLAYERS.find(p=>p.name===app.p1)?.status||'Amateur',
-    p2CareerStatus:PLAYERS.find(p=>p.name===app.p2)?.status||'Amateur',
+    p1CareerStatus:(PLAYERS.find(p=>p.name===app.p1)?.status)||(typeof adminPlayers!=='undefined'?adminPlayers.find(p=>p.name===app.p1)?.careerStatus:null)||null,
+    p2CareerStatus:(PLAYERS.find(p=>p.name===app.p2)?.status)||(typeof adminPlayers!=='undefined'?adminPlayers.find(p=>p.name===app.p2)?.careerStatus:null)||null,
     venue:_venue,
     date:new Date().toISOString().slice(0,10),
     status:'pending-opponent',
@@ -3865,8 +3865,8 @@ function renderMatchesPage(){
   // Career status filter — match if either player has the tier
   if(f.tier){
     matches=matches.filter(m=>{
-      const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)?.status||'');
-      const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
+      const t1=getPlayerCurrentCareerStatus(m.p1)||'';
+      const t2=getPlayerCurrentCareerStatus(m.p2)||'';
       return t1===f.tier||t2===f.tier;
     });
   }
@@ -3908,8 +3908,8 @@ function renderMatchesPage(){
     const s2=isNaN(scParts[1])?'—':scParts[1];
     const isWin=scParts.length===2&&scParts[0]>scParts[1];
 
-    const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)?.status||'');
-    const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)?.status||'');
+    const t1=getPlayerCurrentCareerStatus(m.p1)||'';
+    const t2=getPlayerCurrentCareerStatus(m.p2)||'';
     const tier1=(t1&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t1])?careerTier(0,0,t1):null;
     const tier2=(t2&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[t2])?careerTier(0,0,t2):null;
     const tb1=tier1?`<span style="font-size:.6rem;padding:1px 6px;border-radius:3px;background:${tier1.bg};color:${tier1.color};border:1px solid ${tier1.border};font-family:'Space Grotesk',sans-serif;font-weight:700;text-transform:uppercase;">${tier1.label}</span>`:'';
@@ -4056,6 +4056,15 @@ function isPendingPlayer(nameOrObj){
   const ap=typeof adminPlayers!=='undefined'?(typeof nameOrObj==='string'?adminPlayers.find(p=>p.name===nameOrObj):nameOrObj):null;
   if(!ap) return false;
   return !ap.careerStatus||(typeof CAREER_TIERS!=='undefined'&&!CAREER_TIERS[ap.careerStatus]);
+}
+/* Returns the current admin-assigned career status string (e.g. 'Elite') for a player,
+   or null if not yet admin-approved. Uses PLAYERS[] as the single source of truth —
+   it is only populated via restoreApprovals() from admin-approved entries, so it
+   never contains stale/corrupted data from old match records or pre-fix submissions. */
+function getPlayerCurrentCareerStatus(name){
+  const pl=PLAYERS.find(x=>x.name===name);
+  if(pl&&pl.status&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[pl.status]) return pl.status;
+  return null;
 }
 function rankClass(i){return i===0?'lb-rank top1':i===1?'lb-rank top2':i===2?'lb-rank top3':'lb-rank';}
 
@@ -5340,6 +5349,17 @@ const rankHistory=[
 
 function buildPlayerPortal(){
   if(!app.user){return;}
+  // Re-check approval status in case admin approved since login (same-browser scenario)
+  if(app.user.verificationStatus==='pending'||app.user.verificationStatus===null){
+    const _ap=typeof approvedPlayers!=='undefined'?approvedPlayers.find(x=>x.email===app.user.email||x.username===app.user.username):null;
+    if(_ap&&_ap.status==='active'&&_ap.careerStatus&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[_ap.careerStatus]){
+      app.user.verificationStatus='active';
+      app.user.careerStatus=_ap.careerStatus;
+      try{localStorage.setItem('pp_session',JSON.stringify(app.user));}catch{}
+      const _ru=registeredUsers.find(r=>r.email===app.user.email||r.username===app.user.username);
+      if(_ru){_ru.verificationStatus='active';saveRegisteredUsers();}
+    }
+  }
   const u=app.user;
   const p=PLAYERS.find(x=>x.name===u.name);
   const isPending=u.verificationStatus==='pending'||!p;
@@ -5486,8 +5506,8 @@ function ppTab(btn,tab){
       const r2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
       const b1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
       const b2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
-      const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
-      const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+      const t1=getPlayerCurrentCareerStatus(m.p1)||'';
+      const t2=getPlayerCurrentCareerStatus(m.p2)||'';
       return `<div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;overflow:hidden;margin-bottom:1rem;box-shadow:0 4px 16px rgba(0,0,0,.35);">
         <div style="background:rgba(0,0,0,.25);padding:.6rem 1rem;border-bottom:1px solid #2e3732;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -5818,6 +5838,17 @@ function buildPlayerProfile(){
   const c=document.getElementById('pp-profile-content')||document.getElementById('pp-content');
   if(!c) return;
   if(!app.user){c.innerHTML='<div style="text-align:center;color:var(--chalk2);padding:2rem;">Please log in to view your profile.</div>';return;}
+  // Re-check approval status in case admin approved since login (same-browser scenario)
+  if(app.user.verificationStatus==='pending'||app.user.verificationStatus===null){
+    const _ap=typeof approvedPlayers!=='undefined'?approvedPlayers.find(x=>x.email===app.user.email||x.username===app.user.username):null;
+    if(_ap&&_ap.status==='active'&&_ap.careerStatus&&typeof CAREER_TIERS!=='undefined'&&CAREER_TIERS[_ap.careerStatus]){
+      app.user.verificationStatus='active';
+      app.user.careerStatus=_ap.careerStatus;
+      try{localStorage.setItem('pp_session',JSON.stringify(app.user));}catch{}
+      const _ru=registeredUsers.find(r=>r.email===app.user.email||r.username===app.user.username);
+      if(_ru){_ru.verificationStatus='active';saveRegisteredUsers();}
+    }
+  }
   const p=PLAYERS.find(x=>x.name===app.user?.name)||{mw:0,ml:0,rw:0,rl:0,ppr:0,mi:0,sos:0,pr:0,region:app.user?.region||'',careerStatus:app.user?.careerStatus||null,status:app.user?.verificationStatus||'pending',name:app.user?.name||''};
   {
     // Determine if player is pending (no admin-assigned career status yet)
@@ -5828,6 +5859,7 @@ function buildPlayerProfile(){
       ?(_apEntry.status==='pending'||!_hasValidCareer(_apEntry.careerStatus))
       :!_hasValidCareer(p.status);  // fallback for seeded/test accounts in PLAYERS[]
     const totalMatches=p.mw+p.ml;
+    const winPct=Math.round((p.mw||0)/((p.mw||0)+(p.ml||0)||1)*100);
     const ct=_isPlayerPending
       ?{label:'Pending',bg:'rgba(255,165,0,.1)',color:'#f5a623',border:'rgba(255,165,0,.35)'}
       :careerTier(p.mw,p.ml,p.status||p.careerStatus||app.user?.careerStatus);
@@ -6335,8 +6367,8 @@ function ptab(tab){
       const r2=Array.isArray(m.hcpRack)?m.hcpRack[1]||0:0;
       const b1=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[0])?m.hcpBalls[0]:[];
       const b2=Array.isArray(m.hcpBalls)&&Array.isArray(m.hcpBalls[1])?m.hcpBalls[1]:[];
-      const t1=m.p1CareerStatus||(PLAYERS.find(p=>p.name===m.p1)||{}).status||'';
-      const t2=m.p2CareerStatus||(PLAYERS.find(p=>p.name===m.p2)||{}).status||'';
+      const t1=getPlayerCurrentCareerStatus(m.p1)||'';
+      const t2=getPlayerCurrentCareerStatus(m.p2)||'';
       return `<div style="background:#19211d;border:1px solid #2e3732;border-radius:12px;overflow:hidden;margin-bottom:1rem;box-shadow:0 4px 16px rgba(0,0,0,.35);">
         <div style="background:rgba(0,0,0,.25);padding:.6rem 1rem;border-bottom:1px solid #2e3732;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -7226,11 +7258,11 @@ function buildAdmin(){
         if(r.role==='player'||r.role==='fan'){
           const existing=adminPlayers.find(p=>p.id===r.id||p.email===r.email);
           if(!existing){
-            adminPlayers.unshift({id:r.id,name:name.trim(),username:r.username||'',status:r.status||'pending',email:r.email,phone:r.phone,region:r.region,submittedAt:r.submittedAt,careerStatus:r.careerStatus||'Amateur',ppr:r.ppr||0,tier:'C',colors:'#1a3a22'});
+            adminPlayers.unshift({id:r.id,name:name.trim(),username:r.username||'',status:r.status||'pending',email:r.email,phone:r.phone,region:r.region,submittedAt:r.submittedAt,careerStatus:r.careerStatus||null,ppr:r.ppr||0,tier:'C',colors:'#1a3a22'});
             changed=true;
-          } else if(existing.status!==r.status&&!_localStatusChanged.has(String(r.id))){
+          } else if(existing.status!==r.status&&!_localStatusChanged.has(String(r.id))&&!_localStatusChanged.has(String(existing.id))){
             // Sync status changes from backend (e.g. approved on another device)
-            // Skip if this player's status was changed locally to avoid race with PATCH
+            // Guard checks BOTH backend id and local id — they may differ when local id is Date.now()
             existing.status=r.status||existing.status;
             if(r.careerStatus) existing.careerStatus=r.careerStatus;
             if(r.ppr) existing.ppr=r.ppr;
@@ -7358,7 +7390,7 @@ function admTab(btn,tab){
             <div style="min-width:0;flex:1;">
               <div style="font-weight:600;font-size:.88rem;line-height:1.4;">${fmtPlayerName(p.name)}</div>
               <div style="font-size:.68rem;color:var(--chalk);margin-top:2px;">${_email} · ${_region}</div>
-              <div style="font-size:.65rem;color:var(--chalk2);margin-top:1px;">Joined ${p.joined||'—'} · W:${p.mw} L:${p.ml}</div>
+              <div style="font-size:.65rem;color:var(--chalk2);margin-top:1px;">Joined ${p.joined||'—'} · W:${p.mw||0} L:${p.ml||0}</div>
             </div>
           </div>
           <div style="display:flex;gap:.45rem;align-items:center;">
@@ -7862,9 +7894,10 @@ function admSetCareer(id,tier){
 function admApprovePlayer(id){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
   if(!p)return;
-  // Read career status from inline dropdown, fallback to stored or Amateur
+  // Require career status to be explicitly selected before approving
   const csEl=document.getElementById('cs-'+id);
-  const careerStatus=csEl?.value||p.careerStatus||'Amateur';
+  const careerStatus=csEl?.value||'';
+  if(!careerStatus){toast('⚠️ Please assign a Career Status before approving.');return;}
   const initPPR=INITIAL_PPR[careerStatus]||1300;
   p.status='active';
   p.careerStatus=careerStatus;
@@ -8062,7 +8095,7 @@ function initFromBackend(){
               id:r.id, name, username:r.username||'', email:r.email||'',
               phone:r.phone||'', region:r.region||'',
               status:r.status||'pending',
-              careerStatus:r.careerStatus||'Amateur', ppr:r.ppr||0,
+              careerStatus:r.careerStatus||null, ppr:r.ppr||0,
               mw:0, ml:0, rw:0, rl:0, mi:0, sos:0, colors:'#1a3a22',
               joined:(r.submittedAt||'').slice(0,10), submittedAt:r.submittedAt||''
             });
@@ -8082,7 +8115,7 @@ function initFromBackend(){
           if(r.status==='active'&&!PLAYERS.find(p=>p.id===r.id||p.name===name)){
             PLAYERS.push({
               id:r.id, name, region:r.region||'',
-              status:r.careerStatus||'Amateur', fmt:'9-Ball', colors:'#1a3a22',
+              status:r.careerStatus||null, fmt:'9-Ball', colors:'#1a3a22',
               mw:0, ml:0, rw:0, rl:0, ppr:r.ppr||1300, pr:0, mi:0, sos:0,
               rank:PLAYERS.length+1
             });
@@ -8133,7 +8166,7 @@ function initFromBackend(){
               id:r.id||('ru-'+Date.now()+'-'+Math.random()), name, username:r.username||'', email:r.email||'',
               phone:r.phone||'', region:r.region||'',
               status:r.verificationStatus||'pending',
-              careerStatus:r.careerStatus||'Amateur', ppr:r.ppr||0,
+              careerStatus:r.careerStatus||null, ppr:r.ppr||0,
               mw:0, ml:0, rw:0, rl:0, mi:0, sos:0, colors:'#1a3a22',
               joined:(r.submittedAt||'').slice(0,10), role:r.role
             });
@@ -8153,7 +8186,7 @@ function initFromBackend(){
               id:r.id||('ru-'+Date.now()+'-'+Math.random()), name, username:r.username||'', email:r.email||'',
               phone:r.phone||'', region:r.region||'',
               status:r.verificationStatus||'pending',
-              careerStatus:r.careerStatus||'Amateur', ppr:r.ppr||0,
+              careerStatus:r.careerStatus||null, ppr:r.ppr||0,
               mw:0, ml:0, rw:0, rl:0, mi:0, sos:0, colors:'#1a3a22',
               joined:(r.submittedAt||'').slice(0,10), role:r.role
             });
@@ -8162,6 +8195,24 @@ function initFromBackend(){
       });
       buildDashboard();
     });
+}
+
+/* Restore pending players from registeredUsers into adminPlayers.
+   Runs unconditionally at page load so pending players are always
+   searchable in autocomplete regardless of backend availability. */
+function restorePendingPlayers(){
+  const matchById=(arr,id,em)=>arr.find(p=>(id!=null&&String(p.id)===String(id))||p.email===em);
+  registeredUsers.forEach(r=>{
+    if((r.role==='player'||r.role==='fan')&&!matchById(adminPlayers,r.id,r.email)){
+      adminPlayers.push({
+        id:r.id,name:r.name||'',username:r.username||'',email:r.email||'',
+        phone:r.phone||'',region:r.region||'',role:r.role||'player',
+        status:r.verificationStatus||'pending',careerStatus:null,ppr:0,
+        mw:0,ml:0,rw:0,rl:0,mi:0,sos:0,colors:'#1a3a22',
+        joined:'',submittedAt:''
+      });
+    }
+  });
 }
 
 /* ══════════════════ INIT ══════════════════ */
@@ -8173,6 +8224,7 @@ updateBadge();
 initFromBackend();
 restoreApprovals();
 restoreApprovedHalls();
+restorePendingPlayers();
 restoreTournaments();
 _refreshVenueSelect();
 // ── One-time migration: normalize venue names in adminMatches ──

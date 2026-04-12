@@ -1,11 +1,10 @@
-DirectoryIndex coming-soon.html index.html
+DirectoryIndex index.html
 
 RewriteEngine On
 
-# Serve real files/folders as-is
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
+# Serve static assets (images, sw.js, manifest, css, js) directly — skip Node.js
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteCond %{REQUEST_FILENAME} \.(png|jpg|jpeg|gif|ico|svg|webp|css|js|json|txt|woff|woff2|ttf)$ [NC]
 RewriteRule ^ - [L]
 
-# Everything else → coming soon
-RewriteRule ^ coming-soon.html [L]
+# All other requests (including / and /api/*) go through Node.js via Passenger
