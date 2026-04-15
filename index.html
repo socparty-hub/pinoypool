@@ -2564,7 +2564,8 @@ function doRegister(){
     // Save to session-registered users for login; persist in localStorage so it survives page refresh
     if(!registeredUsers.find(u=>u.username===un)){
       registeredUsers.push({id:pid,name,username:un,email:em,phone:ph,password:pw,role,dob,region,moniker:moniker||'',hall:hall||null,addr:addr||null,verificationStatus:vStatus});
-      saveRegisteredUsers();
+      // /api/register already persisted to MySQL — only sync localStorage here
+      try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{}
     }
     setUser({name,role,initials:getInit(name),username:un,hall,dob,email:em,phone:ph,region,moniker:moniker||'',verificationStatus:vStatus});
     // Store personal details in adminPlayers for both players and hall owners
@@ -8078,7 +8079,8 @@ function admSetPlayerStatus(id,status){
   // On suspension: leave verificationStatus alone — player can still log in and play
   if(status==='active'){
     const ru=registeredUsers.find(r=>r.email===p.email||r.username===p.username);
-    if(ru){ru.verificationStatus='active';saveRegisteredUsers();}
+    // Local sync only — PATCH below handles MySQL so we don't overwrite other users' registrations
+    if(ru){ru.verificationStatus='active';try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{}}
   }
   // Persist to backend
   fetch('/api/registrations/'+String(id),{method:'PATCH',headers:{'Content-Type':'application/json'},
@@ -8157,7 +8159,8 @@ function admApprovePlayer(id){
   saveApprovedPlayers();
   // Also sync verificationStatus in registeredUsers so .catch() fallback doesn't re-show as pending
   const ru=registeredUsers.find(r=>r.email===p.email||r.username===p.username);
-  if(ru){ru.verificationStatus='active';saveRegisteredUsers();}
+  // Local sync only — PATCH below handles MySQL so we don't overwrite other users' registrations
+  if(ru){ru.verificationStatus='active';try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{}}
   // Render immediately with current (already-updated) local state, then persist to backend.
   // buildAdmin() is chained to the PATCH response so the background GET fires AFTER MySQL is updated,
   // eliminating the race condition where GET returns stale 'pending' status before PATCH completes.
@@ -8186,7 +8189,8 @@ function admRejectPlayer(id){
   adminPlayers.splice(adminPlayers.indexOf(p),1);
   // Remove from registeredUsers so username is freed
   const ruIdx=registeredUsers.findIndex(u=>u.email===p.email||u.username===p.username);
-  if(ruIdx!==-1){registeredUsers.splice(ruIdx,1);saveRegisteredUsers();}
+  // Local sync only — PATCH below marks as rejected in MySQL without wiping other registrations
+  if(ruIdx!==-1){registeredUsers.splice(ruIdx,1);try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{}}
   // Remove from approvedPlayers if somehow present
   const apIdx=approvedPlayers.findIndex(u=>u.email===p.email||u.name===p.name);
   if(apIdx!==-1){approvedPlayers.splice(apIdx,1);saveApprovedPlayers();}
