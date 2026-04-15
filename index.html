@@ -7486,8 +7486,9 @@ function buildAdmin(){
             adminHalls.unshift({id:r.id,name:r.hallName||'Unknown Hall',owner:name.trim(),username:r.username||'',city:r.city||'',contact:r.phone,email:r.email,region:r.region,status:r.status||'pending',submitted:(r.submittedAt||'').slice(0,10)});
             changed=true;
           } else if(existing.status!==r.status&&!_localStatusChanged.has(String(r.id))){
-            existing.status=r.status||existing.status;
-            changed=true;
+            // Don't downgrade a locally-approved hall — approvedHalls is the source of truth
+            const isLocallyApproved=approvedHalls.some(ah=>ah.id===r.id||ah.email===r.email);
+            if(!isLocallyApproved){existing.status=r.status||existing.status;changed=true;}
           }
         }
       });
@@ -8224,12 +8225,14 @@ function admApproveHall(id){
   if(!HALLS.find(x=>x.n===h.name))
     HALLS.push({n:h.name,c:h.region||h.city,t:h.tables||0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:h.fb&&h.fb!=='—'?h.fb.replace('fb.com/',''):'—'});
   _refreshVenueSelect();
-  // Persist approval to backend
+  // Mark locally changed so background fetch doesn't race and revert status
+  _localStatusChanged.add(String(id));
+  // Persist approval to backend — chain buildAdmin after PATCH so the refresh
+  // sees the updated status rather than the stale pending state
+  buildDashboard();
   fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({status:'active',approvedAt:new Date().toISOString()})
-  }).catch(()=>{});
-  buildAdmin();
-  buildDashboard();
+  }).then(()=>buildAdmin()).catch(()=>buildAdmin());
   // If this owner is currently logged in, refresh their portal to the active state
   if(app.user&&(app.user.email===h.email||app.user.username===h.username||app.user.name===h.owner)){
     const view=document.getElementById('view-portal');
