@@ -2409,8 +2409,9 @@ function restoreApprovedHalls(){
       HALLS.push({n:ah.name,c:ah.region||ah.city,t:ah.tables||0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:ah.fb||'—'});
     }
   });
-  // Also restore pending hall applications so admin can review them after page reload
-  let _pendHalls=[];try{_pendHalls=JSON.parse(localStorage.getItem('pp_pendingHalls')||'[]');}catch{}
+  // Also restore pending hall applications — merge server data + localStorage so admin sees from any device
+  let _pendHalls=[];
+  try{_pendHalls=JSON.parse((window.__SD__&&window.__SD__['pp_pendingHalls'])||localStorage.getItem('pp_pendingHalls')||'[]');}catch{}
   _pendHalls.forEach(ph=>{
     // Only restore if not already in adminHalls (approved halls take precedence)
     if(!adminHalls.find(h=>h.id===ph.id||h.email===ph.email)){
@@ -2580,10 +2581,12 @@ function doRegister(){
         status:'pending', submitted:new Date().toISOString().slice(0,10)
       };
       adminHalls.unshift(newHall);
-      // Persist pending hall application so it survives page reload for admin to review
+      // Persist pending hall application to backend so admin sees it from any device
       let _pendHalls=[];try{_pendHalls=JSON.parse(localStorage.getItem('pp_pendingHalls')||'[]');}catch{}
       if(!_pendHalls.find(h=>h.email===em)) _pendHalls.unshift(newHall);
-      try{localStorage.setItem('pp_pendingHalls',JSON.stringify(_pendHalls));}catch{}
+      const _pendHallsStr=JSON.stringify(_pendHalls);
+      try{localStorage.setItem('pp_pendingHalls',_pendHallsStr);}catch{}
+      apiPersist('pp_pendingHalls',_pendHallsStr);
     }
     closeM('m-auth');
     toast(`🎉 Welcome, <strong>@${un}</strong>! ${role==='player'?'Your account is pending admin verification.':`Your hall registration is pending admin approval.`}`);

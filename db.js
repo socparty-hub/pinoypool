@@ -11,6 +11,7 @@ const ALLOWED_KEYS = [
   'pp_registeredUsers',
   'pp_approvedPlayers',
   'pp_approvedHalls',
+  'pp_pendingHalls',
   'pp_tournaments',
   'pp_testPasswords',
   'pp_notifications',
