@@ -8214,10 +8214,12 @@ function admApproveHall(id){
   if(ahIdx===-1) approvedHalls.push({...h});
   else approvedHalls[ahIdx]={...approvedHalls[ahIdx],...h};
   saveApprovedHalls();
-  // Remove from pending halls list
+  // Remove from pending halls list — persist to backend so it survives page reload
   let _pendHalls=[];try{_pendHalls=JSON.parse(localStorage.getItem('pp_pendingHalls')||'[]');}catch{}
   _pendHalls=_pendHalls.filter(ph=>ph.id!==id&&ph.email!==h.email);
-  try{localStorage.setItem('pp_pendingHalls',JSON.stringify(_pendHalls));}catch{}
+  const _pendHallsStr=JSON.stringify(_pendHalls);
+  try{localStorage.setItem('pp_pendingHalls',_pendHallsStr);}catch{}
+  apiPersist('pp_pendingHalls',_pendHallsStr);
   // Add to public HALLS list
   if(!HALLS.find(x=>x.n===h.name))
     HALLS.push({n:h.name,c:h.region||h.city,t:h.tables||0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:h.fb&&h.fb!=='—'?h.fb.replace('fb.com/',''):'—'});
@@ -8242,8 +8244,18 @@ function admRejectHall(id){
   const h=adminHalls.find(x=>x.id===id);
   if(!h)return;
   h.status='rejected';
+  // Remove from pending halls — persist to backend
+  let _pendHalls=[];try{_pendHalls=JSON.parse(localStorage.getItem('pp_pendingHalls')||'[]');}catch{}
+  _pendHalls=_pendHalls.filter(ph=>ph.id!==id&&ph.email!==h.email);
+  const _pendHallsStr=JSON.stringify(_pendHalls);
+  try{localStorage.setItem('pp_pendingHalls',_pendHallsStr);}catch{}
+  apiPersist('pp_pendingHalls',_pendHallsStr);
+  // Mark as rejected in pp_registeredUsers on server
+  fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({status:'rejected',rejectedAt:new Date().toISOString()})
+  }).catch(()=>{});
   buildAdmin();
-  toast(`✗ <strong>${h.name}</strong> application rejected. Owner notified.`);
+  toast(`✗ <strong>${h.name}</strong> application rejected.`);
 }
 
 /* ── duplicate stale match-action stubs removed — canonical versions above ── */
