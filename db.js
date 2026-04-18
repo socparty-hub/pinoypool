@@ -12,6 +12,7 @@ const ALLOWED_KEYS = [
   'pp_approvedPlayers',
   'pp_approvedHalls',
   'pp_pendingHalls',
+  'pp_inactiveHalls',
   'pp_tournaments',
   'pp_testPasswords',
   'pp_notifications',
@@ -97,6 +98,11 @@ async function init() {
       KEY idx_owner_email    (owner_email)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+
+  // Add co_owners column if it doesn't exist yet (safe migration)
+  try {
+    await pool.execute(`ALTER TABLE halls ADD COLUMN co_owners TEXT DEFAULT NULL`);
+  } catch(e) { /* column already exists — ignore */ }
 
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS matches (
@@ -261,8 +267,10 @@ async function getAll() {
     fb:        h.fb_page        || '—',
     status:    h.status,
     submitted: h.submitted_at ? new Date(h.submitted_at).toISOString().slice(0, 10) : '',
+    coOwners:  h.co_owners      || '[]',
   });
   result['pp_approvedHalls'] = JSON.stringify(hallRows.filter(h => h.status === 'active').map(hallMap));
+  result['pp_inactiveHalls']  = JSON.stringify(hallRows.filter(h => h.status === 'inactive').map(hallMap));
   result['pp_pendingHalls']   = JSON.stringify(hallRows.filter(h => h.status === 'pending' || h.status === 'review').map(hallMap));
 
   /* ── matches ───────────────────────────────────────────── */
@@ -693,6 +701,36 @@ async function removePushSub(username, endpoint) {
   );
 }
 
+/** Permanently delete a user and their notifications/push subscriptions */
+async function deleteUser(id, email) {
+  // Resolve the real DB id + username (local ids may differ from DB ids)
+  let resolvedId = String(id);
+  let resolvedUsername = null;
+  try {
+    const [rows] = await pool.execute(
+      'SELECT id, username FROM users WHERE id=? OR email=? LIMIT 1',
+      [String(id), email || '']
+    );
+    if (rows.length) { resolvedId = rows[0].id; resolvedUsername = rows[0].username; }
+  } catch(e) { /* fall back to raw id */ }
+  if (resolvedUsername) {
+    await pool.execute(`DELETE FROM notifications WHERE username = ?`, [resolvedUsername]);
+    await pool.execute(`DELETE FROM push_subscriptions WHERE username = ?`, [resolvedUsername]);
+  }
+  await pool.execute(`DELETE FROM users WHERE id = ?`, [resolvedId]);
+}
+
+/** Update a hall row (status, co_owners, etc.) */
+async function updateHall(id, fields) {
+  const cols = [];
+  const vals = [];
+  if (fields.status    !== undefined) { cols.push('status = ?');    vals.push(fields.status); }
+  if (fields.coOwners  !== undefined) { cols.push('co_owners = ?'); vals.push(typeof fields.coOwners === 'string' ? fields.coOwners : JSON.stringify(fields.coOwners)); }
+  if (!cols.length) return;
+  vals.push(String(id));
+  await pool.execute(`UPDATE halls SET ${cols.join(', ')} WHERE id = ?`, vals);
+}
+
 /** Reset all data (admin action) — keeps testPasswords */
 async function resetAll() {
   await pool.execute(`DELETE FROM users WHERE role != 'admin'`);
@@ -706,4 +744,4 @@ async function resetAll() {
   );
 }
 
-module.exports = { ALLOWED_KEYS, init, getAll, set, query, updateUser, getPushSubs, addPushSub, removePushSub, resetAll };
+module.exports = { ALLOWED_KEYS, init, getAll, set, query, updateUser, deleteUser, updateHall, getPushSubs, addPushSub, removePushSub, resetAll };

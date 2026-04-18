@@ -188,6 +188,37 @@ app.patch('/api/registrations/:id', async (req, res) => {
   }
 });
 
+/* ── API: fully delete a user (admin rejection) ── */
+app.delete('/api/users/:id', async (req, res) => {
+  const { id } = req.params;
+  const { email } = req.body || {};
+  try {
+    await db.deleteUser(id, email);
+    invalidateDbCache();
+    res.json({ ok: true });
+  } catch(e) {
+    console.error('[DB] delete user error:', e.message);
+    res.status(500).json({ ok: false, error: 'db_error' });
+  }
+});
+
+/* ── API: update a hall (status, co_owners, etc.) ── */
+app.patch('/api/halls/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status, coOwners } = req.body || {};
+  try {
+    const fields = {};
+    if (status    !== undefined) fields.status   = status;
+    if (coOwners  !== undefined) fields.coOwners = coOwners;
+    await db.updateHall(id, fields);
+    invalidateDbCache();
+    res.json({ ok: true });
+  } catch(e) {
+    console.error('[DB] patch hall error:', e.message);
+    res.status(500).json({ ok: false, error: 'db_error' });
+  }
+});
+
 /* ── API: save a push subscription for a user ── */
 app.post('/api/push/subscribe', async (req, res) => {
   const { username, subscription } = req.body;

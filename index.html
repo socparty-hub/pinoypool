@@ -2429,9 +2429,17 @@ function restoreApprovedHalls(){
   approvedHalls.forEach(ah=>{
     const existing=adminHalls.find(h=>h.id===ah.id||h.email===ah.email);
     if(!existing){adminHalls.push({...ah,status:'active'});}
-    else{existing.status='active';}
+    else{existing.status='active';if(ah.coOwners) existing.coOwners=ah.coOwners;}
     if(!HALLS.find(h=>h.n===ah.name)){
       HALLS.push({n:ah.name,c:ah.region||ah.city,t:ah.tables||0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:ah.fb||'—'});
+    }
+  });
+  // Also restore inactive halls into adminHalls so admin panel shows them
+  let _inactHalls=[];
+  try{_inactHalls=JSON.parse((window.__SD__&&window.__SD__['pp_inactiveHalls'])||localStorage.getItem('pp_inactiveHalls')||'[]');}catch{}
+  _inactHalls.forEach(ih=>{
+    if(!adminHalls.find(h=>h.id===ih.id||h.email===ih.email)){
+      adminHalls.push({...ih,status:'inactive'});
     }
   });
   // Also restore pending hall applications — merge server data + localStorage so admin sees from any device
@@ -6502,14 +6510,37 @@ function buildPortal(){
   if(!u) return;
 
   // Update portal header with actual hall name and location
-  const hallEntry=adminHalls.find(h=>h.email===u.email||h.username===u.username||h.owner===u.name);
+  // Co-owner check: user may be listed in another hall's coOwners array
+  const hallEntry=adminHalls.find(h=>{
+    if(h.email===u.email||h.username===u.username||h.owner===u.name) return true;
+    try{return JSON.parse(h.coOwners||'[]').includes(u.username);}catch{return false;}
+  });
   const hallName=u.hall||hallEntry?.name||'Your Hall';
   const hallCity=hallEntry?.city||u.region||'—';
   const isApproved=hallEntry?.status==='active';
+  const isInactive=hallEntry?.status==='inactive';
   const phn=document.getElementById('portal-hn');
   const phl=document.getElementById('portal-hloc');
   if(phn) phn.textContent=hallName;
-  if(phl) phl.innerHTML=`${hallCity} · <span class="dot ${isApproved?'dg':'dy'}"></span>${isApproved?'Active':'Pending Approval'}`;
+  if(phl) phl.innerHTML=`${hallCity} · <span class="dot ${isApproved?'dg':isInactive?'dr':'dy'}"></span>${isApproved?'Active':isInactive?'Deactivated':'Pending Approval'}`;
+
+  // If hall is deactivated, show restricted access message
+  if(isInactive){
+    document.getElementById('portal-content').innerHTML=`
+      <div class="card" style="text-align:center;padding:2rem 1.4rem;">
+        <div style="font-size:2rem;margin-bottom:.8rem;">⊘</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:#e55;margin-bottom:.5rem;">Hall Access Deactivated</div>
+        <div style="font-size:.82rem;color:var(--chalk);max-width:380px;margin:0 auto 1.2rem;line-height:1.7;">
+          Access to <strong style="color:var(--fg);">${hallName}</strong> has been disabled by the Master Admin.
+          Please contact support if you believe this is an error.
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:.6rem;background:rgba(229,85,85,.08);border:1px solid rgba(229,85,85,.25);border-radius:20px;padding:.5rem 1.4rem;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#e55;"></div>
+          <span style="font-size:.78rem;color:#e55;font-weight:600;">Access Suspended by Admin</span>
+        </div>
+      </div>`;
+    return;
+  }
 
   // If hall is not yet approved by admin, show pending state instead of full portal
   if(!isApproved){
@@ -6536,10 +6567,13 @@ function buildPortal(){
 function ptab(tab){
   // ── GUARD: only approved halls can access portal tabs ──
   const _u=app.user;
-  const _hallEntry=adminHalls.find(h=>h.email===_u?.email||h.username===_u?.username||h.owner===_u?.name);
+  const _hallEntry=adminHalls.find(h=>{
+    if(h.email===_u?.email||h.username===_u?.username||h.owner===_u?.name) return true;
+    try{return JSON.parse(h.coOwners||'[]').includes(_u?.username);}catch{return false;}
+  });
   const _isApproved=_hallEntry?.status==='active';
   if(!_isApproved){
-    // Re-render the pending state and block tab navigation
+    // Re-render the pending/inactive state and block tab navigation
     buildPortal();
     return;
   }
@@ -7681,18 +7715,29 @@ function admTab(btn,tab){
       })()}
     </div>
     <div class="card">
-      <div class="ct">✅ Registered Halls <span style="font-size:.7rem;font-family:'Barlow Condensed',sans-serif;font-weight:400;text-transform:none;letter-spacing:0;color:var(--chalk);">${HALLS.length} approved venues</span></div>
-      ${HALLS.map(h=>`
-        <div class="adm-row">
-          <div style="flex:1;">
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:1px;">${h.n}</div>
-            <div style="font-size:.73rem;color:var(--chalk);">📍 ${h.c} · ${h.t} tables · ${h.fmt}</div>
+      <div class="ct">✅ Registered Halls <span style="font-size:.7rem;font-family:'Barlow Condensed',sans-serif;font-weight:400;text-transform:none;letter-spacing:0;color:var(--chalk);">${adminHalls.filter(h=>h.status==='active'||h.status==='inactive').length} venues</span></div>
+      ${adminHalls.filter(h=>h.status==='active'||h.status==='inactive').map(h=>{
+        const isActive=h.status==='active';
+        let coOwners=[];try{coOwners=JSON.parse(h.coOwners||'[]');}catch{}
+        return`<div style="border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;margin-bottom:.55rem;background:rgba(255,255,255,.02)${!isActive?';opacity:.65':''};">
+          <div style="display:flex;align-items:flex-start;gap:.6rem;">
+            <div style="flex:1;min-width:0;">
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:1px;">${h.name}</div>
+              <div style="font-size:.72rem;color:var(--chalk);">📍 ${h.city||h.region||'—'} · ${h.tables||0} tables · ${h.owner||'—'}</div>
+              ${coOwners.length?`<div style="font-size:.68rem;color:var(--chalk2);margin-top:2px;">Co-owners: ${coOwners.join(', ')}</div>`:''}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.35rem;align-items:flex-end;flex-shrink:0;">
+              <span class="status-pill ${isActive?'sp-active':'sp-suspended'}" style="font-size:.58rem;">● ${isActive?'Active':'Inactive'}</span>
+              <div style="display:flex;gap:.35rem;">
+                <button class="btn btn-g btn-sm" style="font-size:.68rem;padding:3px 8px;" onclick="admEditHall('${h.id}')">✏️ Edit</button>
+                ${isActive
+                  ?`<button class="btn btn-d btn-sm" style="font-size:.68rem;padding:3px 8px;" onclick="admDeactivateHall('${h.id}')">⊘ Deactivate</button>`
+                  :`<button class="btn btn-s btn-sm" style="font-size:.68rem;padding:3px 8px;" onclick="admActivateHall('${h.id}')">✓ Activate</button>`}
+              </div>
+            </div>
           </div>
-          <div class="adm-actions">
-            <span class="status-pill ${h.open?'sp-active':'sp-suspended'}">● ${h.open?'Open':'Closed'}</span>
-            <button class="btn btn-g btn-sm" onclick="toast('✏️ Edit feature — ${h.n}')">✏️ Edit</button>
-          </div>
-        </div>`).join('')}
+        </div>`;}).join('')}
+      ${!adminHalls.filter(h=>h.status==='active'||h.status==='inactive').length?`<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1.5rem 0;">No registered halls</div>`:''}
     </div>`;
 
   /* ── MATCH APPROVALS ── */
@@ -8362,24 +8407,20 @@ function admSuspendPlayer(id){
 function admRejectPlayer(id){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
   if(!p)return;
-  // Remove from adminPlayers
+  // Remove from all in-memory arrays
   adminPlayers.splice(adminPlayers.indexOf(p),1);
-  // Remove from registeredUsers so username is freed
   const ruIdx=registeredUsers.findIndex(u=>u.email===p.email||u.username===p.username);
-  // Local sync only — PATCH below marks as rejected in MySQL without wiping other registrations
   if(ruIdx!==-1){registeredUsers.splice(ruIdx,1);try{localStorage.setItem('pp_registeredUsers',JSON.stringify(registeredUsers));}catch{}}
-  // Remove from approvedPlayers if somehow present
   const apIdx=approvedPlayers.findIndex(u=>u.email===p.email||u.name===p.name);
   if(apIdx!==-1){approvedPlayers.splice(apIdx,1);saveApprovedPlayers();}
-  // Remove from in-memory PLAYERS list
   const plIdx=PLAYERS.findIndex(u=>u.name===p.name);
   if(plIdx!==-1) PLAYERS.splice(plIdx,1);
-  // Notify backend
-  fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({status:'rejected',rejectedAt:new Date().toISOString()})
+  // Permanently delete from backend — account + notifications + push subscriptions
+  fetch('/api/users/'+id,{method:'DELETE',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:p.email||''})
   }).catch(()=>{});
   admRefresh();
-  toast(`✗ <strong>${p.name}</strong> registration rejected. Username <strong>${p.username||p.email}</strong> is now available again.`);
+  toast(`✗ <strong>${p.name}</strong> rejected & account deleted. Username <strong>${p.username||p.email}</strong> is now available again.`);
 }
 /* ── Hall actions ── */
 function admApproveHall(id){
@@ -8441,6 +8482,124 @@ function admRejectHall(id){
   }).catch(()=>{});
   buildAdmin();
   toast(`✗ <strong>${h.name}</strong> application rejected.`);
+}
+
+/* ── Hall deactivate / reactivate ── */
+function admDeactivateHall(id){
+  const h=adminHalls.find(x=>String(x.id)===String(id));
+  if(!h)return;
+  h.status='inactive';
+  _localStatusChanged.add(String(id));
+  // Remove from public HALLS list so venue no longer appears for match booking
+  const hIdx=HALLS.findIndex(x=>x.n===h.name);
+  if(hIdx!==-1) HALLS.splice(hIdx,1);
+  _refreshVenueSelect();
+  // Remove from approvedHalls
+  const ahIdx=approvedHalls.findIndex(x=>x.id===h.id||x.email===h.email);
+  if(ahIdx!==-1){approvedHalls.splice(ahIdx,1);saveApprovedHalls();}
+  // Persist to backend
+  fetch('/api/halls/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({status:'inactive'})
+  }).catch(()=>{});
+  admRefresh();
+  toast(`⊘ <strong>${h.name}</strong> deactivated. Hall owner portal access disabled.`);
+}
+function admActivateHall(id){
+  const h=adminHalls.find(x=>String(x.id)===String(id));
+  if(!h)return;
+  h.status='active';
+  _localStatusChanged.add(String(id));
+  // Re-add to approvedHalls and public HALLS
+  const ahIdx=approvedHalls.findIndex(x=>x.id===h.id||x.email===h.email);
+  if(ahIdx===-1) approvedHalls.push({...h}); else approvedHalls[ahIdx]={...approvedHalls[ahIdx],...h};
+  saveApprovedHalls();
+  if(!HALLS.find(x=>x.n===h.name))
+    HALLS.push({n:h.name,c:h.region||h.city,t:h.tables||0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:h.fb||'—'});
+  _refreshVenueSelect();
+  // Persist to backend
+  fetch('/api/halls/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({status:'active'})
+  }).catch(()=>{});
+  admRefresh();
+  toast(`✅ <strong>${h.name}</strong> reactivated. Hall owner portal access restored.`);
+}
+
+/* ── Hall edit modal (co-owners) ── */
+function admEditHall(id){
+  const h=adminHalls.find(x=>String(x.id)===String(id));
+  if(!h)return;
+  let coOwners=[];
+  try{coOwners=JSON.parse(h.coOwners||'[]');}catch{}
+  const coList=coOwners.map((un,i)=>`
+    <div id="co-row-${i}" style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;">
+      <span style="flex:1;font-size:.82rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;padding:5px 10px;">${un}</span>
+      <button class="btn btn-d btn-sm" onclick="admRemoveCoOwner('${id}',${i})">✕</button>
+    </div>`).join('');
+  // Use a simple modal overlay
+  const existing=document.getElementById('m-hall-edit');
+  if(existing) existing.remove();
+  const m=document.createElement('div');
+  m.id='m-hall-edit';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:1rem;';
+  m.innerHTML=`
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.4rem;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;">✏️ Edit Hall Access</div>
+        <button class="btn btn-sm" onclick="document.getElementById('m-hall-edit').remove()" style="padding:4px 10px;">✕</button>
+      </div>
+      <div style="font-size:.78rem;color:var(--chalk2);margin-bottom:1rem;">Hall: <strong style="color:var(--fg);">${h.name}</strong> · Primary owner: <strong style="color:var(--gold);">${h.owner}</strong></div>
+      <div style="margin-bottom:1rem;">
+        <div style="font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--chalk2);margin-bottom:.5rem;">Co-Owners</div>
+        <div id="co-owner-list">${coList||'<div style="font-size:.78rem;color:var(--chalk2);padding:.4rem 0;">No co-owners assigned</div>'}</div>
+      </div>
+      <div style="display:flex;gap:.5rem;margin-bottom:1rem;">
+        <input id="co-owner-input" type="text" placeholder="Username of co-owner…" style="flex:1;font-size:.8rem;">
+        <button class="btn btn-s btn-sm" onclick="admAddCoOwner('${id}')">+ Add</button>
+      </div>
+      <button class="btn btn-s" style="width:100%;" onclick="admSaveCoOwners('${id}')">💾 Save Changes</button>
+    </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click',e=>{if(e.target===m) m.remove();});
+}
+function admAddCoOwner(hallId){
+  const inp=document.getElementById('co-owner-input');
+  const un=(inp?.value||'').trim().toLowerCase();
+  if(!un){toast('⚠️ Enter a username.');return;}
+  const list=document.getElementById('co-owner-list');
+  if(!list) return;
+  // Check for duplicates in current list
+  const existing=[...list.querySelectorAll('span')].map(s=>s.textContent.trim().toLowerCase());
+  if(existing.includes(un)){toast('⚠️ Already in co-owner list.');return;}
+  const i=existing.length;
+  const row=document.createElement('div');
+  row.id='co-row-'+i;
+  row.style.cssText='display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;';
+  row.innerHTML=`<span style="flex:1;font-size:.82rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;padding:5px 10px;">${un}</span><button class="btn btn-d btn-sm" onclick="this.closest('[id^=co-row]').remove()">✕</button>`;
+  // Remove the "no co-owners" placeholder if present
+  if(list.querySelector('div[style]')) list.innerHTML='';
+  list.appendChild(row);
+  if(inp) inp.value='';
+}
+function admRemoveCoOwner(hallId, idx){
+  const row=document.getElementById('co-row-'+idx);
+  if(row) row.remove();
+}
+function admSaveCoOwners(hallId){
+  const h=adminHalls.find(x=>String(x.id)===String(hallId));
+  if(!h)return;
+  const list=document.getElementById('co-owner-list');
+  if(!list)return;
+  const coOwners=[...list.querySelectorAll('span')].map(s=>s.textContent.trim()).filter(Boolean);
+  h.coOwners=JSON.stringify(coOwners);
+  // Sync to approvedHalls
+  const ah=approvedHalls.find(x=>x.id===h.id||x.email===h.email);
+  if(ah){ah.coOwners=h.coOwners;saveApprovedHalls();}
+  // Persist to backend
+  fetch('/api/halls/'+hallId,{method:'PATCH',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({coOwners})
+  }).catch(()=>{});
+  document.getElementById('m-hall-edit')?.remove();
+  toast(`✅ Co-owners updated for <strong>${h.name}</strong>. ${coOwners.length} co-owner(s) assigned.`);
 }
 
 /* ── duplicate stale match-action stubs removed — canonical versions above ── */
