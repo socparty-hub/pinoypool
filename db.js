@@ -229,7 +229,7 @@ async function getAll() {
 
   result['pp_approvedPlayers'] = JSON.stringify(
     userRows
-      .filter(u => u.verification_status === 'active' && u.role !== 'owner')
+      .filter(u => (u.verification_status === 'active' || u.verification_status === 'suspended') && u.role !== 'owner')
       .map(u => ({
         id:          u.id,
         name:        u.name,
@@ -242,7 +242,7 @@ async function getAll() {
         ppr10:       parseFloat(u.ppr10)  || parseFloat(u.ppr) || 0,
         initialPpr:  parseFloat(u.initial_ppr) || parseFloat(u.ppr) || 0,
         approvedAt:  toIso(u.approved_at),
-        status:      'active',
+        status:      u.verification_status,
         fmt:         u.fmt    || '9-Ball',
         colors:      u.colors || '#1a3a22',
         mw:          u.wins   || 0,  ml:   u.losses   || 0,
@@ -435,7 +435,6 @@ async function set(key, value) {
            losses10            = VALUES(losses10),
            fmt                 = VALUES(fmt),
            colors              = VALUES(colors),
-           verification_status = 'active',
            approved_at         = COALESCE(VALUES(approved_at), approved_at)`,
         [
           String(p.id || ''), p.name || '', p.username || '', p.email || '',
