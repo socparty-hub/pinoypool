@@ -1655,14 +1655,17 @@ textarea{resize:vertical;min-height:75px;}
     var v=window.__SD__[k];
     if(!v) return; // skip null/empty strings
     if(APPROVAL_KEYS.indexOf(k)!==-1){
-      // Only overwrite if server has more data than what's locally stored
+      // Only overwrite if server has STRICTLY MORE entries than local.
+      // Equal-length: keep local — admin may have just made a change (career/status)
+      // that hasn't finished persisting to the DB yet. Overwriting would cause
+      // the oscillation bug where each refresh toggles between old and new values.
       try{
         var local=localStorage.getItem(k);
         var serverArr=JSON.parse(v); var localArr=JSON.parse(local||'[]');
-        if(Array.isArray(serverArr)&&Array.isArray(localArr)&&serverArr.length>=localArr.length){
+        if(Array.isArray(serverArr)&&Array.isArray(localArr)&&serverArr.length>localArr.length){
           localStorage.setItem(k,v);
         }
-        // else: local has more entries — keep local, server missed a write
+        // else: same count or local has more — keep local
       }catch(e){ localStorage.setItem(k,v); }
     } else {
       localStorage.setItem(k,v);
