@@ -1477,6 +1477,7 @@ textarea{resize:vertical;min-height:75px;}
     <div class="adm-tabs-main">
       <button class="adm-tab" onclick="admTab(this,'matches')">⚡ Match Approvals<span class="adm-badge" id="adm-b-matches">0</span></button>
       <button class="adm-tab" onclick="admTab(this,'tournaments')">🏆 Tournaments<span class="adm-badge" id="adm-b-tournaments">0</span></button>
+      <button class="adm-tab" onclick="admTab(this,'activity')">📊 Activity</button>
     </div>
   </div>
   <div id="adm-content"></div>
@@ -1647,17 +1648,41 @@ textarea{resize:vertical;min-height:75px;}
 /* ── Restore server-persisted data into localStorage before any reads ── */
 (function restoreServerData(){
   if(!window.__SD__) return;
+  // Keys that hold admin approval decisions: never overwrite local data with an
+  // empty-array value from the server (means the apiPersist write failed earlier).
+  var APPROVAL_KEYS=['pp_approvedPlayers','pp_approvedHalls'];
   Object.keys(window.__SD__).forEach(function(k){
-    var v=window.__SD__[k]; if(v) localStorage.setItem(k,v);
+    var v=window.__SD__[k];
+    if(!v) return; // skip null/empty strings
+    if(APPROVAL_KEYS.indexOf(k)!==-1){
+      // Only overwrite if server has more data than what's locally stored
+      try{
+        var local=localStorage.getItem(k);
+        var serverArr=JSON.parse(v); var localArr=JSON.parse(local||'[]');
+        if(Array.isArray(serverArr)&&Array.isArray(localArr)&&serverArr.length>=localArr.length){
+          localStorage.setItem(k,v);
+        }
+        // else: local has more entries — keep local, server missed a write
+      }catch(e){ localStorage.setItem(k,v); }
+    } else {
+      localStorage.setItem(k,v);
+    }
   });
   delete window.__SD__;
 })();
 
-/* ── apiPersist: fire-and-forget save to backend SQLite ── */
+/* ── apiPersist: save to backend MySQL with one retry on failure ── */
 function apiPersist(key,value){
   if(typeof fetch==='undefined') return;
-  fetch('/api/store/'+key,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({value:value})}).catch(function(){});
+  const _body=JSON.stringify({value:value});
+  fetch('/api/store/'+key,{method:'POST',headers:{'Content-Type':'application/json'},body:_body})
+    .catch(function(){
+      // Retry once after 3 seconds
+      setTimeout(function(){
+        fetch('/api/store/'+key,{method:'POST',headers:{'Content-Type':'application/json'},body:_body})
+          .catch(function(){});
+      }, 3000);
+    });
 }
 
 /* ── Ball format tag helper ── */
@@ -2595,6 +2620,7 @@ function doRegister(){
     if(role==='player') addNotification('admin','new_player_registration',`👤 <strong>New Player Registration</strong> — <strong>${name}</strong> (@${un}) from ${region||'—'} has registered and is pending approval.`);
     else if(role==='owner') addNotification('admin','new_owner_registration',`🏢 <strong>New Hall Owner Registration</strong> — <strong>${name}</strong> (@${un}) registered <strong>${hall||'a hall'}</strong> in ${region||'—'} and is pending approval.`);
     if(role==='owner') setTimeout(()=>sv('portal',document.getElementById('nb-portal')),600);
+    else if(role==='player') setTimeout(()=>sv('player-portal',document.getElementById('nb-player-portal')),600);
   };
   fetch('/api/register',{
     method:'POST',
@@ -2602,8 +2628,8 @@ function doRegister(){
     body:JSON.stringify({firstName:fn,lastName:ln,username:un,email:em,phone:ph,dob,role,moniker:moniker||'',hallName:hall,city:addr,region,careerStatus:selfCareer,password:pw})
   })
   .then(r=>r.json())
-  .then(data=>{if(!data.ok){toast('⚠️ '+(data.message||'Registration failed.'));return;}_finalize(data.id||null);})
-  .catch(()=>_finalize());
+  .then(data=>{if(!data.ok){toast('⚠️ '+(data.message||'Registration failed. Please try again.'));return;}_finalize(data.id||null);})
+  .catch(()=>toast('⚠️ Could not reach the server. Check your connection and try again.'));
 }
 function setUser(u){
   app.user=u;
@@ -7485,10 +7511,15 @@ function buildAdmin(){
           if(!existing){
             adminHalls.unshift({id:r.id,name:r.hallName||'Unknown Hall',owner:name.trim(),username:r.username||'',city:r.city||'',contact:r.phone,email:r.email,region:r.region,status:r.status||'pending',submitted:(r.submittedAt||'').slice(0,10)});
             changed=true;
-          } else if(existing.status!==r.status&&!_localStatusChanged.has(String(r.id))){
-            // Don't downgrade a locally-approved hall — approvedHalls is the source of truth
-            const isLocallyApproved=approvedHalls.some(ah=>ah.id===r.id||ah.email===r.email);
-            if(!isLocallyApproved){existing.status=r.status||existing.status;changed=true;}
+          } else {
+            // Sync local ID → backend ID so future PATCHes use the correct DB record.
+            // Local IDs may be 'h...' (fallback) while backend always issues 'r...' IDs.
+            if(existing.id!==r.id){existing.id=r.id;changed=true;}
+            if(existing.status!==r.status&&!_localStatusChanged.has(String(r.id))){
+              // Don't downgrade a locally-approved hall — approvedHalls is the source of truth
+              const isLocallyApproved=approvedHalls.some(ah=>ah.id===r.id||ah.email===r.email);
+              if(!isLocallyApproved){existing.status=r.status||existing.status;changed=true;}
+            }
           }
         }
       });
@@ -7859,6 +7890,145 @@ function admTab(btn,tab){
             <button class="btn btn-d btn-sm" onclick="admDeactivateTournament('${t.id}')">Deactivate</button>
           </div>`).join('')}
     </div>`;
+
+  /* ── ACTIVITY MONITOR ── */
+  } else if(tab==='activity'){
+    const _now=new Date();
+    const _todayStr=_now.toISOString().slice(0,10);
+    const _7d=new Date(_now-7*864e5).toISOString();
+
+    // Last 7 days registrations
+    const _recentRegs=[...registeredUsers]
+      .filter(u=>u.submittedAt&&u.submittedAt>=_7d)
+      .sort((a,b)=>b.submittedAt.localeCompare(a.submittedAt))
+      .slice(0,30);
+
+    // Last 7 days matches (all statuses) — use submittedAt or fall back to date
+    const _7dDate=_7d.slice(0,10);
+    const _recentMatches=[...adminMatches]
+      .filter(m=>(m.submittedAt||m.date||'')>=_7dDate)
+      .sort((a,b)=>(b.submittedAt||b.date||'').localeCompare(a.submittedAt||a.date||''))
+      .slice(0,30);
+
+    // Last 7 days approvals
+    const _recentApprovals=[...adminMatches]
+      .filter(m=>m.approvedAt&&m.approvedAt>=_7dDate)
+      .sort((a,b)=>(b.approvedAt||'').localeCompare(a.approvedAt||''))
+      .slice(0,20);
+
+    function _fmtTs(ts){
+      if(!ts) return '—';
+      try{
+        const d=new Date(ts);
+        const isToday=d.toISOString().slice(0,10)===_todayStr;
+        if(isToday) return 'Today '+d.toTimeString().slice(0,5);
+        return d.toISOString().slice(0,10)+' '+d.toTimeString().slice(0,5);
+      }catch{return ts.slice(0,16);}
+    }
+
+    // Health check ping
+    let _healthHtml='<span style="color:var(--chalk2);">Checking…</span>';
+
+    c.innerHTML=`
+    <!-- HEALTH -->
+    <div class="card" style="margin-bottom:1.1rem;">
+      <div class="ct">🟢 System Health</div>
+      <div id="adm-health-row" style="display:flex;gap:1.5rem;flex-wrap:wrap;font-size:.8rem;padding:.3rem 0;">
+        ${_healthHtml}
+      </div>
+    </div>
+
+    <!-- SUMMARY COUNTERS -->
+    <div class="card" style="margin-bottom:1.1rem;">
+      <div class="ct">📊 Last 7 Days</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;text-align:center;padding:.4rem 0;">
+        <div style="background:#19211d;border:1px solid #2e3732;border-radius:10px;padding:.8rem .5rem;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--green);">${_recentRegs.length}</div>
+          <div style="font-size:.68rem;color:var(--chalk2);">Registrations</div>
+        </div>
+        <div style="background:#19211d;border:1px solid #2e3732;border-radius:10px;padding:.8rem .5rem;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);">${_recentMatches.length}</div>
+          <div style="font-size:.68rem;color:var(--chalk2);">Matches Recorded</div>
+        </div>
+        <div style="background:#19211d;border:1px solid #2e3732;border-radius:10px;padding:.8rem .5rem;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#7cf;">${_recentApprovals.length}</div>
+          <div style="font-size:.68rem;color:var(--chalk2);">Matches Approved</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT REGISTRATIONS -->
+    <div class="card" style="margin-bottom:1.1rem;">
+      <div class="ct">👤 Recent Registrations <span style="font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--chalk);">last 7 days</span></div>
+      ${_recentRegs.length===0
+        ?'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1rem 0;">No registrations in the last 7 days</div>'
+        :_recentRegs.map(u=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-size:.85rem;font-weight:600;">${u.name||'—'} <span style="font-family:'DM Mono',monospace;font-size:.7rem;color:var(--chalk);">@${u.username||'?'}</span></div>
+            <div style="font-size:.7rem;color:var(--chalk2);">${u.role||'player'} · ${u.region||'—'}</div>
+          </div>
+          <div style="text-align:right;">
+            <span class="status-pill ${{pending:'sp-pending',active:'sp-active',approved:'sp-active',rejected:'sp-suspended'}[u.verificationStatus]||'sp-pending'}" style="font-size:.6rem;">● ${u.verificationStatus||'pending'}</span>
+            <div style="font-size:.65rem;color:var(--chalk2);margin-top:3px;">${_fmtTs(u.submittedAt)}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <!-- RECENT MATCH ACTIVITY -->
+    <div class="card" style="margin-bottom:1.1rem;">
+      <div class="ct">⚡ Recent Match Activity <span style="font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--chalk);">last 7 days</span></div>
+      ${_recentMatches.length===0
+        ?'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1rem 0;">No matches recorded in the last 7 days</div>'
+        :_recentMatches.map(m=>{
+          const _sColor={approved:'#5d5',pending:'#fa0','player-pending':'#fa0','owner-pending':'#fa0',rejected:'#e55'}[m.status]||'#888';
+          return`<div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-size:.82rem;font-weight:600;">${m.p1||'?'} <span style="color:var(--chalk2);">vs</span> ${m.p2||'?'}</div>
+              <div style="font-size:.7rem;color:var(--chalk2);">${m.fmt||'9-Ball'} · ${m.venue||'—'} · <span style="font-family:'DM Mono',monospace;">${m.sc||'—'}</span></div>
+            </div>
+            <div style="text-align:right;">
+              <span style="font-size:.65rem;color:${_sColor};background:${_sColor}22;border:1px solid ${_sColor}44;border-radius:8px;padding:1px 7px;">● ${m.status||'?'}</span>
+              <div style="font-size:.65rem;color:var(--chalk2);margin-top:3px;">${_fmtTs(m.submittedAt||m.date)}</div>
+            </div>
+          </div>`;
+        }).join('')}
+    </div>
+
+    <!-- APPROVED MATCHES LOG -->
+    <div class="card">
+      <div class="ct">✅ Approved Matches <span style="font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--chalk);">last 7 days</span></div>
+      ${_recentApprovals.length===0
+        ?'<div style="color:var(--chalk2);font-size:.82rem;text-align:center;padding:1rem 0;">No approved matches in the last 7 days</div>'
+        :_recentApprovals.map(m=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-size:.82rem;font-weight:600;">${m.p1||'?'} <span style="color:var(--chalk2);">vs</span> ${m.p2||'?'}</div>
+            <div style="font-size:.7rem;color:var(--chalk2);">${m.fmt||'9-Ball'} · <span style="font-family:'DM Mono',monospace;color:var(--gold);">${m.sc||'—'}</span></div>
+          </div>
+          <div style="font-size:.65rem;color:var(--chalk2);text-align:right;">${_fmtTs(m.approvedAt)}</div>
+        </div>`).join('')}
+    </div>`;
+
+    // Health check — async ping
+    fetch('/api/health')
+      .then(r=>r.json())
+      .then(h=>{
+        const _hr=document.getElementById('adm-health-row');
+        if(!_hr) return;
+        const _uptimeFmt=h.uptime!=null?(h.uptime<60?h.uptime+'s':h.uptime<3600?Math.floor(h.uptime/60)+'m':Math.floor(h.uptime/3600)+'h '+Math.floor((h.uptime%3600)/60)+'m'):'—';
+        _hr.innerHTML=`
+          <span style="color:${h.ok?'#5d5':'#e55'};">● DB ${h.ok?'Connected':'ERROR'}</span>
+          <span style="color:var(--chalk);">Uptime: <strong style="color:var(--fg);">${_uptimeFmt}</strong></span>
+          <span style="color:var(--chalk);">Server time: <strong style="color:var(--fg);">${(h.ts||'').slice(11,19)} UTC</strong></span>
+          <span style="color:var(--chalk);">Players: <strong style="color:var(--fg);">${approvedPlayers.length}</strong></span>
+          <span style="color:var(--chalk);">Active halls: <strong style="color:var(--fg);">${adminHalls.filter(h=>h.status==='active').length}</strong></span>
+          <span style="color:var(--chalk);">Total matches: <strong style="color:var(--fg);">${adminMatches.length}</strong></span>`;
+      })
+      .catch(()=>{
+        const _hr=document.getElementById('adm-health-row');
+        if(_hr) _hr.innerHTML='<span style="color:#e55;">⚠ Server unreachable</span>';
+      });
   }
 }
 
@@ -8168,7 +8338,13 @@ function admApprovePlayer(id){
   buildDashboard();
   fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({status:'active',careerStatus,ppr:initPPR,approvedAt:new Date().toISOString()})
-  }).then(()=>buildAdmin()).catch(()=>buildAdmin());
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok===false) toast(`⚠️ DB error saving player approval — active locally but may revert on reload. Try re-approving.`,5000);
+    buildAdmin();
+  }).catch(()=>{
+    toast(`⚠️ Could not reach server to save player approval. Active locally — reload and re-approve if it reverts.`,5000);
+    buildAdmin();
+  });
   if(app.lbTab) renderLbTab(app.lbTab);
   // Store approval notification for the player — shown on their next login
   if(p.email){
@@ -8231,8 +8407,14 @@ function admApproveHall(id){
   // sees the updated status rather than the stale pending state
   buildDashboard();
   fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({status:'active',approvedAt:new Date().toISOString()})
-  }).then(()=>buildAdmin()).catch(()=>buildAdmin());
+    body:JSON.stringify({status:'active',approvedAt:new Date().toISOString(),email:h.email||''})
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok===false) toast(`⚠️ DB error saving approval — hall is active locally but may revert on reload. Try approving again.`,5000);
+    buildAdmin();
+  }).catch(()=>{
+    toast(`⚠️ Could not reach server to save approval. Hall is active locally — reload and re-approve if it reverts.`,5000);
+    buildAdmin();
+  });
   // If this owner is currently logged in, refresh their portal to the active state
   if(app.user&&(app.user.email===h.email||app.user.username===h.username||app.user.name===h.owner)){
     const view=document.getElementById('view-portal');
@@ -8255,7 +8437,7 @@ function admRejectHall(id){
   apiPersist('pp_pendingHalls',_pendHallsStr);
   // Mark as rejected in pp_registeredUsers on server
   fetch('/api/registrations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({status:'rejected',rejectedAt:new Date().toISOString()})
+    body:JSON.stringify({status:'rejected',rejectedAt:new Date().toISOString(),email:h.email||''})
   }).catch(()=>{});
   buildAdmin();
   toast(`✗ <strong>${h.name}</strong> application rejected.`);
@@ -8369,9 +8551,27 @@ function initFromBackend(){
               rank:PLAYERS.length+1
             });
           }
+          // Reconstruct approvedPlayers from server data so cross-browser approval works
+          // even if apiPersist('pp_approvedPlayers') failed on the approving browser
+          if(r.status==='active'&&r.careerStatus){
+            const _apIdx=approvedPlayers.findIndex(x=>String(x.id)===String(r.id)||x.email===r.email);
+            if(_apIdx===-1){
+              approvedPlayers.push({
+                id:r.id, name, username:r.username||'', email:r.email||'',
+                region:r.region||'', careerStatus:r.careerStatus, ppr:r.ppr||1300,
+                ppr9:r.ppr||1300, ppr10:r.ppr||1300,
+                initialPpr:r.ppr||1300, approvedAt:r.approvedAt||'',
+                status:'active', fmt:'9-Ball', colors:'#1a3a22',
+                mw:0, ml:0, rw:0, rl:0, mi:0, mw9:0, ml9:0, mw10:0, ml10:0
+              });
+              // Persist so future page loads in this browser skip the reconstruction
+              saveApprovedPlayers();
+            }
+          }
         } else if(r.role==='owner'){
           // Sync into adminHalls
-          if(!adminHalls.find(h=>h.id===r.id||h.email===r.email)){
+          const _existingHall=adminHalls.find(h=>h.id===r.id||h.email===r.email);
+          if(!_existingHall){
             adminHalls.push({
               id:r.id, name:r.hallName||'Unknown Hall', owner:name,
               username:r.username||'', city:r.city||r.region||'—',
@@ -8379,13 +8579,39 @@ function initFromBackend(){
               status:r.status||'pending', submitted:(r.submittedAt||'').slice(0,10)
             });
           } else {
-            // Update status if changed on backend
-            const existing=adminHalls.find(h=>h.id===r.id||h.email===r.email);
-            if(existing) existing.status=r.status||existing.status;
+            // Sync local ID → backend ID so future PATCHes use the correct DB record.
+            // Local IDs may be 'h...' (offline fallback) while backend issues 'r...' IDs.
+            if(_existingHall.id!==r.id) _existingHall.id=r.id;
+            // Don't downgrade if hall is already in approvedHalls — that's the admin's
+            // explicit approval record and takes precedence over pp_registeredUsers status.
+            const isLocallyApproved=approvedHalls.some(ah=>ah.id===r.id||ah.email===r.email);
+            if(!isLocallyApproved) _existingHall.status=r.status||_existingHall.status;
           }
-          // If approved, make sure hall is in the public HALLS list
-          if(r.status==='active'&&!HALLS.find(h=>h.n===r.hallName)){
+          // Reconstruct approvedHalls from server data so cross-browser hall approval works
+          if(r.status==='active'){
+            const _ahIdx=approvedHalls.findIndex(x=>x.id===r.id||x.email===r.email);
+            if(_ahIdx===-1){
+              const _hallEntry=adminHalls.find(h=>h.id===r.id||h.email===r.email);
+              approvedHalls.push({
+                id:r.id, name:r.hallName||_hallEntry?.name||'Unknown Hall',
+                owner:name, username:r.username||'',
+                city:r.city||r.region||'—', region:r.region||'',
+                tables:_hallEntry?.tables||0, contact:r.phone||'',
+                email:r.email||'', fb:'—', status:'active',
+                submitted:(r.submittedAt||'').slice(0,10)
+              });
+              saveApprovedHalls();
+            }
+          }
+          // If approved (by either source), make sure hall is in the public HALLS list
+          const _hallApproved=r.status==='active'||approvedHalls.some(ah=>ah.id===r.id||ah.email===r.email);
+          if(_hallApproved&&!HALLS.find(h=>h.n===r.hallName)){
             HALLS.push({n:r.hallName||'Unknown Hall',c:r.region||r.city||'',t:0,open:true,fmt:'9-Ball, 10-Ball',ap:0,fb:'—'});
+          }
+          // If the current user is this hall owner and their portal is showing stale pending state, refresh it
+          if(app.user?.role==='owner'&&(app.user.email===r.email||app.user.username===r.username)){
+            const _nowApproved=adminHalls.find(h=>h.email===r.email||h.username===r.username)?.status==='active';
+            if(_nowApproved&&document.getElementById('view-portal')?.classList.contains('act')) buildPortal();
           }
         }
       });
@@ -8401,6 +8627,15 @@ function initFromBackend(){
           if(inp){inp.value=app.user.name;inp.readOnly=true;inp.style.color='var(--gold)';inp.style.cursor='default';}
           const _dp1=document.getElementById('dp1');if(_dp1)_dp1.textContent=app.user.name.split(' ')[0];
         }
+      }
+      // If current user is a player whose approval just resolved, refresh their portal
+      if(app.user?.role==='player'){
+        const _me=PLAYERS.find(p=>p.name===app.user.name||p.email===app.user.email);
+        if(_me&&(app.user.verificationStatus==='pending'||!app.user.verificationStatus)){
+          app.user.verificationStatus='active';
+          try{localStorage.setItem('pp_session',JSON.stringify(app.user));}catch{}
+        }
+        if(document.getElementById('view-player-portal')?.classList.contains('act')) buildPlayerPortal();
       }
       buildDashboard();
     })

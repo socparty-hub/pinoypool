@@ -61,7 +61,11 @@ app.post('/api/register', async (req, res) => {
   if (!firstName || !lastName || !role) {
     return res.status(400).json({ ok: false, message: 'Missing required fields.' });
   }
-  const store = await db.getAll();
+  let store;
+  try { store = await db.getAll(); } catch(e) {
+    console.error('[DB] register fetch error:', e.message);
+    return res.status(500).json({ ok: false, message: 'Server error. Please try again.' });
+  }
   let users = [];
   try { users = JSON.parse(store['pp_registeredUsers'] || '[]'); } catch(e) {}
   const entry = {
@@ -84,15 +88,24 @@ app.post('/api/register', async (req, res) => {
     submittedAt:        new Date().toISOString()
   };
   users.push(entry);
-  await db.set('pp_registeredUsers', JSON.stringify(users));
-  invalidateDbCache();
+  try {
+    await db.set('pp_registeredUsers', JSON.stringify(users));
+    invalidateDbCache();
+  } catch(e) {
+    console.error('[DB] register save error:', e.message);
+    return res.status(500).json({ ok: false, message: 'Server error saving registration. Please try again.' });
+  }
   console.log(`[REG] New ${role} registration received (id: ${entry.id})`);
   res.json({ ok: true, id: entry.id, message: 'Registration received! Admin will review and activate your account within 24–48 hours.' });
 });
 
 /* ── API: list registered users (buildAdmin fetches this to populate adminPlayers) ── */
 app.get('/api/registrations', async (req, res) => {
-  const store = await db.getAll();
+  let store;
+  try { store = await db.getAll(); } catch(e) {
+    console.error('[DB] registrations fetch error:', e.message);
+    return res.status(500).json([]);
+  }
   let users = [];
   try { users = JSON.parse(store['pp_registeredUsers'] || '[]'); } catch(e) {}
   const registrations = users.map(u => {
@@ -120,20 +133,32 @@ app.get('/api/registrations', async (req, res) => {
 /* ── API: update registration status (called when admin approves a player) ── */
 app.patch('/api/registrations/:id', async (req, res) => {
   const { id } = req.params;
-  const { status, careerStatus, ppr, approvedAt } = req.body;
-  const store = await db.getAll();
-  let users = [];
-  try { users = JSON.parse(store['pp_registeredUsers'] || '[]'); } catch(e) {}
-  const user = users.find(u => String(u.id) === String(id));
-  if (user) {
-    if (status)           user.verificationStatus = status;
-    if (careerStatus)     user.careerStatus = careerStatus;
-    if (typeof ppr === 'number') user.ppr = ppr;
-    if (approvedAt)       user.approvedAt = approvedAt;
-    await db.set('pp_registeredUsers', JSON.stringify(users));
+  const { status, careerStatus, ppr, approvedAt, email } = req.body;
+  try {
+    const fields = {};
+    if (status)                   fields.status       = status;
+    if (careerStatus)             fields.careerStatus = careerStatus;
+    if (typeof ppr === 'number')  fields.ppr          = ppr;
+    if (approvedAt)               fields.approvedAt   = approvedAt;
+    // Local hall IDs (h...) may differ from backend user IDs (r...) when
+    // registration happened offline. Resolve the real DB row by email fallback.
+    let resolvedId = String(id);
+    if (email) {
+      try {
+        const [rows] = await db.query(
+          'SELECT id FROM users WHERE id=? OR email=? LIMIT 1',
+          [String(id), email]
+        );
+        if (rows.length) resolvedId = rows[0].id;
+      } catch(e) { /* fall back to raw id */ }
+    }
+    await db.updateUser(resolvedId, fields, email);
     invalidateDbCache();
+    res.json({ ok: true });
+  } catch(e) {
+    console.error('[DB] patch registration error:', e.message);
+    res.status(500).json({ ok: false, error: 'db_error' });
   }
-  res.json({ ok: true });
 });
 
 /* ── API: save a push subscription for a user ── */
@@ -142,17 +167,13 @@ app.post('/api/push/subscribe', async (req, res) => {
   if (!username || !subscription || !subscription.endpoint) {
     return res.status(400).json({ ok: false, error: 'Missing username or subscription' });
   }
-  const store = await db.getAll().catch(() => ({}));
-  let subs = {};
-  try { subs = JSON.parse(store['pp_push_subscriptions'] || '{}'); } catch {}
-  if (!subs[username]) subs[username] = [];
-  // Deduplicate by endpoint
-  const exists = subs[username].find(s => s.endpoint === subscription.endpoint);
-  if (!exists) subs[username].push(subscription);
-  // Cap per user at 10 devices
-  if (subs[username].length > 10) subs[username] = subs[username].slice(-10);
-  await db.set('pp_push_subscriptions', JSON.stringify(subs)).catch(() => {});
-  res.json({ ok: true });
+  try {
+    await db.addPushSub(username, subscription);
+    res.json({ ok: true });
+  } catch(e) {
+    console.error('[PUSH] subscribe error:', e.message);
+    res.status(500).json({ ok: false, error: 'db_error' });
+  }
 });
 
 /* ── API: send a push notification to a user ── */
@@ -161,14 +182,11 @@ app.post('/api/push/send', async (req, res) => {
   const { username, title, body, type } = req.body;
   if (!username) return res.status(400).json({ ok: false, error: 'Missing username' });
 
-  const store = await db.getAll().catch(() => ({}));
-  let subs = {};
-  try { subs = JSON.parse(store['pp_push_subscriptions'] || '{}'); } catch {}
-  const userSubs = subs[username] || [];
+  let userSubs;
+  try { userSubs = await db.getPushSubs(username); } catch(e) { return res.json({ ok: true, sent: 0 }); }
   if (!userSubs.length) return res.json({ ok: true, sent: 0 });
 
   const payload = JSON.stringify({ title: title || 'PinoyPool', body: body || 'New notification', type: type || '' });
-  const dead = [];
   let sent = 0;
 
   await Promise.all(userSubs.map(async sub => {
@@ -177,15 +195,11 @@ app.post('/api/push/send', async (req, res) => {
       sent++;
     } catch (err) {
       // 410 Gone or 404 = subscription expired, remove it
-      if (err.statusCode === 410 || err.statusCode === 404) dead.push(sub.endpoint);
+      if (err.statusCode === 410 || err.statusCode === 404) {
+        await db.removePushSub(username, sub.endpoint).catch(() => {});
+      }
     }
   }));
-
-  // Clean up dead subscriptions
-  if (dead.length) {
-    subs[username] = subs[username].filter(s => !dead.includes(s.endpoint));
-    await db.set('pp_push_subscriptions', JSON.stringify(subs)).catch(() => {});
-  }
 
   res.json({ ok: true, sent });
 });
@@ -200,12 +214,15 @@ app.post('/api/admin/reset', async (req, res) => {
   const { password } = req.body;
   const RESET_PW = process.env.ADMIN_RESET_PASSWORD;
   if (!RESET_PW || password !== RESET_PW) return res.status(403).json({ ok: false, error: 'Forbidden' });
-  for (const k of db.ALLOWED_KEYS.filter(k => k !== 'pp_testPasswords')) {
-    await db.set(k, '[]');
+  try {
+    await db.resetAll();
+    invalidateDbCache();
+    console.log('[RESET] All server data cleared by admin.');
+    res.json({ ok: true, message: 'All server data cleared.' });
+  } catch(e) {
+    console.error('[RESET] Error during reset:', e.message);
+    res.status(500).json({ ok: false, error: 'db_error' });
   }
-  invalidateDbCache();
-  console.log('[RESET] All server data cleared by admin.');
-  res.json({ ok: true, message: 'All server data cleared.' });
 });
 
 /* ── API: save a single pp_* key to MySQL ── */
@@ -215,10 +232,26 @@ app.post('/api/store/:key', async (req, res) => {
   if (typeof value !== 'string') {
     return res.status(400).json({ error: 'value must be a JSON string' });
   }
-  const ok = await db.set(key, value);
-  if (!ok) return res.status(403).json({ error: 'key not permitted' });
-  invalidateDbCache();
-  res.json({ ok: true });
+  try {
+    const ok = await db.set(key, value);
+    if (!ok) return res.status(403).json({ error: 'key not permitted' });
+    invalidateDbCache();
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[DB] store error:', e.message);
+    res.status(500).json({ ok: false, error: 'db_error' });
+  }
+});
+
+/* ── API: health check ── */
+app.get('/api/health', async (req, res) => {
+  let dbOk = false;
+  try { await db.getAll(); dbOk = true; } catch (e) {}
+  res.status(dbOk ? 200 : 503).json({
+    ok: dbOk,
+    ts: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+  });
 });
 
 /* ── In-memory cache for db.getAll() — avoids MySQL hit on every page load ── */
