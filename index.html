@@ -1648,24 +1648,29 @@ textarea{resize:vertical;min-height:75px;}
 /* ── Restore server-persisted data into localStorage before any reads ── */
 (function restoreServerData(){
   if(!window.__SD__) return;
-  // Keys that hold admin approval decisions: never overwrite local data with an
-  // empty-array value from the server (means the apiPersist write failed earlier).
-  var APPROVAL_KEYS=['pp_approvedPlayers','pp_approvedHalls'];
+  // Keys that hold admin approval/update decisions.
+  // Rule: only let server win when it has STRICTLY MORE entries (new record from another
+  // device/user). Equal or fewer = keep local so in-progress admin changes don't
+  // oscillate on refresh while the async DB write is still in flight.
+  var APPROVAL_KEYS=[
+    'pp_approvedPlayers',  // player status, career, PPR
+    'pp_approvedHalls',    // hall owner approval / deactivation / co-owners
+    'pp_adminMatches',     // match approval status
+    'pp_tournaments',      // tournament creation / approval
+  ];
   Object.keys(window.__SD__).forEach(function(k){
     var v=window.__SD__[k];
     if(!v) return; // skip null/empty strings
     if(APPROVAL_KEYS.indexOf(k)!==-1){
-      // Only overwrite if server has STRICTLY MORE entries than local.
-      // Equal-length: keep local — admin may have just made a change (career/status)
-      // that hasn't finished persisting to the DB yet. Overwriting would cause
-      // the oscillation bug where each refresh toggles between old and new values.
       try{
         var local=localStorage.getItem(k);
         var serverArr=JSON.parse(v); var localArr=JSON.parse(local||'[]');
+        // Server wins only when it has strictly more records — means a new entry
+        // arrived from another session. Same count = local is authoritative.
         if(Array.isArray(serverArr)&&Array.isArray(localArr)&&serverArr.length>localArr.length){
           localStorage.setItem(k,v);
         }
-        // else: same count or local has more — keep local
+        // else: keep local
       }catch(e){ localStorage.setItem(k,v); }
     } else {
       localStorage.setItem(k,v);
