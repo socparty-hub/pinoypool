@@ -61,42 +61,45 @@ app.post('/api/register', async (req, res) => {
   if (!firstName || !lastName || !role) {
     return res.status(400).json({ ok: false, message: 'Missing required fields.' });
   }
-  let store;
-  try { store = await db.getAll(); } catch(e) {
-    console.error('[DB] register fetch error:', e.message);
-    return res.status(500).json({ ok: false, message: 'Server error. Please try again.' });
-  }
-  let users = [];
-  try { users = JSON.parse(store['pp_registeredUsers'] || '[]'); } catch(e) {}
-  const entry = {
-    id:                 'r' + Date.now(),
-    name:               (firstName + ' ' + lastName).trim(),
-    username:           username   || '',
-    email:              email      || '',
-    phone:              phone      || '',
-    dob:                dob        || '',
-    role,
-    hall:               hallName   || '',
-    hallName:           hallName   || '',
-    city:               city       || '',
-    region:             region     || '',
-    moniker:            moniker    || '',
-    password:           password   || '',
-    verificationStatus: 'pending',
-    careerStatus:       null,
-    ppr:                0,
-    submittedAt:        new Date().toISOString()
-  };
-  users.push(entry);
+  const id   = 'r' + Date.now();
+  const name = (firstName + ' ' + lastName).trim();
+  // Guarantee a unique username — fall back to u<timestamp> so the DB UNIQUE constraint never fires
+  const uname = (username || ('u' + id.slice(1))).slice(0, 20);
+
   try {
-    await db.set('pp_registeredUsers', JSON.stringify(users));
+    await db.query(
+      `INSERT INTO users
+         (id, name, username, email, phone, dob, role, region, moniker,
+          hall_name, city, password_hash, verification_status, ppr, submitted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 0, NOW())`,
+      [id, name, uname, email || '', phone || '', dob || '', role,
+       region || '', moniker || '', hallName || '', city || '', password || '']
+    );
+    // Hall owner: also create a pending halls record for admin review
+    if (role === 'owner' && hallName) {
+      await db.query(
+        `INSERT INTO halls
+           (id, name, owner_name, owner_username, owner_email,
+            city, region, phone, status, submitted_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
+         ON DUPLICATE KEY UPDATE
+           name          = VALUES(name),
+           owner_name    = VALUES(owner_name),
+           owner_email   = VALUES(owner_email),
+           status        = IF(status = 'active', 'active', 'pending')`,
+        [id, hallName, name, uname, email || '', city || '', region || '', phone || '']
+      );
+    }
     invalidateDbCache();
   } catch(e) {
     console.error('[DB] register save error:', e.message);
+    if (e.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ ok: false, message: 'Username already taken. Please choose a different username.' });
+    }
     return res.status(500).json({ ok: false, message: 'Server error saving registration. Please try again.' });
   }
-  console.log(`[REG] New ${role} registration received (id: ${entry.id})`);
-  res.json({ ok: true, id: entry.id, message: 'Registration received! Admin will review and activate your account within 24–48 hours.' });
+  console.log(`[REG] New ${role} registration received (id: ${id})`);
+  res.json({ ok: true, id, message: 'Registration received! Admin will review and activate your account within 24–48 hours.' });
 });
 
 /* ── API: list registered users (buildAdmin fetches this to populate adminPlayers) ── */
@@ -153,6 +156,30 @@ app.patch('/api/registrations/:id', async (req, res) => {
       } catch(e) { /* fall back to raw id */ }
     }
     await db.updateUser(resolvedId, fields, email);
+    // If activating an owner, make sure a halls row exists.
+    // It may be absent if the registration pre-dates the new schema.
+    if (fields.status === 'active') {
+      try {
+        const [uRows] = await db.query(
+          `SELECT * FROM users WHERE id = ? LIMIT 1`, [resolvedId]
+        );
+        if (uRows.length && uRows[0].role === 'owner') {
+          const u = uRows[0];
+          await db.query(
+            `INSERT INTO halls
+               (id, name, owner_name, owner_username, owner_email,
+                city, region, phone, status, approved_at, submitted_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())
+             ON DUPLICATE KEY UPDATE
+               status      = 'active',
+               approved_at = NOW()`,
+            [resolvedId, u.hall_name || 'Unknown Hall', u.name,
+             u.username || '', u.email || '', u.city || '',
+             u.region || '', u.phone || '']
+          );
+        }
+      } catch(e) { console.error('[DB] halls upsert on approval error:', e.message); }
+    }
     invalidateDbCache();
     res.json({ ok: true });
   } catch(e) {
