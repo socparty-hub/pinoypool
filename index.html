@@ -4647,10 +4647,10 @@ function rankMoveHtml(name,currentRank){
 
 function renderLbTab(tab){
   const m=app._rankMult||1;
-  // Only show active players in rankings — suspended/pending/review are hidden but retain rating
+  // Active and review players show in rankings; suspended/pending are hidden but retain rating
   const data=PLAYERS.filter(p=>{
     const adm=adminPlayers.find(a=>a.name===p.name||(a.email&&a.email===p.email));
-    return !adm||adm.status==='active';
+    return !adm||adm.status==='active'||adm.status==='review';
   }).map(p=>genPlayerStats(p,m));
   const c=document.getElementById('lb-content');
   // Clear sidebar for non-global tabs
@@ -7600,10 +7600,11 @@ function admTab(btn,tab){
 
   /* ── PLAYER REGISTRATION ── */
   if(tab==='players'){
-    const incoming = adminPlayers.filter(p=>(p.status==='pending'||p.status==='review')&&p.role!=='owner');
+    // review stays in Registered Players — only pending goes back to Incoming Registrations
+    const incoming = adminPlayers.filter(p=>p.status==='pending'&&p.role!=='owner');
     const searchQ  = (app.admPlayerQ||'').toLowerCase();
     const registered = adminPlayers.filter(p=>
-      (p.status==='active'||p.status==='suspended') &&
+      (p.status==='active'||p.status==='suspended'||p.status==='review') &&
       (!searchQ||p.name.toLowerCase().includes(searchQ))
     );
     const REGIONS=['NCR','CAR','Region I','Region II','Region III','Region IV-A','Region IV-B','Region V','Region VI','Region VII','Region VIII','Region IX','Region X','Region XI','Region XII','Region XIII','BARMM'];
