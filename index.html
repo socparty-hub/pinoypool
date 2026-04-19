@@ -8326,20 +8326,20 @@ function admSetCareer(id,tier){
   // Propagate to approvedPlayers (persistent store)
   const ap=approvedPlayers.find(x=>x.id===p.id||x.email===p.email||x.username===p.username);
   if(ap){ ap.careerStatus=tier; }
-  // Propagate to PLAYERS[] (used for K-factor in PPR calculations)
+  // Propagate to PLAYERS[] — only update the tier label, NOT PPR
+  // PPR is earned and must not be recalculated when career status changes
   const pl=PLAYERS.find(x=>x.name===p.name||x.id===p.id);
   if(pl){ pl.status=tier; }
   // Persist to localStorage so change survives page reload
   saveApprovedPlayers();
-  // Rebuild PPR so K-factor and initial PPR reflect the new career status
-  rebuildStatsFromMatches();
-  buildDashboard();
+  // Refresh rankings display only (no PPR recalculation)
+  if(app.lbTab) renderLbTab(app.lbTab);
   // Persist to backend
   fetch('/api/registrations/'+String(id),{method:'PATCH',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({careerStatus:tier,updatedAt:new Date().toISOString()})
   }).catch(()=>{});
   admRefresh();
-  toast(`✅ <strong>${p.name}</strong> career status → <strong>${tier}</strong>. Rankings updated.`);
+  toast(`✅ <strong>${p.name}</strong> career status → <strong>${tier}</strong>. PPR unchanged.`);
 }
 function admApprovePlayer(id){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
