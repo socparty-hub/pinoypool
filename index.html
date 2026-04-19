@@ -7523,6 +7523,8 @@ const CAREER_STATUS_LIST=['Amateur','Skilled','Semi-Pro','Pro','Elite'];
 const STATUS_OPTS=['active','suspended','pending','review'];
 // Track IDs whose status was changed locally so background fetches don't race and overwrite them
 const _localStatusChanged=new Set();
+// Track IDs/emails that were locally deleted so background fetches don't re-add them
+const _locallyDeleted=new Set();
 
 function buildAdmin(){
   if(app.user?.role!=='admin'){toast('⚠️ Admin access only.');return;}
@@ -7536,6 +7538,8 @@ function buildAdmin(){
       regs.forEach(r=>{
         const name=(r.firstName||'')+' '+(r.lastName||'');
         if(r.role==='player'||r.role==='fan'){
+          // Skip any player that was just deleted locally — DELETE may not have completed yet
+          if(_locallyDeleted.has(String(r.id))||_locallyDeleted.has(r.email||'')) return;
           const existing=adminPlayers.find(p=>p.id===r.id||p.email===r.email);
           if(!existing){
             adminPlayers.unshift({id:r.id,name:name.trim(),username:r.username||'',status:r.status||'pending',email:r.email,phone:r.phone,region:r.region,submittedAt:r.submittedAt,careerStatus:r.careerStatus||null,ppr:r.ppr||0,tier:'C',colors:'#1a3a22'});
@@ -8416,6 +8420,10 @@ function admSuspendPlayer(id){
 function admRejectPlayer(id){
   const p=adminPlayers.find(x=>String(x.id)===String(id));
   if(!p)return;
+  // Mark as deleted so background fetch can't re-add before DELETE completes
+  _locallyDeleted.add(String(p.id));
+  _locallyDeleted.add(String(id));
+  if(p.email) _locallyDeleted.add(p.email);
   // Remove from all in-memory arrays
   adminPlayers.splice(adminPlayers.indexOf(p),1);
   const ruIdx=registeredUsers.findIndex(u=>u.email===p.email||u.username===p.username);
